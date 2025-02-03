@@ -10,7 +10,7 @@
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-100">
             <div class="flex items-center gap-3">
-                <h4 class="text-xl font-bold text-gray-800">رزروهای {{ $customer->fullname }}</h4>
+                <h4 class="text-xl font-bold text-gray-800">رزروها</h4>
             </div>
             <!-- Search Form -->
             <div class="w-64">
@@ -28,11 +28,6 @@
             <div class="px-6 py-12 flex flex-col items-center justify-center">
                 <i class="material-icons-round text-gray-400 text-6xl mb-4">event_busy</i>
                 <h2 class="text-xl font-bold text-gray-800 mb-4">هیچ رزروی ثبت نشده است.</h2>
-                <a href="{{ route('bookings.create', $customer->id) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                    <i class="material-icons-round text-xl ml-2">add</i>
-                    افزودن رزرو جدید
-                </a>
             </div>
         @else
             <div class="p-6">

@@ -62,7 +62,7 @@
                         <tbody class="divide-y divide-gray-200">
                             @foreach($recentBookings as $booking)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-900"><a href="{{route("customers.show" , $booking->customer->fullname)}}">{{ $booking->customer->fullname }}</a></td>
+                                <td class="px-4 py-3 text-sm text-gray-900"><a href="{{route("customers.profile" , $booking->customer->fullname)}}">{{ $booking->customer->fullname }}</a></td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->date }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->time_slot }}</td>
                                 <td class="px-4 py-3">
@@ -106,7 +106,7 @@
                     <span class="text-gray-700">ثبت نقش جدید</span>
                 </a>
         
-                <a href="{{ route('option.create') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                <a href="{{ route('create.option') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                     <i class="material-icons-round text-green-600 text-xl ml-3">add_circle</i>
                     <span class="text-gray-700">ثبت خدمت جدید</span>
                 </a>

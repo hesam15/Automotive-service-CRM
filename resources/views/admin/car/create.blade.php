@@ -15,7 +15,7 @@
 
         <!-- Form Content -->
         <div class="p-6">
-            <form action="{{ route('cars.store', $customer->fullname) }}" method="POST">
+            <form action="{{ route('cars.store', $customer->id) }}" method="POST">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Owner Info -->

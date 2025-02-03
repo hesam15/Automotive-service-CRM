@@ -1,311 +1,263 @@
 document.addEventListener('DOMContentLoaded', function() {
-    initializeUI();
-    initializeDataHandlers();
-    initializeInteractions();
-    initializeTimeSlots();
-    initializeSelectAll();
+    App.initialize();
 });
 
-function initializeTimeSlots() {
-    const datepicker = document.getElementById('datepicker');
-    const timeSlotsContainer = document.getElementById('time-slots-container');
-    const timeSlotSelect = document.getElementById('time_slot');
-
-    if (datepicker && datepicker.value) {
-        timeSlotsContainer.classList.remove('hidden');
-        loadTimeSlots(datepicker.value);
+const App = {
+    initialize() {
+        UIManager.initialize();
+        ModalManager.initialize();
+        OptionsManager.initialize();
+        DateTimeManager.initialize();
+        SelectManager.initialize();
     }
+};
 
-    function loadTimeSlots(date) {
-        timeSlotSelect.innerHTML = '';
-        
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'انتخاب کنید';
-        timeSlotSelect.appendChild(defaultOption);
+const UIManager = {
+    initialize() {
+        this.initializeSidebar();
+        this.initializeDropdowns();
+        this.initializeBreadcrumbBehavior();
+        this.initializeAlerts();
+    },
 
-        for (let hour = 8; hour <= 20; hour++) {
-            const option = document.createElement('option');
-            option.value = `${hour}:00`;
-            option.textContent = `${hour}:00`;
-            timeSlotSelect.appendChild(option);
+    initializeSidebar() {
+        const elements = {
+            toggle: document.getElementById('sidebarToggle'),
+            sidebar: document.getElementById('sidebar'),
+            overlay: document.getElementById('sidebarOverlay')
+        };
+
+        if (Object.values(elements).every(Boolean)) {
+            const toggleSidebar = () => {
+                elements.sidebar.classList.toggle('translate-x-full');
+                elements.overlay.classList.toggle('hidden');
+                document.body.classList.toggle('overflow-hidden');
+            };
+
+            elements.toggle.addEventListener('click', toggleSidebar);
+            elements.overlay.addEventListener('click', toggleSidebar);
         }
-    }
-}
+    },
 
-function initializeUI() {
-    initializeSidebar();
-    initializeDropdowns();
-    initializeBreadcrumbBehavior();
-}
+    initializeDropdowns() {
+        ['services', 'roles', 'users', 'customers'].forEach(menu => {
+            const elements = {
+                button: document.getElementById(`${menu}Button`),
+                menu: document.getElementById(`${menu}Menu`),
+                icon: document.getElementById(`${menu}Icon`)
+            };
 
-function initializeDataHandlers() {
-    initializeDeleteFunctionality();
-}
+            if (Object.values(elements).every(Boolean)) {
+                elements.button.addEventListener('click', () => {
+                    const isExpanded = elements.menu.style.maxHeight !== '0px';
+                    elements.menu.style.maxHeight = isExpanded ? '0px' : '160px';
+                    elements.icon.style.transform = `rotate(${isExpanded ? 0 : 180}deg)`;
+                });
+            }
+        });
 
-function initializeInteractions() {
-    initializeOptionsForm();
-    initializeAlerts();
-    initializeModals();
-}
+        this.initializeUserDropdown();
+    },
 
-function initializeSidebar() {
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    initializeUserDropdown() {
+        const elements = {
+            button: document.getElementById('userDropdown'),
+            menu: document.getElementById('userMenu'),
+            icon: document.getElementById('userDropdown')?.querySelector('.material-icons-round:last-child')
+        };
 
-    if (sidebarToggle && sidebar && overlay) {
-        function toggleSidebar() {
-            sidebar.classList.toggle('translate-x-full');
-            overlay.classList.toggle('hidden');
-            document.body.classList.toggle('overflow-hidden');
+        if (elements.button && elements.menu) {
+            elements.button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isExpanded = !elements.menu.classList.contains('hidden');
+                elements.menu.classList.toggle('hidden');
+                if (elements.icon) {
+                    elements.icon.style.transform = `rotate(${isExpanded ? 0 : 180}deg)`;
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!elements.button.contains(e.target)) {
+                    elements.menu.classList.add('hidden');
+                    if (elements.icon) {
+                        elements.icon.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
         }
+    },
 
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
+    initializeBreadcrumbBehavior() {
+        const breadcrumbContainer = document.querySelector('.breadcrumb-container');
+        let scrollTimer;
+
+        window.addEventListener('scroll', () => {
+            if (breadcrumbContainer) {
+                breadcrumbContainer.style.transform = 'translateY(-100%)';
+                clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(() => {
+                    breadcrumbContainer.style.transform = 'translateY(0)';
+                }, 500);
+            }
+        });
+    },
+
+    initializeAlerts() {
+        document.querySelectorAll('.alert-dismissible').forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add('opacity-0');
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        });
     }
-}
+};
 
-function initializeModals() {
-    window.openModal = function(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    };
+const ModalManager = {
+    initialize() {
+        this.setupModalHandlers();
+        this.setupDeleteHandler();
+    },
 
-    window.closeModal = function(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    };
+    setupModalHandlers() {
+        window.openModal = (modalId) => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                SelectManager.initialize();
+            }
+        };
 
-    // Close modal when clicking close buttons
-    const closeButtons = document.querySelectorAll('.modal-close');
-    closeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const modal = document.getElementById('deleteModal');
+        window.closeModal = (modalId) => {
+            const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
             }
-        });
-    });
-
-    // Close modal when clicking outside
-    const modal = document.getElementById('deleteModal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            const modalContent = modal.querySelector('.bg-white');
-            if (!modalContent.contains(e.target)) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        });
-    }    
-
-    // Handle edit buttons
-    const editButtons = document.querySelectorAll('button[onclick*="editCarModal"]');
-    editButtons.forEach(button => {
-        button.onclick = (e) => {
-            e.preventDefault();
-            const modalId = button.getAttribute('onclick').match(/['"]([^'"]+)['"]/)[1];
-            openModal(modalId);
         };
-    });
 
-    initializeDeleteFunctionality();
-}
-
-function initializeDeleteFunctionality() {
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-    const deleteModal = document.getElementById('deleteModal');
-    
-    if (!deleteButtons.length || !deleteModal) return;
-    
-    deleteButtons.forEach(button => {
-        button.onclick = function(e) {
-            e.preventDefault();
-            const route = this.dataset.route;
-            const type = this.dataset.type;
-            
-            if (route) {
-                const form = deleteModal.querySelector('#deleteForm');
-                const title = deleteModal.querySelector('h3');
-                const message = deleteModal.querySelector('p');
-                
-                form.action = route;
-                
-                const types = {
-                    customer: 'مشتری',
-                    car: 'خودرو',
-                    booking: 'رزرو',
-                    report: 'گزارش',
-                    option: 'آپشن',
-                    role: "نقش",
-                };
-                
-                const itemType = types[type] || 'آیتم';
-                title.textContent = `تایید حذف ${itemType}`;
-                message.textContent = `آیا از حذف این ${itemType} اطمینان دارید؟`;
-                
-                openModal('deleteModal');
-            }
-        };
-    });
-}
-
-function initializeDropdowns() {
-    // Initialize sidebar menus
-    ['services', 'roles', 'users', 'customers'].forEach(menu => {
-        const button = document.getElementById(`${menu}Button`);
-        const menuElement = document.getElementById(`${menu}Menu`);
-        const icon = document.getElementById(`${menu}Icon`);
-        
-        if (button && menuElement && icon) {
-            button.addEventListener('click', () => {
-                const isExpanded = menuElement.style.maxHeight !== '0px';
-                menuElement.style.maxHeight = isExpanded ? '0px' : '160px';
-                icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
-            });
-        }
-    });
-
-    // Initialize user dropdown
-    const userButton = document.getElementById('userDropdown');
-    const userMenu = document.getElementById('userMenu');
-    const userIcon = userButton?.querySelector('.material-icons-round:last-child');
-    
-    if (userButton && userMenu) {
-        userButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isExpanded = !userMenu.classList.contains('hidden');
-            userMenu.classList.toggle('hidden');
-            if (userIcon) {
-                userIcon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!userButton.contains(e.target)) {
-                userMenu.classList.add('hidden');
-                if (userIcon) {
-                    userIcon.style.transform = 'rotate(0deg)';
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (!modal.querySelector('.bg-white').contains(e.target)) {
+                    closeModal(modal.id);
                 }
-            }
+            });
+        });
+    },
+
+    setupDeleteHandler() {
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const deleteModal = document.getElementById('deleteModal');
+        
+        if (!deleteButtons.length || !deleteModal) return;
+
+        const types = {
+            customer: 'مشتری',
+            car: 'خودرو',
+            booking: 'رزرو',
+            report: 'گزارش',
+            option: 'آپشن',
+            role: "نقش"
+        };
+
+        deleteButtons.forEach(button => {
+            button.onclick = function(e) {
+                e.preventDefault();
+                const { route, type } = this.dataset;
+                if (route) {
+                    const form = deleteModal.querySelector('#deleteForm');
+                    const itemType = types[type] || 'آیتم';
+                    
+                    form.action = route;
+                    deleteModal.querySelector('h3').textContent = `تایید حذف ${itemType}`;
+                    deleteModal.querySelector('p').textContent = `آیا از حذف این ${itemType} اطمینان دارید؟`;
+                    
+                    openModal('deleteModal');
+                }
+            };
         });
     }
-}
+};
 
-function initializeAlerts() {
-    const alerts = document.querySelectorAll('.alert-dismissible');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.classList.add('opacity-0');
-            setTimeout(() => alert.remove(), 300);
-        }, 3000);
-    });
-}
+const OptionsManager = {
+    initialize() {
+        this.initializeOptionsForm();
+    },
 
-function initializeBreadcrumbBehavior() {
-    const breadcrumbContainer = document.querySelector('.breadcrumb-container');
-    let scrollTimer;
+    initializeOptionsForm() {
+        const elements = {
+            addButton: document.getElementById('option_add'),
+            removeButton: document.getElementById('option_remove'),
+            container: document.getElementById('options_container')
+        };
 
-    window.addEventListener('scroll', () => {
-        if (breadcrumbContainer) {
-            breadcrumbContainer.style.transform = 'translateY(-100%)';
-            clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(() => {
-                breadcrumbContainer.style.transform = 'translateY(0)';
-            }, 500);
+        if (Object.values(elements).every(Boolean)) {
+            this.setupOptionButtons(elements);
         }
-    });
-}
+    },
 
-function initializeOptionsForm() {
-    const addButton = document.getElementById('option_add');
-    const removeButton = document.getElementById('option_remove');
+    setupOptionButtons(elements) {
+        elements.addButton.addEventListener('click', () => {
+            const newIndex = elements.container.querySelectorAll('.option-field').length;
+            elements.container.appendChild(this.createOptionField(newIndex));
+        });
 
-    if (addButton && removeButton) {
-        addButton.addEventListener('click', addOptionField);
-        removeButton.addEventListener('click', removeOptionField);
-        updateButtonStates();
-    }
-}
+        elements.removeButton.addEventListener('click', () => {
+            const fields = elements.container.getElementsByClassName('option-field');
+            if (fields.length > 1) {
+                fields[fields.length - 1].remove();
+            }
+        });
+    },
 
-function addOptionField() {
-    const container = document.getElementById('options_container');
-    const newField = `
-        <div class="option-field grid grid-cols-2 gap-4">
+    createOptionField(index) {
+        const div = document.createElement('div');
+        div.className = 'option-field grid grid-cols-2 gap-6';
+        div.innerHTML = this.getOptionFieldTemplate(index);
+        return div;
+    },
+
+    getOptionFieldTemplate(index) {
+        return `
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">خدمات(برای مثال درب موتور)</label>
-                <input type="text" name="sub_options[]" placeholder="نام آپشن"
-                    class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
+                <label class="block text-sm font-medium text-gray-700 mb-2">خدمات</label>
+                <input type="text" name="sub_options[${index}]" placeholder="نام آپشن"
+                       class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">مقادیر</label>
-                <input type="text" name="sub_values[]" placeholder="مقادیر رو با ، جدا کنید"
-                    class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
-            </div>
-        </div>`;
-    container.insertAdjacentHTML('beforeend', newField);
-    updateButtonStates();
-}
-
-function removeOptionField() {
-    const container = document.getElementById('options_container');
-    const fields = container.getElementsByClassName('option-field');
-    if (fields.length > 1) {
-        fields[fields.length - 1].remove();
-    } else if (fields.length === 1) {
-        Array.from(fields[0].getElementsByTagName('input')).forEach(input => input.value = '');
+                <input type="text" name="sub_values[${index}]" placeholder="مقادیر را با ، جدا کنید"
+                       class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
+            </div>`;
     }
-    updateButtonStates();
-}
+};
 
-function updateButtonStates() {
-    const fields = document.getElementById('options_container').getElementsByClassName('option-field');
-    const addButton = document.getElementById('option_add');
-    const removeButton = document.getElementById('option_remove');
+const SelectManager = {
+    initialize() {
+        document.querySelectorAll('[id^="editModal-"]').forEach(modal => {
+            const selectAllBtn = modal.querySelector('#selectAll');
+            const checkboxes = modal.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
+            const buttonText = modal.querySelector('#selectAllText');
 
-    addButton.disabled = fields.length >= 10;
-    addButton.classList.toggle('opacity-50', fields.length >= 10);
-    removeButton.disabled = fields.length <= 1;
-    removeButton.classList.toggle('opacity-50', fields.length <= 1);
-}
+            if (selectAllBtn && checkboxes.length > 0 && buttonText) {
+                this.setupSelectAllHandler(selectAllBtn, checkboxes, buttonText);
+            }
+        });
+    },
 
-// Initialize select all functionality for each modal
-function initializeSelectAll() {
-    // Get all modals
-    const modals = document.querySelectorAll('[id^="editModal-"]');
-    
-    modals.forEach(modal => {
-        const modalId = modal.id;
-        const selectAllBtn = modal.querySelector('#selectAll');
-        
-        if (selectAllBtn) {
-            selectAllBtn.addEventListener('click', function() {
-                // Get checkboxes only within this specific modal
-                const checkboxes = modal.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
-                const isAllChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
-                const buttonText = modal.querySelector('#selectAllText');
-                
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = !isAllChecked;
-                });
-                
-                buttonText.textContent = !isAllChecked ? 'برداشتن همه' : 'انتخاب همه';
-            });
+    setupSelectAllHandler(button, checkboxes, buttonText) {
+        const checkState = () => Array.from(checkboxes).every(cb => cb.checked);
+        const updateButtonText = () => {
+            buttonText.textContent = checkState() ? 'برداشتن همه' : 'انتخاب همه';
+        };
 
-            // Set initial button text on load
-            window.addEventListener('load', function() {
-                const checkboxes = modal.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
-                const isAllChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
-                const buttonText = modal.querySelector('#selectAllText');
-                
-                buttonText.textContent = isAllChecked ? 'برداشتن همه' : 'انتخاب همه';
-            });
-        }
-    });
-}
+        button.onclick = () => {
+            const newState = !checkState();
+            checkboxes.forEach(cb => cb.checked = newState);
+            updateButtonText();
+        };
+
+        updateButtonText();
+        checkboxes.forEach(cb => cb.addEventListener('change', updateButtonText));
+    }
+};

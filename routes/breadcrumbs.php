@@ -17,78 +17,40 @@ Breadcrumbs::for('home', function (BreadcrumbTrail $trail) {
     $trail->push('داشبورد', route('home'));
 });
 
-// Options List
-Breadcrumbs::for('show.options', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('خدمات', route('show.options'));
-});
-
-// Create Option
-Breadcrumbs::for('create.option', function (BreadcrumbTrail $trail) {
-    $trail->parent('show.options');
-    $trail->push('ایجاد خدمت', route('create.option'));
-});
-
-// Edit Option
-Breadcrumbs::for('edit.option', function (BreadcrumbTrail $trail) {
-    $option = Options::where('id', request()->route('id'))->first();
-
-    $trail->parent('show.options');
-    $trail->push($option->name, route('edit.option', $option->id));
-});
-
-
 // Customer Form
 Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
     $trail->push('فرم مشتری', route('customer.form'));
 });
 
-// Users List
-Breadcrumbs::for('users.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('کاربران', route('users.index'));
-});
+// Users
+    // Users List
+    Breadcrumbs::for('users.index', function (BreadcrumbTrail $trail) {
+        $trail->parent('home');
+        $trail->push('کاربران', route('users.index'));
+    });
 
-// Create User
-Breadcrumbs::for('users.create', function (BreadcrumbTrail $trail) {
-    $trail->parent('users.index');
-    $trail->push('ایجاد کاربر', route('users.create'));
-});
+    // Create User
+    Breadcrumbs::for('users.create', function (BreadcrumbTrail $trail) {
+        $trail->parent('users.index');
+        $trail->push('ایجاد کاربر', route('users.create'));
+    });
 
-// Edit User
-Breadcrumbs::for('users.edit', function (BreadcrumbTrail $trail) {
-    $user = User::where('id', request()->route('user')->id)->first();
+    // Edit User
+    Breadcrumbs::for('users.edit', function (BreadcrumbTrail $trail) {
+        $user = User::where('id', request()->route('user')->id)->first();
 
-    $trail->parent('users.index');
-    $trail->push("{$user->name}", route('users.edit', $user));
-});
+        $trail->parent('users.index');
+        $trail->push("{$user->name}", route('users.edit', $user));
+    });
 
-// User Profile
-Breadcrumbs::for('user.profile', function (BreadcrumbTrail $trail) {
-    $user = User::where('name', request()->route('name'))->first();
-
-    $trail->parent('home');
-    $trail->push("{$user->name}", route('user.profile', $user->name));
-});
-
-// Reports List
-Breadcrumbs::for('reports.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('گزارشات', route('reports.index'));
-});
-
-// Create Report
-Breadcrumbs::for('reports.create', function (BreadcrumbTrail $trail) {
-    $trail->parent('reports.index');
-    $trail->push('ایجاد گزارش', route('reports.create'));
-});
-
-// Edit Report
-Breadcrumbs::for('reports.edit', function (BreadcrumbTrail $trail, $report) {
-    $trail->parent('reports.index');
-    $trail->push("ویرایش گزارش", route('reports.edit', $report));
-});
+    // User Profile
+    Breadcrumbs::for('user.profile', function (BreadcrumbTrail $trail) {
+        $user = User::where('id', request()->route('id'))->first();
+        
+        $trail->parent('home');
+        $trail->push("{$user->name}", route('user.profile', $user->name));
+    });
 
 
 //Roles
@@ -119,11 +81,11 @@ Breadcrumbs::for('reports.edit', function (BreadcrumbTrail $trail, $report) {
         $trail->push('لیست مشتریان', route('customers.index'));
     });
     // Customer show
-    Breadcrumbs::for('customers.show', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('fullname', request()->route('name'))->first();
+    Breadcrumbs::for('customers.profile', function (BreadcrumbTrail $trail) {
+        $customer = Customer::where('id', request()->route('id'))->first();
 
         $trail->parent('customers.index');
-        $trail->push("{$customer->fullname}", route('customers.show', ['name' => $customer->fullname]));
+        $trail->push("{$customer->fullname}", route('customers.profile', ['id' => $customer->id]));
     });
 
     // Customer create
@@ -134,23 +96,51 @@ Breadcrumbs::for('reports.edit', function (BreadcrumbTrail $trail, $report) {
 
     //Customer Bookings
     Breadcrumbs::for('customers.bookings', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('fullname', request()->route('name'))->first();
-        $trail->parent('customers.show', ['name' => $customer->fullname]);
-        $trail->push('رزرو ها', route('customers.bookings', ['name' => $customer->fullname]));
+        $customer = Customer::where('id', request()->route('id'))->first();
+        $trail->parent('customers.profile', ['id' => $customer->id]);
+        $trail->push('رزرو ها', route('customers.bookings', ['id' => $customer->id]));
+    });
+
+    //Cars create
+    Breadcrumbs::for('cars.create', function (BreadcrumbTrail $trail) {
+        $customer = Customer::where('id', request()->route('id'))->first();
+        $trail->parent('customers.profile', ['id' => $customer->id]);
+        $trail->push('ایجاد خودرو', route('cars.create', ['id' => $customer->id]));
     });
 
     //Booking
     //Bookings Index
     Breadcrumbs::for('bookings.create', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('fullname', request()->route('name'))->first();
+        $customer = Customer::where('id', request()->route('id'))->first();
 
-        $trail->parent('customers.show', ['name' => $customer->fullname]);
-        $trail->push('رزرو', route('bookings.create', ['name' => $customer->fullname]));
+        $trail->parent('customers.profile', ['id' => $customer->id]);
+        $trail->push('رزرو', route('bookings.create', ['id' => $customer->id]));
     });
 
-    //Cars create
-    Breadcrumbs::for('cars.create', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('fullname', request()->route('name'))->first();
-        $trail->parent('customers.show', ['name' => $customer->fullname]);
-        $trail->push('ایجاد خودرو', route('cars.create', ['name' => $customer->fullname]));
+//Options
+    // Options List
+    Breadcrumbs::for('show.options', function (BreadcrumbTrail $trail) {
+        $trail->parent('home');
+        $trail->push('خدمات', route('show.options'));
+    });
+
+    // Create Option
+    Breadcrumbs::for('create.option', function (BreadcrumbTrail $trail) {
+        $trail->parent('show.options');
+        $trail->push('ایجاد خدمت', route('create.option'));
+    });
+
+    // Edit Option
+    Breadcrumbs::for('edit.option', function (BreadcrumbTrail $trail) {
+        $option = Options::where('id', request()->route('id'))->first();
+
+        $trail->parent('show.options');
+        $trail->push($option->name, route('edit.option', $option->id));
+    });
+
+//Bookings
+    //Bookings Index
+    Breadcrumbs::for('bookings.index', function (BreadcrumbTrail $trail) {
+        $trail->parent('home');
+        $trail->push('تمام رزروی ها', route('bookings.index'));
     });

@@ -26,7 +26,6 @@
 
             <form action="{{route('update.option', $option->id)}}" method="post" class="space-y-6">
                 @csrf
-                @method('PUT')
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                         نام خدمت اصلی(برای مثال خدمات کارشناسی بدنه)
@@ -35,7 +34,7 @@
                         class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
                 </div>
 
-                <div id="options_container" class="space-y-4">
+                <div id="options_container_{{$option->id}}" class="space-y-4">
                     @foreach(json_decode($option->values) as $key => $values)
                     <div class="option-field grid grid-cols-2 gap-4">
                         <div>
@@ -56,17 +55,18 @@
                     @endforeach
                 </div>
 
-                <div class="flex gap-3">
-                    <button type="button" id="option_add"
+                <div class="flex gap-3 mt-3">
+                    <button type="button" id="option_add" onclick="addOptionField('{{$option->id}}')"
                         class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors duration-200">
                         <i class="material-icons-round text-lg ml-1">add</i>
                         اضافه کردن آپشن
                     </button>
-                    <button type="button" id="option_remove"
+                    
+                    <button type="button" id="option_remove" onclick="removeOptionField('{{$option->id}}')"
                         class="inline-flex items-center px-4 py-2 bg-rose-100 text-rose-800 rounded-lg hover:bg-rose-200 transition-colors duration-200">
                         <i class="material-icons-round text-lg ml-1">remove</i>
                         حذف کردن آپشن
-                    </button>
+                    </button>                    
                 </div>
 
                 <button type="submit"

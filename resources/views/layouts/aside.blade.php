@@ -15,6 +15,12 @@
                     <i class="material-icons-round text-gray-500 text-lg ml-2 {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : '' }}">dashboard</i>
                     <span class="text-gray-700 {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : '' }}">داشبورد</span>
                 </a>
+                
+                <!-- Bookings Menu -->
+                <a href="{{route('bookings.index')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'bookings.index' ? 'bg-gray-100' : '' }}">
+                    <i class="material-icons-round text-gray-500 text-lg ml-2">event_note</i>
+                    <span class="text-gray-700 {{ Route::currentRouteName() == 'bookings.index' ? 'text-blue-600' : '' }}">لیست رزروها</span>
+                </a>
 
                 <!-- Customers Menu -->
                 @permision("create_customer")
@@ -60,7 +66,7 @@
                                     <i class="material-icons-round text-gray-500 text-lg ml-2">list</i>
                                     <span class="text-gray-700">نمایش خدمات</span>
                                 </a>
-                                <a href="{{route('option.create')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'create.option' ? 'bg-gray-100' : '' }}">
+                                <a href="{{route('create.option')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'create.option' ? 'bg-gray-100' : '' }}">
                                     <i class="material-icons-round text-gray-500 text-lg ml-2">add</i>
                                     <span class="text-gray-700">ایجاد خدمات</span>
                                 </a>

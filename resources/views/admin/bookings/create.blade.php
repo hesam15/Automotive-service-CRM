@@ -13,7 +13,7 @@
             </div>
 
             <div class="p-4 md:p-6">
-                <form action="{{route("bookings.store", $customer->fullname)}}" method="POST" class="space-y-4">
+                <form action="{{route("bookings.store", $customer->id)}}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid md:grid-cols-2 gap-4 md:gap-6">
                         <!-- نام و نام خانوادگی -->
@@ -55,7 +55,7 @@
                             @else
                                 <div class="w-full flex items-center justify-between px-4 py-2.5 md:py-2 bg-red-600 text-white text-sm rounded-lg">
                                     <span>هنوز خودرویی برای این مشتری ثبت نشده است.</span>
-                                    <a href="{{ route('cars.create', $customer->fullname) }}" class="inline-flex items-center px-3 py-1.5 bg-white text-red-600 rounded hover:bg-red-50 transition-colors duration-200">
+                                    <a href="{{ route('cars.create', $customer->id) }}" class="inline-flex items-center px-3 py-1.5 bg-white text-red-600 rounded hover:bg-red-50 transition-colors duration-200">
                                         <span class="material-icons-round text-base ml-1">add</span>
                                         افزودن خودرو
                                     </a>
@@ -73,12 +73,12 @@
                     </div>
 
                     <!-- ساعت مراجعه -->
-                    <div id="time-slots-container" class="hidden">
-                        <label for="time_slot" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">ساعت مراجعه</label>
-                        <div class="grid grid-cols-6 gap-2">
-                            <!-- Time slot buttons will be dynamically added here -->
+                    <div id="time-slots-container">
+                        <input type="text" id="datepicker" class="form-control">
+                        <div id="time-slots-grid" class="grid grid-cols-6 gap-2">
+                            <!-- Time slots will be inserted here -->
                         </div>
-                        <input type="hidden" name="time_slot" id="time_slot" value="{{old('time_slot')}}" required>
+                        <input type="hidden" name="time_slot" id="time_slot" value="{{ old('time_slot') }}" required>
                         <x-input-error :messages="$errors->get('time_slot')" class="mt-2" />
                     </div>
 

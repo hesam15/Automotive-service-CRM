@@ -1,140 +1,163 @@
-// Initial time slots check on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const datepicker = document.getElementById('datepicker');
-    const hiddenInput = document.querySelector('input[name="time_slot"]');
-    const currentTimeSlot = hiddenInput ? hiddenInput.value : null;
+window.DateTimeManager = {
+    initialized: false,
 
-    if (datepicker && datepicker.value) {
-        loadTimeSlots(datepicker.value, currentTimeSlot);
-    }
-});
+    initialize() {
+        if (this.initialized) return;
 
-// Datepicker initialization and event handling
-$('#datepicker').persianDatepicker({
-    initialValueType: 'persian',
-    format: 'YYYY/MM/DD',
-    maxDate: new persianDate().add('month', 3).valueOf(),
-    minDate: new persianDate(),
-    onSelect: function(unix) {
-        const pd = new persianDate(unix);
-        const selectedDate = `${pd.year()}/${pd.month()}/${pd.date()}`;
-        const currentTimeSlot = document.querySelector('input[name="time_slot"]').value;
-        loadTimeSlots(selectedDate, currentTimeSlot);
-    }
-});
+        const newBookingDatepicker = document.querySelector('#datepicker:not([id*="-"])');
+        if (newBookingDatepicker) {
+            this.initDatepicker(newBookingDatepicker, '');
+        }
 
-function loadTimeSlots(selectedDate, currentTimeSlot) {
-    const timeSlotContainer = document.getElementById('time-slots-container');
-
-    if (selectedDate) {
-        timeSlotContainer.classList.remove('hidden');
-        $.ajax({
-            url: `/dashboard/available-times`,
-            method: 'GET',
-            data: { 
-                date: selectedDate,
-                current_slot: currentTimeSlot 
-            },
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function(data) {
-                renderTimeSlots(data, timeSlotContainer, currentTimeSlot);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching available times:', error);
-                console.log(response(xhr));
-                timeSlotContainer.innerHTML = '<p class="text-red-500">خطا در دریافت ساعت‌های موجود</p>';
+        const editModals = document.querySelectorAll('[id^="bookingEditModal-"]');
+        editModals.forEach(modal => {
+            const bookingId = modal.id.split('-')[1];
+            const datepicker = modal.querySelector('#datepicker');
+            if (datepicker) {
+                this.initDatepicker(datepicker, bookingId);
             }
         });
-    }
-}
 
-function renderTimeSlots(data, container, currentTimeSlot) {
-    container.innerHTML = '';
+        this.initialized = true;
+    },
 
-    // Add styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .time-slot input:checked + label {
-            border-color: rgb(34 197 94) !important;
-            color: rgb(34 197 94) !important;
+    initDatepicker(element, bookingId) {
+        const self = this;
+        jQuery(element).persianDatepicker({
+            initialValue: true,
+            initialValueType: 'persian',
+            format: 'YYYY/MM/DD',
+            autoClose: true,
+            maxDate: new persianDate().add('month', 3).valueOf(),
+            minDate: new persianDate(),
+            onSelect: function(unix) {
+                const date = new persianDate(unix);
+                const formattedDate = `${date.year()}/${date.month()}/${date.date()}`;
+                self.handleDateSelection(formattedDate, bookingId);
+                
+                const containerId = bookingId ? `time-slots-container-${bookingId}` : 'time-slots-container';
+                const container = document.getElementById(containerId);
+                if (container) container.classList.remove('hidden');
+            }
+        });
+
+        if (element.value) {
+            this.handleDateSelection(element.value, bookingId);
         }
-        .time-slot:not(.disabled) label:hover {
-            border-color: rgb(34 197 94);
-            color: rgb(34 197 94);
-            transform: translateY(-1px);
-        }
-    `;
-    document.head.appendChild(style);
+    },
 
-    // Add header
-    const header = document.createElement('h3');
-    header.className = 'text-lg font-semibold text-gray-800 mb-4 pr-4';
-    header.textContent = 'ساعت های قابل انتخاب';
-    container.appendChild(header);
+    handleDateSelection(selectedDate, bookingId) {
+        const timeSlotInput = document.getElementById(bookingId ? `time_slot_${bookingId}` : 'time_slot');
+        const currentTimeSlot = timeSlotInput ? timeSlotInput.value : '';
+        this.loadTimeSlots(selectedDate, currentTimeSlot, bookingId);
+    },
 
-    // Create wrapper
-    const wrapper = document.createElement('div');
-    wrapper.className = 'space-y-4 px-4';
-
-    // Sort and combine times
-    const availableTimes = data.available;
-    const bookedTimes = data.booked || [];
-    const times = [...availableTimes, ...bookedTimes].sort((a, b) => {
-        const [hoursA, minutesA] = a.split(':').map(Number);
-        const [hoursB, minutesB] = b.split(':').map(Number);
-        return hoursA !== hoursB ? hoursA - hoursB : minutesA - minutesB;
-    });
-
-    // Create time slots grid
-    for(let i = 0; i < times.length; i += 6) {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'flex flex-row justify-between w-full gap-4';
+    loadTimeSlots(selectedDate, currentTimeSlot, bookingId) {
+        const gridId = bookingId ? `time-slots-grid-${bookingId}` : 'time-slots-grid';
+        const container = document.getElementById(gridId);
         
-        times.slice(i, i + 6).forEach(time => {
-            const isBooked = bookedTimes.includes(time);
-            const div = document.createElement('div');
-            div.className = `flex-1 time-slot ${isBooked ? 'disabled' : ''}`;
+        if (container) {
+            container.className = 'grid grid-cols-4 gap-4 auto-rows-auto';
+            
+            fetch(`/dashboard/available-times?date=${selectedDate}${bookingId ? '&booking_id=' + bookingId : ''}`)
+                .then(response => response.json())
+                .then(data => {
+                    container.innerHTML = '';
+                    
+                    const bookedTimes = data.booked || [];
+                    
+                    data.all.forEach((time, index) => {
+                        const isBooked = bookedTimes.includes(time);
+                        const slot = this.createTimeSlot(time, isBooked, currentTimeSlot, bookingId);
+                        
+                        const totalItems = data.all.length;
+                        const lastRowItems = totalItems % 4;
+                        if (lastRowItems > 0 && index >= totalItems - lastRowItems) {
+                            slot.className += ` col-span-${Math.floor(4/lastRowItems)}`;
+                        }
+                        
+                        container.appendChild(slot);
+                    });
+                });
+        }
+    },
 
-            const input = document.createElement('input');
-            input.type = 'radio';
-            input.name = 'time_slot';
-            input.id = `time-${time}`;
-            input.value = time;
-            input.className = 'hidden';
-            input.disabled = isBooked;
-
-            // Add change event listener
-            input.addEventListener('change', function() {
-                const hiddenInput = document.querySelector('input[name="time_slot"]');
-                if (hiddenInput) {
-                    hiddenInput.value = this.value;
+    createTimeSlot(time, isBooked, currentValue, bookingId) {
+        const div = document.createElement('div');
+        div.className = 'time-slot transform transition-all duration-300';
+    
+        const input = document.createElement('input');
+        const inputId = `time-${time}-${bookingId}`;
+        input.type = 'radio';
+        input.name = bookingId ? `time_slot_${bookingId}` : 'time_slot';
+        input.id = inputId;
+        input.value = time;
+        input.className = 'hidden';
+        input.disabled = isBooked;
+        input.checked = time === currentValue;
+    
+        const label = document.createElement('label');
+        label.htmlFor = inputId;
+        
+        // Highlight the user's previous booking time
+        const isPreviousBooking = time === currentValue;
+        label.className = this.getTimeSlotClasses(isBooked, input.checked, isPreviousBooking);
+        label.textContent = time;
+        
+        if (isPreviousBooking) {
+            label.classList = 'block w-full text-center px-3 py-2 rounded-lg text-sm transition-all duration-300 bg-red-500 text-white cursor-not-allowed';
+            label.textContent = time;
+        }        
+    
+        if (!isBooked) {
+            label.addEventListener('click', () => {
+                const previousBooking = currentValue;
+                const baseClasses = 'block w-full text-center px-3 py-2 rounded-lg text-sm transition-all duration-300';
+                
+                document.querySelectorAll('.time-slot label').forEach(l => {
+                    const timeText = l.textContent.trim();
+                    const isThisBooked = l.classList.contains('cursor-not-allowed');
+                    const isThisPreviousBooking = timeText === previousBooking;
+                    
+                    if (isThisPreviousBooking) {
+                        l.className = `${baseClasses} bg-gray-100 border-2 border-red-500 text-red-700`;
+                    } else if (timeText === time) {
+                        l.className = `${baseClasses} bg-blue-100 border-2 border-blue-500 text-blue-700 shadow-md`;
+                    } else if (!isThisBooked) {
+                        l.className = `${baseClasses} bg-white border border-gray-200 text-gray-700 cursor-pointer hover:bg-blue-50 hover:border-blue-300`;
+                    }
+                });
+                
+                const timeSlotInput = document.getElementById(bookingId ? `time_slot_${bookingId}` : 'time_slot');
+                if (timeSlotInput) {
+                    timeSlotInput.value = time;
                 }
             });
-
-            // Check if this is the current time slot
-            if (time === currentTimeSlot) {
-                input.checked = true;
-            }
-
-            const label = document.createElement('label');
-            label.htmlFor = `time-${time}`;
-            label.className = `block w-full text-center px-3 py-2 rounded-lg border-2 transition-all duration-200 ${
-                !isBooked
-                    ? 'border-gray-200 text-gray-700 cursor-pointer'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`;
-            label.textContent = time;
-
-            div.appendChild(input);
-            div.appendChild(label);
-            rowDiv.appendChild(div);
-        });
-        
-        wrapper.appendChild(rowDiv);
-    }
+        }                               
     
-    container.appendChild(wrapper);
+        div.appendChild(input);
+        div.appendChild(label);
+        return div;
+    },
+    
+    getTimeSlotClasses(isBooked, isSelected) {
+        const baseClasses = 'block w-full text-center px-3 py-2 rounded-lg text-sm transition-all duration-300';
+    
+        if (isBooked) {
+            return `${baseClasses} bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed`;
+        }
+    
+        if (isSelected) {
+            return `${baseClasses} bg-blue-100 border-2 border-blue-500 text-blue-700 shadow-md`;
+        }
+    
+        return `${baseClasses} bg-white border border-gray-200 text-gray-700 cursor-pointer hover:bg-blue-50 hover:border-blue-300`;
+    } 
+};
+
+if (!window.dateTimeManagerInitialized) {
+    window.dateTimeManagerInitialized = true;
+    document.addEventListener('DOMContentLoaded', () => {
+        window.DateTimeManager.initialize();
+    });
 }

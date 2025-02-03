@@ -8,47 +8,81 @@ use Illuminate\Support\Facades\Auth;
 
 class OptionsController extends Controller
 {
-    public function index(){
+    // Read
+    public function index()
+    {
         $options = Options::all();
-        $suboptions = Options::pluck('values')->toArray();
-
-        return view('admin.options.index', compact('options', 'suboptions'));
+        return view('admin.options.index', compact('options'));
     }
 
-    public function create(){
-
+    // Create
+    public function create()
+    {
         return view('admin.options.createOption');
     }
-    
-    public function store(Request $request){
+
+    public function store(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
             'sub_options' => 'required|array',
             'sub_values' => 'required|array',
         ]);
 
-        $sub_options = $request->sub_options;
-        $sub_values = $request->sub_values;
-        
-        $options_array = [];
-        
-        for($i = 0; $i < count($sub_options); $i++) {
-            $values = explode('،', $sub_values[$i]);
-            $options_array[$sub_options[$i]] = $values;
-        }
-        
+        $options_array = array_combine(
+            $request->sub_options,
+            array_map(function ($value) {
+                return array_map('trim', explode('،', $value));
+            }, $request->sub_values)
+        );
+
         $option = new Options();
         $option->name = $request->name;
         $option->values = json_encode($options_array, JSON_UNESCAPED_UNICODE);
-        $option->user_id = Auth::user()->id;
+        $option->user_id = Auth::id();
         $option->save();
-    
-        return redirect()->back()->with('success', true);
+
+        return redirect()->back()->with('success', 'خدمت با موفقیت ایجاد شد.');
     }
 
-    public function edit($id){
-        $option = Options::where('id', $id)->first();
+    // Update
+    public function edit($id)
+    {
+        $option = Options::findOrFail($id);
         $values = json_decode($option->values, true);
-        return view('admin.options.editOption', compact('option', 'values'));
+        return view('admin.options.edit', compact('option', 'values'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'sub_options' => 'required|array',
+            'sub_values' => 'required|array',
+        ]);
+
+        $options_array = array_combine(
+            $request->sub_options,
+            array_map(function ($value) {
+                return array_map('trim', explode('،', $value));
+            }, $request->sub_values)
+        );
+
+        $option = Options::findOrFail($id);
+        $option->update([
+            'name' => $request->name,
+            'values' => json_encode($options_array, JSON_UNESCAPED_UNICODE),
+            'user_id' => Auth::id()
+        ]);
+
+        return back()->with('success', 'خدمت با موفقیت ویرایش شد.');
+    }
+
+    // Delete
+    public function destroy($id)
+    {
+        $option = Options::findOrFail($id);
+        $option->delete();
+        return redirect()->back()->with('success', 'خدمت با موفقیت حذف شد.');
     }
 }

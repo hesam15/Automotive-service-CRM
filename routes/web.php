@@ -33,7 +33,7 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         //Users
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('users.index');
-            Route::get('/profile/{name}', [UserController::class, 'profile'])->name('user.profile');
+            Route::get('/profile/{id}', [UserController::class, 'profile'])->name('user.profile');
 
             Route::middleware('permision:create_user')->group(function () {
                 Route::get('/create', [UserController::class, 'create'])->name('users.create');
@@ -66,13 +66,13 @@ Route::middleware(['auth' , 'verified'])->group(function () {
 
         //Customers
         Route::prefix('customers')->group(function () {
-            Route::get('/list', [CustomerController::class, 'list'])->name('customers.index');
+            Route::get('/index', [CustomerController::class, 'index'])->name('customers.index');
 
             Route::get('/create', [CustomerController::class, 'create'])->name('customers.create');
             Route::post('/store', [CustomerController::class, 'store'])->name('customers.store');
 
-            Route::get('/{name}', [CustomerController::class, 'show'])->name('customers.show');
-            Route::get('/{name}/bookings', [BookingController::class, 'list'])->name('customers.bookings');
+            Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.profile');
+            Route::get('/{id}/bookings', [BookingController::class, 'customer'])->name('customers.bookings');
 
             Route::middleware('permision:edit_customer')->group(function () {
                 Route::post('/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
@@ -85,8 +85,8 @@ Route::middleware(['auth' , 'verified'])->group(function () {
             Route::get('/list', [BookingController::class, 'index'])->name('bookings.index');
             // Route::get('/{id}', [BookingController::class, 'show'])->name('bookings.show');
 
-            Route::get('/{name}/create', [BookingController::class, 'create'])->name('bookings.create');
-            Route::post('/{name}/store', [BookingController::class, 'store'])->name('bookings.store');
+            Route::get('/{id}/create', [BookingController::class, 'create'])->name('bookings.create');
+            Route::post('/{id}/store', [BookingController::class, 'store'])->name('bookings.store');
 
             Route::post('/{id}/update', [BookingController::class, 'update'])->name('bookings.update');
             Route::post('/{id}/delete', [BookingController::class, 'destroy'])->name('bookings.destroy');
@@ -98,8 +98,8 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         Route::prefix('cars')->group(function () {
             Route::get('/list', [CarController::class, 'index'])->name('cars.index');
 
-            Route::get('{name}/create', [CarController::class, 'create'])->name('cars.create');
-            Route::post('/store', [CarController::class, 'store'])->name('cars.store');
+            Route::get('{id}/create', [CarController::class, 'create'])->name('cars.create');
+            Route::post('{id}/store', [CarController::class, 'store'])->name('cars.store');
 
             Route::post('/{id}/update', [CarController::class, 'update'])->name('cars.update');
             Route::post('/{id}/delete', [CarController::class, 'destroy'])->name('cars.destroy');
@@ -122,7 +122,7 @@ Route::middleware(['auth' , 'verified'])->group(function () {
             Route::get('/', [OptionsController::class, 'index'])->name('show.options');
 
             Route::middleware('permision:create_option')->group(function () {
-                Route::get('/create', [OptionsController::class, 'create'])->name('option.create');
+                Route::get('/create', [OptionsController::class, 'create'])->name('create.option');
                 Route::post('/create', [OptionsController::class, 'store'])->name('store.option');
             });
 
@@ -134,7 +134,6 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         })->middleware('permision:create_option');
 
         Route::get('/available-times', [DatePicker::class, 'getAvailableTimes']);
-
     });
 
 //pdf
