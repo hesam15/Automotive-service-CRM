@@ -33,44 +33,57 @@
             <div class="p-6">
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-gray-100">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">شماره رزرو</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">خودرو</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">تاریخ رزرو</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">ساعت رزرو</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">وضعیت</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">عملیات</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/6">تاریخ</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/6">ساعت</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/6">نوع خودرو</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/6">وضعیت</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-2/6">عملیات</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @foreach($bookings as $booking)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-base text-gray-900">{{ $booking->id }}</td>
-                                <td class="px-4 py-2 text-base text-gray-900">{{ $booking->car->name }}</td>
-                                <td class="px-4 py-2 text-base text-gray-900">{{ $booking->date }}</td>
-                                <td class="px-4 py-2 text-base text-gray-900">{{ $booking->time_slot }}</td>
+                                <td class="px-4 py-3 text-gray-900">{{ $booking->date }}</td>
+                                <td class="px-4 py-3 text-gray-900">{{ $booking->time_slot }}</td>
+                                <td class="px-4 py-3 text-gray-900">{{ $booking->car->name }}</td>
                                 <td class="px-4 py-3">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
                                         {{ $booking->status === 'completed' ? 'تکمیل شده' : 'در انتظار' }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-2">
-                                    <div class="flex items-center gap-1">
-                                        <button onclick="openModal('bookingEditModal-{{$booking->id}}')" 
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-2">
+                                        @if($booking->status === 'pending')
+                                            <a href="{{ route('report.create', ['booking_id' => $booking->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
+                                                <i class="material-icons-round text-sm">assignment</i>
+                                                <span class="text-xs mr-0.5">ثبت گزارش</span>
+                                            </a>
+                                        @endif
+                                        @if($booking->status === 'completed')
+                                            <a href="{{ route('report.index', ['booking_id' => $booking->id, 'car_id' => $booking->car_id]) }}"
+                                            class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
+                                                <i class="material-icons-round text-sm">visibility</i>
+                                                <span class="text-xs mr-0.5">مشاهده گزارش</span>
+                                            </a>
+                                        @endif
+                                        <button onclick="openModal('bookingEditModal-{{$booking->id}}')" 
+                                                class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                                             <i class="material-icons-round text-sm">edit</i>
                                             <span class="text-xs mr-0.5">ویرایش</span>
                                         </button>
-                                        <button class="inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200 delete-btn" 
-                                                data-route="{{ route('bookings.destroy', $booking->id) }}">
-                                            <i class="material-icons-round text-sm">delete</i>
-                                            <span class="text-xs mr-0.5">حذف</span>
-                                        </button>
+                                        @if($booking->status === 'pending')
+                                            <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" data-route="{{route("bookings.destroy", $booking->id)}}" data-type="booking">
+                                                <i class="material-icons-round text-sm">cancel</i>
+                                                <span class="text-xs mr-0.5">کنسل کردن</span>
+                                            </button> 
+                                        @endif 
                                     </div>
                                 </td>
                             </tr>
-
+                        
                             <!-- Edit Booking Modal -->
                             <x-edit-modal :id="'bookingEditModal-'.$booking->id" title="ویرایش رزرو" :action="route('bookings.update', $booking->id)" method='POST'>
                                 @csrf
@@ -140,8 +153,9 @@
                                     <x-input-error :messages="$errors->get('time_slot')" class="mt-2" />
                                 </div>
                             </x-edit-modal>
+                                                         
                             @endforeach
-                        </tbody>
+                        </tbody>  
                     </table>
                 </div>
             </div>

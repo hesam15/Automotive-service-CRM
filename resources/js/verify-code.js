@@ -1,192 +1,207 @@
-// Path checking utility
-const isRelevantPath = () => {
-    return window.location.pathname.includes('register') || 
-           window.location.pathname.includes('dashboard/users');
+// Constants
+const VERIFICATION_TIMEOUT = 300; // 5 minutes in seconds
+const PHONE_LENGTH = 11;
+const VERIFICATION_CODE_LENGTH = 4;
+const API_ENDPOINTS = {
+    SEND_CODE: 'http://127.0.0.1:8000/sendVerify',
+    VERIFY_CODE: 'http://127.0.0.1:8000/verifyCode'
 };
 
-// Event Listeners
-window.addEventListener('beforeunload', () => {
-    if (!isRelevantPath()) resetVerificationForm();
-});
-
-document.addEventListener('click', (e) => {
-    if (e.target.tagName === 'A') {
-        const href = e.target.getAttribute('href');
-        if (href && !isRelevantPath()) resetVerificationForm();
-    }
-});
-
-// Phone verification handler
-document.querySelectorAll('.verify-phone-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const userId = this.dataset.phoneId;
-        const phoneNumber = document.getElementById(`phone-${userId}`).value;
+class PhoneVerification {
+    constructor() {
+        this.API_ENDPOINTS = {
+            SEND_CODE: '/api/verify/send',
+            VERIFY_CODE: '/api/verify/check'
+        };
         
-        if (!phoneNumber || phoneNumber.length !== 11) {
-            alert('لطفا شماره موبایل معتبر وارد کنید');
+        this.PHONE_LENGTH = 11;
+        this.VERIFICATION_CODE_LENGTH = 4;
+        this.VERIFICATION_TIMEOUT = 300;
+        
+        this.initialize();
+    }
+
+    initialize() {
+        if (!this.isValidPage()) return;
+        
+        this.setupEventListeners();
+        this.checkExistingVerification();
+    }
+
+    isValidPage() {
+        const verifyButton = document.querySelector('.verify-phone-btn');
+        if (!verifyButton) {
+            console.warn('Verification button not found');
+            return false;
+        }
+        return true;
+    }
+
+    setupEventListeners() {
+        // Delegate all click events to document
+        document.addEventListener('click', (e) => {
+            // Handle verify phone button click
+            if (e.target.closest('.verify-phone-btn')) {
+                e.preventDefault();
+                this.handleVerifyButtonClick(e.target.closest('.verify-phone-btn'));
+            }
+            
+            // Handle verify code button click
+            if (e.target.matches('[id^="verify-code-btn-"]')) {
+                this.handleVerifyCodeClick(e.target);
+            }
+        });
+
+        // Handle form submission
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        }
+    }
+
+    async handleVerifyButtonClick(button) {
+        const userId = button.dataset.phoneId;
+        const phoneInput = document.getElementById(`phone-${userId}`);
+        
+        if (!phoneInput?.value) {
+            this.showError('لطفا شماره موبایل را وارد کنید');
             return;
         }
 
-        this.disabled = true;
-        this.textContent = 'در حال ارسال...';
+        if (!this.isValidPhone(phoneInput.value)) {
+            this.showError('شماره موبایل نامعتبر است');
+            return;
+        }
 
-        const formData = new FormData();
-        formData.append('phone', phoneNumber);
-        formData.append('_token', document.querySelector('input[name="_token"]').getAttribute('value'));
+        try {
+            button.disabled = true;
+            button.textContent = 'در حال ارسال...';
 
-        fetch('http://127.0.0.1:8000/sendVerify', {
+            const response = await this.sendVerificationRequest(phoneInput.value);
+            
+            if (response.success) {
+                this.showVerificationForm(userId);
+                this.startVerificationTimer(userId);
+                this.showSuccess('کد تایید ارسال شد');
+            }
+        } catch (error) {
+            this.showError(error.message);
+        } finally {
+            button.disabled = false;
+            button.textContent = 'ارسال کد تایید';
+        }
+    }
+
+    async sendVerificationRequest(phone) {
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!token) throw new Error('CSRF token not found');
+
+        const response = await fetch(this.API_ENDPOINTS.SEND_CODE, {
             method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            saveStartTime(userId);
-            showVerificationForm(userId);
-            startTimer(userId);
-            alert('کد تایید با موفقیت ارسال شد');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('خطا در ارسال کد');
-        })
-        .finally(() => {
-            this.disabled = false;
-            this.textContent = 'ارسال کد تایید';
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ phone })
         });
-    });
-});
 
-// Verification form UI
-function showVerificationForm(userId) {
-    const verificationHTML = `
-        <div id="verification-form-${userId}" class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">کد تایید</label>
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'خطا در ارسال کد');
+        }
+
+        return response.json();
+    }
+
+    showVerificationForm(userId) {
+        const container = document.querySelector(`#phone-${userId}`).parentElement;
+        if (!container) return;
+
+        const verificationForm = document.createElement('div');
+        verificationForm.id = `verification-form-${userId}`;
+        verificationForm.className = 'mt-4';
+        verificationForm.innerHTML = `
             <div class="relative">
-                <input type="text" name="verification_code" maxlength="4"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                    placeholder="کد تایید را وارد کنید">
-                <button type="button" id="verify-code-btn-${userId}"
-                    class="absolute left-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm">
+                <input type="text" 
+                       name="verification_code" 
+                       maxlength="${this.VERIFICATION_CODE_LENGTH}"
+                       class="w-full px-4 py-2 border rounded-lg"
+                       placeholder="کد تایید را وارد کنید">
+                <button type="button" 
+                        id="verify-code-btn-${userId}"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-green-600 text-white rounded-lg">
                     تایید کد
                 </button>
             </div>
             <span id="timer-${userId}" class="text-sm text-gray-600 mt-2 block"></span>
-        </div>`;
+        `;
 
-    document.getElementById(`phone-${userId}`).parentNode.insertAdjacentHTML('afterend', verificationHTML);
-    document.getElementById(`phone-${userId}`).setAttribute('readonly', true);
-    document.querySelector(`[data-phone-id="${userId}"]`).setAttribute('disabled', true);
-}
+        container.insertAdjacentElement('afterend', verificationForm);
+        this.disablePhoneInput(userId);
+    }
 
-// Timer management
-function saveStartTime(userId) {
-    const startTime = Date.now();
-    const endTime = startTime + (300 * 1000); // 5 minutes
-    localStorage.setItem('verificationEndTime', endTime);
-    localStorage.setItem('phoneNumber', document.getElementById(`phone-${userId}`).value);
-}
+    startVerificationTimer(userId) {
+        const timerElement = document.getElementById(`timer-${userId}`);
+        if (!timerElement) return;
 
-function startTimer(userId) {
-    const timerDisplay = document.getElementById(`timer-${userId}`);
-    const endTime = parseInt(localStorage.getItem('verificationEndTime'));
+        const endTime = Date.now() + (this.VERIFICATION_TIMEOUT * 1000);
+        localStorage.setItem('verificationEndTime', endTime.toString());
 
-    const countdown = setInterval(() => {
-        const now = Date.now();
-        const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+        const timer = setInterval(() => {
+            const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+            
+            if (remaining <= 0) {
+                clearInterval(timer);
+                this.resetVerification(userId);
+                return;
+            }
 
-        if (remainingTime <= 0) {
-            clearInterval(countdown);
-            timerDisplay.textContent = 'زمان به پایان رسید';
-            resetVerificationForm(userId);
-            return;
-        }
+            timerElement.textContent = this.formatTime(remaining);
+        }, 1000);
+    }
 
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = remainingTime % 60;
-        timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    }, 1000);
-}
+    formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
 
-function resetVerificationForm(userId) {
-    document.getElementById(`verification-form-${userId}`)?.remove();
-    const phoneInput = document.getElementById(`phone-${userId}`);
-    const verifyButton = document.querySelector(`[data-phone-id="${userId}"]`);
-    
-    if (phoneInput) phoneInput.removeAttribute('readonly');
-    if (verifyButton) verifyButton.removeAttribute('disabled');
-    
-    localStorage.removeItem('verificationEndTime');
-    localStorage.removeItem('phoneNumber');
+    isValidPhone(phone) {
+        return phone && phone.length === this.PHONE_LENGTH;
+    }
+
+    showError(message) {
+        alert(message); // Replace with your preferred error display method
+    }
+
+    showSuccess(message) {
+        alert(message); // Replace with your preferred success display method
+    }
+
+    resetVerification(userId) {
+        const form = document.getElementById(`verification-form-${userId}`);
+        if (form) form.remove();
+
+        const phoneInput = document.getElementById(`phone-${userId}`);
+        const verifyButton = document.querySelector(`[data-phone-id="${userId}"]`);
+        
+        if (phoneInput) phoneInput.removeAttribute('readonly');
+        if (verifyButton) verifyButton.removeAttribute('disabled');
+        
+        localStorage.removeItem('verificationEndTime');
+    }
+
+    disablePhoneInput(userId) {
+        const phoneInput = document.getElementById(`phone-${userId}`);
+        const verifyButton = document.querySelector(`[data-phone-id="${userId}"]`);
+        
+        if (phoneInput) phoneInput.setAttribute('readonly', true);
+        if (verifyButton) verifyButton.setAttribute('disabled', true);
+    }
 }
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    if (!isRelevantPath()) return;
-
-    const endTime = parseInt(localStorage.getItem('verificationEndTime'));
-    const savedPhone = localStorage.getItem('phoneNumber');
-
-    if (endTime && savedPhone) {
-        const now = Date.now();
-        const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
-        
-        if (remainingTime > 0) {
-            document.getElementById('phone').value = savedPhone;
-            showVerificationForm();
-            startTimer();
-        } else {
-            localStorage.removeItem('verificationEndTime');
-            localStorage.removeItem('phoneNumber');
-        }
-    }
-});
-
-// Verify code handler
-// Verify code handler
-document.addEventListener('click', function(e) {
-    if (e.target.id && e.target.id.startsWith('verify-code-btn-')) {
-        const userId = e.target.id.split('-').pop();
-        const code = e.target.parentNode.querySelector('input[name="verification_code"]').value;
-        const phone = document.getElementById(`phone-${userId}`).value;
-        
-        if (!code || code.length !== 4) {
-            alert('لطفا کد 4 رقمی را وارد کنید');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('code', code);
-        formData.append('phone', phone);
-        formData.append('_token', document.querySelector('input[name="_token"]').value);
-
-        fetch('http://127.0.0.1:8000/verifyCode', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-            },
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('کد با موفقیت تایید شد');
-                resetVerificationForm(userId);
-            } else {
-                alert('کد وارد شده صحیح نمی‌باشد');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('خطا در ارسال درخواست');
-        });
-    }
-});
-
-// Form submission validation
-document.querySelector('form')?.addEventListener('submit', function(e) {
-    const verificationForm = document.getElementById('verification-form-register');
-    const verificationCode = verificationForm?.querySelector('input[name="verification_code"]');
-    
-    if (verificationForm && !verificationCode?.value) {
-        e.preventDefault();
-        alert('لطفا کد تایید را وارد کنید');
-    }
+    new PhoneVerification();
 });

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\OptionsArrayHelper;
 use App\Models\Options;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use League\Uri\Idna\Option;
 
 class OptionsController extends Controller
 {
@@ -16,11 +18,6 @@ class OptionsController extends Controller
     }
 
     // Create
-    public function create()
-    {
-        return view('admin.options.createOption');
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -29,31 +26,30 @@ class OptionsController extends Controller
             'sub_values' => 'required|array',
         ]);
 
-        $options_array = array_combine(
-            $request->sub_options,
-            array_map(function ($value) {
-                return array_map('trim', explode('،', $value));
-            }, $request->sub_values)
-        );
+        $options_array = OptionsArrayHelper::generateOptionsArray($request->sub_options, $request->sub_values);
 
-        $option = new Options();
-        $option->name = $request->name;
-        $option->values = json_encode($options_array, JSON_UNESCAPED_UNICODE);
-        $option->user_id = Auth::id();
-        $option->save();
-
-        return redirect()->back()->with('success', 'خدمت با موفقیت ایجاد شد.');
+        try {
+            Options::create([
+                'name' => $request->name,
+                'values' => json_encode($options_array, JSON_UNESCAPED_UNICODE),
+                'user_id' => Auth::id(),
+            ]);
+    
+            return redirect()->back()->with('success', 'خدمت با موفقیت ایجاد شد.');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->with('error', 'خطا در ایجاد خدمت.');
+        }
     }
 
     // Update
-    public function edit($id)
+    public function edit(Options $option)
     {
-        $option = Options::findOrFail($id);
         $values = json_decode($option->values, true);
         return view('admin.options.edit', compact('option', 'values'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Options $option)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -61,27 +57,25 @@ class OptionsController extends Controller
             'sub_values' => 'required|array',
         ]);
 
-        $options_array = array_combine(
-            $request->sub_options,
-            array_map(function ($value) {
-                return array_map('trim', explode('،', $value));
-            }, $request->sub_values)
-        );
+        $options_array = OptionsArrayHelper::generateOptionsArray($request->sub_options, $request->sub_values);
 
-        $option = Options::findOrFail($id);
-        $option->update([
-            'name' => $request->name,
-            'values' => json_encode($options_array, JSON_UNESCAPED_UNICODE),
-            'user_id' => Auth::id()
-        ]);
+        try {
+            $option->update([
+                'name' => $request->name,
+                'values' => json_encode($options_array, JSON_UNESCAPED_UNICODE),
+                'user_id' => Auth::id(),
+            ]);
 
-        return back()->with('success', 'خدمت با موفقیت ویرایش شد.');
+            return redirect()->back()->with('success', 'خدمت با موفقیت بروزرسانی شد.');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->with('error', 'خطا در بروزرسانی خدمت.');
+        }
     }
 
     // Delete
-    public function destroy($id)
+    public function destroy(Options $option)
     {
-        $option = Options::findOrFail($id);
         $option->delete();
         return redirect()->back()->with('success', 'خدمت با موفقیت حذف شد.');
     }

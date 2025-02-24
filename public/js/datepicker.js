@@ -57,23 +57,26 @@ window.DateTimeManager = {
         const container = document.getElementById(gridId);
         
         if (container) {
-            container.className = 'grid grid-cols-4 gap-4 auto-rows-auto';
+            container.className = 'grid grid-cols-4 gap-4';
             
             fetch(`/dashboard/available-times?date=${selectedDate}${bookingId ? '&booking_id=' + bookingId : ''}`)
                 .then(response => response.json())
                 .then(data => {
                     container.innerHTML = '';
-                    
                     const bookedTimes = data.booked || [];
+                    
+                    const totalItems = data.all.length;
+                    const lastRowItems = totalItems % 4;
                     
                     data.all.forEach((time, index) => {
                         const isBooked = bookedTimes.includes(time);
                         const slot = this.createTimeSlot(time, isBooked, currentTimeSlot, bookingId);
                         
-                        const totalItems = data.all.length;
-                        const lastRowItems = totalItems % 4;
+                        // Handle last row items
                         if (lastRowItems > 0 && index >= totalItems - lastRowItems) {
-                            slot.className += ` col-span-${Math.floor(4/lastRowItems)}`;
+                            const colSpan = 12 / lastRowItems;
+                            console.log('Col span for last row item:', colSpan);
+                            slot.className = `time-slot transform transition-all duration-300 col-span-${colSpan}`;
                         }
                         
                         container.appendChild(slot);

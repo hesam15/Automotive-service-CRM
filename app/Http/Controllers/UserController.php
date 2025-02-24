@@ -6,20 +6,16 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Token;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    // Read
-    public function index()
+    public function profile(User $user)
     {
-        $users = User::all();
-        $roles = Role::all();
-        return view('admin.users.index', compact('users', 'roles'));
-    }
+        if(Auth::id() != $user->id) {
+            return redirect()->back()->with('error', 'شما اجازه دسترسی به این صفحه را ندارید.');
+        }
 
-    public function profile($id)
-    {
-        $user = User::where('id', $id)->first();
         return view('admin.users.profile', compact('user'));
     }
 

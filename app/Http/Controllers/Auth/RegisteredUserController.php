@@ -32,14 +32,14 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $token = Token::where("user_phone", $request->phone)->first();
-
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'phone' => ['required', 'max:11' ,'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+
+        $token = Token::where("user_phone", $request->phone)->first();
 
         if($token->used){
             $user = User::create([
@@ -62,59 +62,5 @@ class RegisteredUserController extends Controller
         
         return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
 
-    }
-
-    //Verify Phone
-    public function sendVerify(Request $request)
-    {
-        $request->validate([
-            'phone' => ['required', 'max:11' ,'unique:'.User::class],
-        ]);
-
-        $data = $request->only('phone');
-
-        $token = Token::where("user_phone", $data['phone'])->first();
-
-        if($token){
-            $token->delete();
-        }
-
-        $token = Token::create([
-            'user_phone' => $data['phone'],
-        ]);
-
-        if ($token->sendCode($data['phone'], $token->code)) {
-            session()->put("code_id", $token->id);
-            session()->put("user_phone", $data['phone']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'کد تایید ارسال شد'
-            ]);
-        }
-
-        $token->delete();
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'خطا در ارسال کد تایید'
-        ], 422);
-    }
-
-    public function verifyCode(Request $request) {
-        if (!session()->has('code_id') || !session()->has('user_phone'))
-            redirect()->route('loginPhone');
-        $token = Token::where('user_phone', session()->get('user_phone'))->find(session()->get('code_id'));
-        if (!$token || empty($token->id))
-            redirect()->route('loginPhone');
-        if (!$token->isValid())
-            redirect()->back()->with('error' ,'کد منقضی شده است.');
-        if ($token->code !== $request->input('code'))
-            redirect()->back()->with("error" ,'کد اشتباه است');
-        $token->update([
-            'used' => true
-        ]);
-        
-        return true;
     }
 }

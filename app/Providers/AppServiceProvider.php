@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use Mpdf\Tag\B;
+use App\SmsServiceInterface;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Mpdf\Tag\B;
+use misterspelik\LaravelPdf\Facades\Pdf;
+use App\Services\Notification\SmsService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(SmsServiceInterface::class, SmsService::class);
+        $this->app->bind('dompdf.pdf', function() {
+            return new Pdf();
+        });
     }
 
     /**

@@ -42,5 +42,23 @@ return [
             'pass' => env('SMS_PASS'),
             'fromNum' => env('SMS_NUMBER'),
         ]
-    ]
+    ],
+
+    'pdf' => [
+        'enabled' => true,
+        'binary'  => env('DOMPDF_BINARY', base_path('vendor/dompdf/dompdf/bin/dompdf')),
+        'font_dir' => storage_path('fonts/'),
+        'font_cache' => storage_path('fonts/'),
+        'temp_dir' => sys_get_temp_dir(),
+        'options' => [
+            'defaultFont' => 'IRANSans',
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'isFontSubsettingEnabled' => true,
+            'defaultMediaType' => 'screen',
+            'defaultPaperSize' => 'a4',
+            'defaultPaperOrientation' => 'portrait',
+            'dpi' => 96,
+        ],
+    ],
 ];

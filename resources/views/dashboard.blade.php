@@ -52,17 +52,19 @@
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">نام مشتری</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">تاریخ</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">ساعت</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">وضعیت</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500">عملیات</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام مشتری</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام خودرو</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاریخ</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ساعت</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @foreach($recentBookings as $booking)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-900"><a href="{{route("customers.profile" , $booking->customer->fullname)}}">{{ $booking->customer->fullname }}</a></td>
+                                <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->car->name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->date }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->time_slot }}</td>
                                 <td class="px-4 py-3">
@@ -71,11 +73,19 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <a href="" 
-                                       class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                                        <span class="material-icons-round text-sm ml-1">assignment</span>
-                                        کارشناسی
-                                    </a>
+                                    @if($booking->status === 'pending')
+                                        <a href="{{ route("report.create", $booking->id) }}" 
+                                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                            <span class="material-icons-round text-sm ml-1">assignment</span>
+                                            کارشناسی
+                                        </a>
+                                    @else
+                                        <a href="{{ route("report.index", ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
+                                            class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                            <span class="material-icons-round text-sm ml-1">description</span>
+                                            مشاهده گزارش
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach

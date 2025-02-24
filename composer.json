@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "codedredd/laravel-soap": "^3.0",
         "diglactic/laravel-breadcrumbs": "^9.0",
         "hekmatinasser/verta": "^8.4",
@@ -19,6 +20,7 @@
         "shayanys/lara-reserve": "^2.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.14",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.2",
         "laravel/pint": "^1.13",
@@ -35,7 +37,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/PersianHelper.php"
+            "app/Helpers/PersianConvertNumberHelper.php"
         ]
     },
     "autoload-dev": {

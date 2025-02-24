@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
+use App\Helpers\PersianConvertNumberHelper;
 use App\Models\Booking;
 use Morilog\Jalali\Jalalian;
-use App\Helpers\PersianHelper;
 use Illuminate\Http\Request;
 
 class DatePicker {
     public function getAvailableTimes(Request $request)
     {
-        $date = PersianHelper::convertPersianToEnglish($request->date);
-        $date = Jalalian::fromFormat('Y/m/d', $date)->toCarbon()->format('Y-m-d');
-        $times = [8, 20];
+        $date = (new PersianConvertNumberHelper($request->date))->convertPersianToEnglish()->convertDateToEnglish()->getValue();
+        $times = [8, 21];
     
         // دریافت همه ساعت‌ها به صورت associative array
         $allTimes = $this->allTimes($times);

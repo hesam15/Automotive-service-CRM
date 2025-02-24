@@ -17,11 +17,16 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerifyPhoneTokensController;
+use App\Models\Customer;
+use App\Models\Role;
 use Illuminate\Notifications\Notification as NotificationsNotification;
 
-    //verify phone
-    Route::post('sendVerify', [RegisteredUserController::class, 'sendVerify'])->name('sendVerify');
-    Route::post('verifyCode', [RegisteredUserController::class, 'verifyCode'])->name('verifyCode');
+//verify phone
+Route::controller(VerifyPhoneTokensController::class)->group(function(){
+    Route::post('sendVerify', 'create')->name('sendVerify');
+    Route::post('verifyCode', 'verifyCode')->name('verifyCode');
+});
 
 Route::middleware(['auth' , 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('home');
@@ -31,105 +36,106 @@ Route::middleware(['auth' , 'verified'])->group(function () {
     Route::group(['prefix' => 'dashboard'], function () {
 
         //Users
-        Route::prefix('users')->group(function () {
-            Route::get('/', [UserController::class, 'index'])->name('users.index');
-            Route::get('/profile/{id}', [UserController::class, 'profile'])->name('user.profile');
+        Route::prefix('users')->controller(UserController::class)->group(function () {
+            Route::view('/', 'admin.users.index', ['users' => User::all(), 'roles' => Role::all()])->name('users.index');
+            Route::get('/profile/{id}', 'profile')->name('user.profile');
 
             Route::middleware('permision:create_user')->group(function () {
-                Route::get('/create', [UserController::class, 'create'])->name('users.create');
-                Route::post('/create', [UserController::class, 'store'])->name('users.store');
+                Route::get('/create', 'create')->name('users.create');
+                Route::post('/create', 'store')->name('users.store');
             });
-            Route::post('/{user}/delete', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permision:delete_user');
+            Route::post('/{user}/delete', 'destroy')->name('users.destroy')->middleware('permision:delete_user');
             Route::middleware('permision:edit_customer')->group(function () {
-                Route::get('/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-                Route::post('/{user}/edit', [UserController::class, 'update'])->name('users.update');
-                Route::post('/{user}/updatePhone', [UserController::class, 'updatePhone'])->name('users.update.phone');
+                Route::get('/{user}/edit', 'edit')->name('users.edit');
+                Route::post('/{user}/edit', 'update')->name('users.update');
+                Route::post('/{user}/updatePhone', 'updatePhone')->name('users.update.phone');
                 //asign role to user
-                Route::post('/{user}/asignRole', [UserController::class, 'assignRole'])->name('users.asignRole');
+                Route::post('/{user}/asignRole', 'assignRole')->name('users.asignRole');
             });
         });
 
         //Roles
-        Route::prefix('roles')->group(function () {
-            Route::get('/', [RoleController::class, 'index'])->name('roles.index');
+        Route::prefix('roles')->controller(RoleController::class)->group(function () {
+            Route::get('/', 'index')->name('roles.index');
 
-            Route::get('/create', [RoleController::class, 'storePage'])->name('roles.create');
-            Route::post('/create', [RoleController::class, 'store'])->name('roles.store');
+            Route::get('/create', 'storePage')->name('roles.create');
+            Route::post('/create', 'store')->name('roles.store');
 
             Route::middleware('permision:edit_role')->group(function () {
-                Route::get("/{role}/edit", [RoleController::class, 'edit'])->name('roles.edit');
-                Route::post("/{role}/edit", [RoleController::class, 'update'])->name('roles.update');
+                Route::get("/{role}/edit", 'edit')->name('roles.edit');
+                Route::post("/{role}/edit", 'update')->name('roles.update');
             });
 
-            Route::post("/{role}/delete", [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('permision:delete_role');
+            Route::post("/{role}/delete", 'destroy')->name('roles.destroy')->middleware('permision:delete_role');
         })->middleware('permision:create_role');
 
         //Customers
-        Route::prefix('customers')->group(function () {
-            Route::get('/index', [CustomerController::class, 'index'])->name('customers.index');
+        Route::prefix('customers')->controller(CustomerController::class)->group(function () {
+            Route::view('/', 'index')->name('customers.index');
 
-            Route::get('/create', [CustomerController::class, 'create'])->name('customers.create');
-            Route::post('/store', [CustomerController::class, 'store'])->name('customers.store');
+            Route::view('/create', 'admin.customers.create')->name('customers.create');
+            Route::post('/store', 'store')->name('customers.store');
 
-            Route::get('/{id}', [CustomerController::class, 'show'])->name('customers.profile');
-            Route::get('/{id}/bookings', [BookingController::class, 'customer'])->name('customers.bookings');
+            Route::get('/{customer}', 'show')->name('customers.profile');
+            Route::get('/{customer}/bookings', 'customer')->name('customers.bookings');
 
             Route::middleware('permision:edit_customer')->group(function () {
-                Route::post('/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-                Route::post('/{id}/update', [CustomerController::class, 'update'])->name('customers.update');
+                Route::post('/{customer}', 'destroy')->name('customers.destroy');
+                Route::post('/{customer}/update', 'update')->name('customers.update');
             });
         })->middleware('permision:create_customer'); 
 
         //Bookings
-        Route::prefix("bookings")->group(function () {
-            Route::get('/list', [BookingController::class, 'index'])->name('bookings.index');
+        Route::prefix("bookings")->controller(BookingController::class)->group(function () {
+            Route::get('/list', 'index')->name('bookings.index');
             // Route::get('/{id}', [BookingController::class, 'show'])->name('bookings.show');
 
-            Route::get('/{id}/create', [BookingController::class, 'create'])->name('bookings.create');
-            Route::post('/{id}/store', [BookingController::class, 'store'])->name('bookings.store');
+            Route::get('/{customer}/create', 'create')->name('bookings.create');
+            Route::post('/{customer}/store', 'store')->name('bookings.store');
 
-            Route::post('/{id}/update', [BookingController::class, 'update'])->name('bookings.update');
-            Route::post('/{id}/delete', [BookingController::class, 'destroy'])->name('bookings.destroy');
+            Route::post('/{customer}/update', 'update')->name('bookings.update');
+            Route::post('/{customer}/delete', 'destroy')->name('bookings.destroy');
 
-            Route::post('/{id}/updateStatus', [BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
+            Route::post('/{customer}/updateStatus', 'updateStatus')->name('bookings.updateStatus');
         })->middleware('permision:create_customer');
 
         //Cars
-        Route::prefix('cars')->group(function () {
-            Route::get('/list', [CarController::class, 'index'])->name('cars.index');
+        Route::prefix('cars')->controller(CarController::class)->group(function () {
+            Route::get('/list', 'index')->name('cars.index');
 
-            Route::get('{id}/create', [CarController::class, 'create'])->name('cars.create');
-            Route::post('{id}/store', [CarController::class, 'store'])->name('cars.store');
+            Route::get('{customer}/create', 'create')->name('cars.create');
+            Route::post('{customer}/store', 'store')->name('cars.store');
 
-            Route::post('/{id}/update', [CarController::class, 'update'])->name('cars.update');
-            Route::post('/{id}/delete', [CarController::class, 'destroy'])->name('cars.destroy');
+            Route::post('/{id}/update', 'update')->name('cars.update');
+            Route::post('/{id}/delete', 'destroy')->name('cars.destroy');
         })->middleware('permision:create_customer');
 
         //Reports
-        Route::prefix('reports')->group(function () {
-            Route::get('/list', [ReportController::class, 'index'])->name('reports.index');
-            Route::get('/{id}', [ReportController::class, 'show'])->name('reports.show');
+        Route::prefix('report')->controller(ReportController::class)->group(function () {
+            Route::get('bookings/{booking}/reports/{report}', 'index')->name('report.index');
 
-            Route::get('/create', [ReportController::class, 'create'])->name('reports.create');
-            Route::post('/store', [ReportController::class, 'store'])->name('reports.store');
-
-            Route::post('/{id}/update', [ReportController::class, 'update'])->name('reports.update');
-            Route::post('/{id}/delete', [ReportController::class, 'destroy'])->name('reports.destroy');
+            Route::get('/{booking_id}/create', 'create')->name('report.create');
+            Route::post('/{booking_id}/store', 'store')->name('report.store');
+            
+            Route::post('/{car_id}/{id}/update', 'update')->name('report.update');
+            Route::post('/{car_id}/{id}/delete', 'destroy')->name('report.destroy');
+            
+            Route::get('reports/{report}/print', 'print')->name('reports.print');
         });
 
         //Options
-        Route::prefix('options')->group(function () {
-            Route::get('/', [OptionsController::class, 'index'])->name('show.options');
+        Route::prefix('options')->controller(OptionsController::class)->group(function () {
+            Route::get('/', 'index')->name('show.options');
 
             Route::middleware('permision:create_option')->group(function () {
-                Route::get('/create', [OptionsController::class, 'create'])->name('create.option');
-                Route::post('/create', [OptionsController::class, 'store'])->name('store.option');
+                Route::view('/create', 'admin.options.create')->name('create.option');
+                Route::post('/create', 'store')->name('store.option');
             });
 
             Route::middleware('permision:edit_option')->group(function () {
-                Route::get("/{id}", [OptionsController::class, 'edit'])->name('edit.option');
-                Route::post("/{id}/update", [OptionsController::class, 'update'])->name('update.option');
-                Route::post("/{id}/delete", [OptionsController::class, 'destroy'])->name('delete.option');
+                Route::get("/{id}", 'edit')->name('edit.option');
+                Route::post("/{id}/update", 'update')->name('update.option');
+                Route::post("/{id}/delete", 'destroy')->name('delete.option');
             });
         })->middleware('permision:create_option');
 

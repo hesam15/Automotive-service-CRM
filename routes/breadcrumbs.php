@@ -8,6 +8,7 @@ use App\Models\User;
 
 // This import is also not required, and you could replace `BreadcrumbTrail $trail`
 //  with `$trail`. This is nice for IDE type checking and completion.
+use App\Models\Booking;
 use App\Models\Options;
 use App\Models\Customer;
 use Diglactic\Breadcrumbs\Breadcrumbs;
@@ -82,10 +83,10 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     });
     // Customer show
     Breadcrumbs::for('customers.profile', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('id'))->first();
+        $customer = Customer::where('id', request()->route('customer'))->first();
 
         $trail->parent('customers.index');
-        $trail->push("{$customer->fullname}", route('customers.profile', ['id' => $customer->id]));
+        $trail->push("{$customer->fullname}", route('customers.profile', ['customer' => $customer->id]));
     });
 
     // Customer create
@@ -96,25 +97,26 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
 
     //Customer Bookings
     Breadcrumbs::for('customers.bookings', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('id'))->first();
+        $customer = Customer::where('id', request()->route('customer'))->first();
         $trail->parent('customers.profile', ['id' => $customer->id]);
-        $trail->push('رزرو ها', route('customers.bookings', ['id' => $customer->id]));
+        $trail->push('رزرو ها', route('customers.bookings', ['customer' => $customer->id]));
     });
 
     //Cars create
     Breadcrumbs::for('cars.create', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('id'))->first();
+        $customer = Customer::where('id', request()->route('customer'))->first();
+
         $trail->parent('customers.profile', ['id' => $customer->id]);
-        $trail->push('ایجاد خودرو', route('cars.create', ['id' => $customer->id]));
+        $trail->push('ایجاد خودرو', route('cars.create', ['customer' => $customer->id]));
     });
 
     //Booking
     //Bookings Index
     Breadcrumbs::for('bookings.create', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('id'))->first();
+        $customer = request()->route('customer');
 
-        $trail->parent('customers.profile', ['id' => $customer->id]);
-        $trail->push('رزرو', route('bookings.create', ['id' => $customer->id]));
+        $trail->parent('customers.profile', ['customer' => $customer->id]);
+        $trail->push('رزرو', route('bookings.create', ['customer' => $customer->id]));
     });
 
 //Options
@@ -143,4 +145,19 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     Breadcrumbs::for('bookings.index', function (BreadcrumbTrail $trail) {
         $trail->parent('home');
         $trail->push('تمام رزروی ها', route('bookings.index'));
+    });
+
+//Reports
+    //Reports Create
+    Breadcrumbs::for('report.create', function (BreadcrumbTrail $trail) {
+        $trail->parent('home');
+        $trail->push('ایجاد گزارش', route('report.create', ['booking_id' => request()->route('booking_id')]));
+    });
+
+    //Reports Index
+    Breadcrumbs::for('report.index', function (BreadcrumbTrail $trail) {
+        $booking = Booking::where('id', request()->route('booking_id'))->first();
+
+        $trail->parent('home');
+        $trail->push('گزارش '.$booking->customer->fullname , route('report.index', ['booking_id' => request()->route('booking_id'), 'car_id' => request()->route('car_id')]));
     });

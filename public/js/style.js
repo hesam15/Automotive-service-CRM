@@ -7,8 +7,9 @@ const App = {
         UIManager.initialize();
         ModalManager.initialize();
         OptionsManager.initialize();
-        DateTimeManager.initialize();
         SelectManager.initialize();
+        ExplanationManager.initialize();
+        AccordionManager.initialize();
     }
 };
 
@@ -143,6 +144,17 @@ const ModalManager = {
                 }
             });
         });
+
+        // Add event listeners for modal close buttons
+        document.querySelectorAll('.modal-close').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modal = button.closest('.modal');
+                if (modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
     },
 
     setupDeleteHandler() {
@@ -175,6 +187,14 @@ const ModalManager = {
                     openModal('deleteModal');
                 }
             };
+        });
+
+        // Ensure close functionality for delete modal
+        deleteModal.querySelectorAll('.modal-close').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeModal('deleteModal');
+            });
         });
     }
 };
@@ -259,5 +279,132 @@ const SelectManager = {
 
         updateButtonText();
         checkboxes.forEach(cb => cb.addEventListener('change', updateButtonText));
+    }
+};
+
+const ExplanationManager = {
+    initialize() {
+        this.setupExplanationToggles();
+    },
+
+    setupExplanationToggles() {
+        window.toggleExplanation = (serviceName) => {
+            const container = document.getElementById(`explanation_${serviceName}`);
+            const button = document.querySelector(`[data-service="${serviceName}"]`);
+            
+            if (container) {
+                // اگر textarea وجود دارد، آن را حذف می‌کنیم
+                if (container.querySelector('textarea')) {
+                    container.innerHTML = '';
+                    if (button) {
+                        const icon = button.querySelector('svg');
+                        if (icon) {
+                            icon.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                } 
+                // اگر textarea وجود ندارد، آن را ایجاد می‌کنیم
+                else {
+                    const textarea = document.createElement('textarea');
+                    textarea.name = `${serviceName}_explanation`;
+                    textarea.rows = 3;
+                    textarea.className = 'w-full px-4 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200 mb-3';
+                    textarea.placeholder = 'توضیحات خود را اینجا وارد کنید...';
+                    
+                    container.appendChild(textarea);
+                    
+                    if (button) {
+                        const icon = button.querySelector('svg');
+                        if (icon) {
+                            icon.style.transform = 'rotate(45deg)';
+                        }
+                    }
+
+                    // اسکرول به موقعیت textarea
+                    textarea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        };
+
+        document.querySelectorAll('.explanation-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const serviceName = button.dataset.service;
+                if (serviceName) {
+                    toggleExplanation(serviceName);
+                }
+            });
+        });
+    }
+};
+
+const AccordionManager = {
+    initialize() {
+        this.setupAccordion();
+        this.setupServiceAccordions();
+    },
+
+    setupAccordion() {
+        const accordionButton = document.getElementById('infoAccordion');
+        if (accordionButton) {
+            accordionButton.addEventListener('click', () => {
+                const content = document.getElementById('infoContent');
+                const icon = document.getElementById('accordionIcon');
+                this.toggleAccordion(content, icon);
+            });
+
+            // Set initial state to closed for main accordion
+            const content = document.getElementById('infoContent');
+            const icon = document.getElementById('accordionIcon');
+            if (content && icon) {
+                this.setInitialState(content, icon);
+            }
+        }
+    },
+
+    setupServiceAccordions() {
+        window.toggleService = (serviceKey) => {
+            const content = document.getElementById(`content_${serviceKey}`);
+            const icon = document.getElementById(`icon_${serviceKey}`);
+            this.toggleAccordion(content, icon);
+        };
+
+        // Set initial state for all service accordions
+        document.querySelectorAll('[id^="content_"]').forEach((content) => {
+            const serviceKey = content.id.replace('content_', '');
+            const icon = document.getElementById(`icon_${serviceKey}`);
+            this.setInitialState(content, icon);
+        });
+    },
+
+    toggleAccordion(content, icon) {
+        if (content && icon) {
+            const isHidden = content.classList.contains('hidden');
+            
+            // Toggle content visibility with smooth animation
+            if (isHidden) {
+                content.classList.remove('hidden');
+                setTimeout(() => {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }, 0);
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+                setTimeout(() => {
+                    content.classList.add('hidden');
+                }, 200); // Match with CSS transition duration
+            }
+        }
+    },
+
+    setInitialState(content, icon) {
+        if (content) {
+            content.classList.add('hidden');
+            content.style.maxHeight = '0px';
+        }
+        if (icon) {
+            icon.style.transform = 'rotate(0deg)';
+        }
     }
 };

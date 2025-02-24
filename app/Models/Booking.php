@@ -18,12 +18,19 @@ class Booking extends Model
         'status'
     ];
 
-    public function customer(){
+    public function customer()
+    {
         return $this->belongsTo(Customer::class);
     }
 
-    public function car(){
+    public function car()
+    {
         return $this->belongsTo(Cars::class);
+    }
+
+    public function report()
+    {
+        return $this->hasOne(Reports::class);
     }
 
     public static function isTimeSlotAvailable($date, $timeSlot)

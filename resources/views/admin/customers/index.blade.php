@@ -73,7 +73,7 @@
                                     </td>
                                     <td class="px-4 py-2 w-2/5">
                                         <div class="flex items-center gap-1">
-                                            <a href="{{ route('customers.profile', ['id' => $customer->id]) }}" 
+                                            <a href="{{ route('customers.profile', ['customer' => $customer->id]) }}" 
                                                 class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">person</i>
                                                 <span class="text-xs mr-0.5">پروفایل</span>
