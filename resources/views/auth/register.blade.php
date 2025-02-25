@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>ثبت نام</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +32,6 @@
                     <x-errors-success-label/>
 
                     <form method="POST" action="{{ route("registerUser") }}" class="space-y-6">
-                        @csrf
                         <div class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">نام</label>
@@ -56,16 +56,18 @@
                             <div>
                                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">شماره تلفن</label>
                                 <div class="relative">
-                                    <input type="phone" id="phone-register" name="phone" value="{{ old('phone') }}"
-                                    placeholder="شماره تلفن خود را وارد کنید"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
-                                    <button type="button"
-                                        class="verify-phone-btn absolute left-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
-                                        data-phone-id="register">
-                                        ارسال کد تایید
-                                    </button>                                
-                                </div>
+                                    <div>
+                                        <input type="phone" id="phone-register" name="phone" value="{{ old('phone') }}"
+                                        placeholder="شماره تلفن خود را وارد کنید"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                                        <button type="button"
+                                            class="verify-phone-btn absolute left-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
+                                            data-phone-id="register">
+                                            ارسال کد تایید
+                                        </button> 
+                                    </div>                               
                                 <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                                </div>
                             </div>                            
 
 

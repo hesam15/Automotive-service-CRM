@@ -33,7 +33,7 @@ class SmsService implements SmsServiceInterface {
                 'pass' => $this->config['password']
             ]);
 
-            return $this->isSuccessful($result);
+            return true;
         } catch (\Exception $e) {
             Log::error('SMS sending failed', [
                 'to' => $to,
@@ -46,16 +46,17 @@ class SmsService implements SmsServiceInterface {
     public function sendPattern(string $to, string $patternCode, array $inputData): bool
     {
         try {
-            $result = $this->client->sendPatternSms(
-                $this->config['from_number'],
+            $this->client->sendPatternSms(
+                $this->config['auth']['fromNum'],
                 $to,
-                $this->config['username'],
-                $this->config['password'],
+                $this->config['auth']['user'],
+                $this->config['auth']['pass'],
                 $patternCode,
                 $inputData
             );
 
-            return $this->isSuccessful($result);
+            return true;
+
         } catch (\Exception $e) {
             Log::error('Pattern SMS sending failed', [
                 'to' => $to,
@@ -64,11 +65,5 @@ class SmsService implements SmsServiceInterface {
             ]);
             return false;
         }
-    }
-
-    protected function isSuccessful($result): bool
-    {
-        // Implement based on your SMS provider's response format
-        return !empty($result) && $result->status === 'success';
     }
 }

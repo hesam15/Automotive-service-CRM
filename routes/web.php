@@ -23,10 +23,19 @@ use App\Models\Role;
 use Illuminate\Notifications\Notification as NotificationsNotification;
 
 //verify phone
-Route::controller(VerifyPhoneTokensController::class)->group(function(){
-    Route::post('sendVerify', 'create')->name('sendVerify');
-    Route::post('verifyCode', 'verifyCode')->name('verifyCode');
+Route::middleware('guest')->group(function () {
+    Route::post('/sendVerify', [VerifyPhoneTokensController::class, 'create'])
+        ->name('send.verification');
+    Route::post('/verifyCode', [VerifyPhoneTokensController::class, 'verify'])->name('verify.phone');
+    
+    // Existing routes remain unchanged
+    Route::get('register', [RegisteredUserController::class, 'create'])
+        ->name('register');
+
+    Route::post('register', [RegisteredUserController::class, 'store'])
+        ->name('registerUser');
 });
+
 
 Route::middleware(['auth' , 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('home');

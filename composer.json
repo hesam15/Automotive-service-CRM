@@ -12,6 +12,7 @@
         "hekmatinasser/verta": "^8.4",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.9",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "misterspelik/laravel-pdf": "^2.1",
         "morilog/jalali": "3.*",

@@ -15,6 +15,11 @@ class SmsVerificationService {
         $this->smsService = $smsService;
     }
 
+    public function generateCode(): string
+    {
+        return str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
+    }
+
     public function sendVerificationCode(string $phone, string $code): bool
     {
         return $this->smsService->sendPattern(
@@ -27,16 +32,11 @@ class SmsVerificationService {
     public function verifyCode(string $phone, string $code): bool{
         $token = VerifyPhoneTokens::where('user_phone', $phone)->first();
         if ($token && $token->code === $code) {
-            $token->used = true;
+            $token->is_used = true;
             $token->save();
             return true;
         }
         return false;
-    }
-
-    public function generateCode(): string
-    {
-        return str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
     }
 
     public function isExpired(\DateTime $createdAt): bool
