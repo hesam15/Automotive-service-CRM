@@ -25,7 +25,7 @@ class SmsVerificationService {
         return $this->smsService->sendPattern(
             $phone,
             self::VERIFICATION_PATTERN,
-            ['verify_code' => $code]
+            ['verify_code' => $code],
         );
     }
 

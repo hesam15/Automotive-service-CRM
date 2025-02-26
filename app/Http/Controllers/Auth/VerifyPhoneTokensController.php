@@ -58,7 +58,7 @@ class VerifyPhoneTokensController extends Controller
                 'success' => true,
                 'message' => 'کد تایید با موفقیت ارسال شد',
                 'data' => [
-                    'timeout' => 300 // زمان اعتبار کد به ثانیه
+                    'timeout' => 500 // زمان اعتبار کد به ثانیه
                 ]
             ], 200);
         }

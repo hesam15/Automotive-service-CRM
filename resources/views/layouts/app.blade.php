@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield("title")</title>
 
     <!-- Fonts and Icons -->
@@ -12,17 +13,27 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
-    <!-- Load jQuery first -->
+    <!-- Core Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Third Party Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Then load Persian Date dependencies -->
-    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
-    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
-    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
-    
-    <!-- Your custom scripts last -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="{{ asset('js/style.js') }}"></script>
+    <!-- Persian Date Dependencies -->
+    @if(in_array(Route::current()->getName(), ['bookings.create', 'customers.bookings', 'customers.profile', 'bookings.index']))
+        <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+        <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+        <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+        @vite(['resources/js/datepicker.js'])
+    @endif
+
+    <!-- User Verification Script -->
+    @if(Route::current()->getName() == 'users.index')
+        @vite(['resources/js/verify-code.js'])
+    @endif
+
+    <!-- Additional Page-Specific Scripts -->
+    @stack('scripts')
 </head>
 
 <body class="font-sans antialiased">
@@ -49,13 +60,5 @@
             </main>
         </div>
     </div>
-
-    @if(in_array(Route::current()->getName(), ['bookings.create', 'customers.bookings', 'customers.profile', 'bookings.index']))
-        <script src="{{ asset('js/datepicker.js') }}"></script>
-    @endif
-
-    @if(Route::current()->getName() == 'users.index')
-        @vite('resources/js/verify-code.js')
-    @endif
 </body>
 </html>

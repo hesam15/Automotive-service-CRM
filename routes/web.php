@@ -67,7 +67,7 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         Route::prefix('roles')->controller(RoleController::class)->group(function () {
             Route::get('/', 'index')->name('roles.index');
 
-            Route::get('/create', 'storePage')->name('roles.create');
+            Route::get('/create', 'create')->name('roles.create');
             Route::post('/create', 'store')->name('roles.store');
 
             Route::middleware('permision:edit_role')->group(function () {

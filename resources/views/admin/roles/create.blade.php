@@ -39,23 +39,21 @@
                 <div class="mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <label class="text-sm font-medium text-gray-700">دسترسی‌ها</label>
-                        <button type="button" id="selectAll"
-                                class="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors duration-200">
-                            انتخاب همه
+                        <button type="button" id="selectAllPermissions" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                            <span class="select-all-text">انتخاب همه</span>
                         </button>
                     </div>
 
                     @if($permissions->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             @foreach($permissions as $permission)
                                 <div class="flex items-center">
-                                    <input type="checkbox"
-                                           name="permissions[]"
-                                           value="{{ $permission->id }}"
-                                           id="perm_{{ $permission->id }}"
-                                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                           {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}>
-                                    <label class="mr-2 text-sm text-gray-700" for="perm_{{ $permission->id }}">
+                                    <input type="checkbox" 
+                                        name="permissions[]"
+                                        value="{{ $permission->id }}"
+                                        id="permission-{{ $permission->id }}"
+                                        class="w-4 h-4 text-blue-600 rounded border-gray-300">
+                                    <label for="permission-{{ $permission->id }}" class="mr-2 text-sm text-gray-700">
                                         {{ $permission->persian_name }}
                                     </label>
                                 </div>

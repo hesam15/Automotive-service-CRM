@@ -3,7 +3,7 @@ class PhoneVerification {
         const defaultValidation = {
             PHONE_LENGTH: 11,
             CODE_LENGTH: 6,
-            TIMEOUT_SECONDS: 300,
+            TIMEOUT_SECONDS: 500,
         };
 
         this.config = {

@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Token;
+use App\Models\VerifyPhoneTokens;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
-    public function profile(User $user)
-    {
+    public function profile(User $user) {
         if(Auth::id() != $user->id) {
             return redirect()->back()->with('error', 'شما اجازه دسترسی به این صفحه را ندارید.');
         }
@@ -20,15 +21,15 @@ class UserController extends Controller
     }
 
     // Create
-    public function create()
-    {
-        $roles = Role::all();
+    public function create() {
+        $roles = Cache::remember('permissions', now()->addHour(), function() {
+            return Role::select('id', 'persian_name');
+        });
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(Request $request)
-    {
-        $token = Token::where("user_phone", $request->phone)->first();
+    public function store(Request $request) {
+        $token = VerifyPhoneTokens::where("user_phone", $request->phone)->first();
 
         if (!$token || $token->used) {
             return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
