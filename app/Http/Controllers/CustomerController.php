@@ -23,6 +23,30 @@ class CustomerController extends Controller
         return view('admin.customers.index', compact('customers'));
     }
 
+    public function show(Customer $customer) {
+        $registrationTime = (new PersianConvertNumberHelper($customer->created_at))->convertDateToPersinan()->getValue();
+
+        foreach ($customer->bookings as $booking) {
+            $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->getValue();
+        }
+
+        foreach ($customer->cars as $car) {
+            $car->license_plate = LicensePlateHleper::show($car->license_plate);
+        }
+
+        return view("admin.customers.profile", compact('customer', 'registrationTime'));
+    }
+
+    public function bookings(Customer $customer) {
+        $bookings = Booking::where('customer_id', $customer->id)->get();
+
+        foreach ($bookings as $booking) {
+            $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
+        }
+
+        return view('admin.customers.bookings', compact('customer', 'bookings'));
+    }
+
     public function store(Request $request) {
         $this->validateRequest($request);
 
@@ -37,20 +61,6 @@ class CustomerController extends Controller
         catch (\Exception $e) {
             return redirect()->route("customers.index")->with("error", "اضافه کردن مشتری با ارور مواجه شد.");
         }
-    }
-
-    public function show(Customer $customer) {
-        $registrationTime = (new PersianConvertNumberHelper($customer->created_at))->convertDateToPersinan()->getValue();
-
-        foreach ($customer->bookings as $booking) {
-            $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->getValue();
-        }
-
-        foreach ($customer->cars as $car) {
-            $car->license_plate = LicensePlateHleper::show($car->license_plate);
-        }
-
-        return view("admin.customers.profile", compact('customer', 'registrationTime'));
     }
 
     public function edit(Customer $customer) {

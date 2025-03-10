@@ -81,11 +81,11 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
             Route::get('/', 'index')->name('index');
 
-            Route::view('/create', 'create')->name('create');
+            Route::view('/create', 'admin.customers.create')->name('create');
             Route::post('/store', 'store')->name('store');
 
             Route::get('/{customer}', 'show')->name('profile');
-            Route::get('/{customer}/bookings', 'customer')->name('bookings');
+            Route::get('/{customer}/bookings', 'bookings')->name('bookings');
 
             Route::middleware('permision:edit_customer')->group(function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');

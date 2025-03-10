@@ -137,6 +137,7 @@
                                                 required>
                                             <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>در انتظار</option>
                                             <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>تکمیل شده</option>
+                                            <option value="completed" {{ $booking->status == 'expired' ? 'selected' : '' }}>منقضی شده</option>
                                         </select>
                                     </div>
 
