@@ -17,7 +17,7 @@ use SebastianBergmann\CodeCoverage\Report\Xml\Report;
 class ReportController extends Controller
 {
     public function index(Booking $booking, Reports $report) {
-        $report->date = (new PersianConvertNumberHelper($report->date))->convertDateToPersinan()->getValue();
+        $report->date = (new PersianConvertNumberHelper($report->date))->convertDateToPersinan()->value;
 
         if (!$report) {
             return redirect()->back()->with('error', 'گزارشی برای این رزرو یافت نشد');
@@ -27,7 +27,7 @@ class ReportController extends Controller
     }
 
     public function create(Booking $booking) {
-        $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->getValue();
+        $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
 
         $options = Options::all();
         foreach ($options as $option) {

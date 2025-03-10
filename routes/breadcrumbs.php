@@ -122,23 +122,23 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
 
 //Options
     // Options List
-    Breadcrumbs::for('show.options', function (BreadcrumbTrail $trail) {
+    Breadcrumbs::for('options.index', function (BreadcrumbTrail $trail) {
         $trail->parent('home');
-        $trail->push('خدمات', route('show.options'));
+        $trail->push('خدمات', route('options.index'));
     });
 
     // Create Option
-    Breadcrumbs::for('create.option', function (BreadcrumbTrail $trail) {
-        $trail->parent('show.options');
-        $trail->push('ایجاد خدمت', route('create.option'));
+    Breadcrumbs::for('options.create', function (BreadcrumbTrail $trail) {
+        $trail->parent('options.index');
+        $trail->push('ایجاد خدمت', route('options.create'));
     });
 
     // Edit Option
-    Breadcrumbs::for('edit.option', function (BreadcrumbTrail $trail) {
+    Breadcrumbs::for('options.edit', function (BreadcrumbTrail $trail) {
         $option = Options::where('id', request()->route('id'))->first();
 
-        $trail->parent('show.options');
-        $trail->push($option->name, route('edit.option', $option->id));
+        $trail->parent('options.index');
+        $trail->push($option->name, route('options.edit', $option->id));
     });
 
 //Bookings
@@ -152,7 +152,7 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     //Reports Create
     Breadcrumbs::for('report.create', function (BreadcrumbTrail $trail) {
         $trail->parent('home');
-        $trail->push('ایجاد گزارش', route('report.create', ['booking_id' => request()->route('booking_id')]));
+        $trail->push('ایجاد گزارش', route('report.create', ['booking' => request()->route('booking')]));
     });
 
     //Reports Index

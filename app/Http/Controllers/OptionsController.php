@@ -14,6 +14,10 @@ class OptionsController extends Controller
     public function index()
     {
         $options = Options::all();
+        foreach ($options as $option) {
+            $option->values = json_decode($option->values);
+        }
+
         return view('admin.options.index', compact('options'));
     }
 
@@ -22,11 +26,11 @@ class OptionsController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'sub_options' => 'required|array',
-            'sub_values' => 'required|array',
+            'options' => 'required|array',
+            'values' => 'required|array',
         ]);
 
-        $options_array = OptionsArrayHelper::generateOptionsArray($request->sub_options, $request->sub_values);
+        $options_array = OptionsArrayHelper::generateOptionsArray($request->options, $request->values);
 
         try {
             Options::create([
@@ -53,8 +57,8 @@ class OptionsController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'sub_options' => 'required|array',
-            'sub_values' => 'required|array',
+            'options' => 'required|array',
+            'values' => 'required|array',
         ]);
 
         $options_array = OptionsArrayHelper::generateOptionsArray($request->sub_options, $request->sub_values);

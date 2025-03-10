@@ -15,15 +15,11 @@ class BookingController extends Controller
 {
     // Read
     public function index() {
-        $now = explode(" " ,Carbon::now()->format('Y-m-d H:i'));
-        $now[0] = (new PersianConvertNumberHelper($now[0]))->convertDateToPersinan()->getValue();
-
         $bookings = Booking::with('car', 'customer')->orderBy('date', 'asc')->orderByRaw("CAST(time_slot AS TIME)")->get();
         foreach ($bookings as $booking) {
             $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->getValue();
         }
         
-
         return view('admin.bookings.index', compact('bookings'));
     }
 

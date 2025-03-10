@@ -77,7 +77,7 @@
         </div>
 
         <div class="p-6">
-            <form action="{{ route('report.store', ['booking_id' => $booking->id]) }}" method="POST">
+            <form action="{{ route('report.store', ['booking' => $booking->id]) }}" method="POST">
                 @csrf
                 
                 <div class="space-y-8">

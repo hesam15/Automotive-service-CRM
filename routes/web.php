@@ -119,31 +119,31 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         })->middleware('permision:create_customer');
 
         //Reports
-        Route::prefix('report')->controller(ReportController::class)->group(function () {
-            Route::get('bookings/{booking}/reports/{report}', 'index')->name('report.index');
+        Route::prefix('report')->controller(ReportController::class)->name('report.')->group(function () {
+            Route::get('bookings/{booking}/reports/{report}', 'index')->name('index');
 
-            Route::get('/{booking_id}/create', 'create')->name('report.create');
-            Route::post('/{booking_id}/store', 'store')->name('report.store');
+            Route::get('/{booking}/create', 'create')->name('create');
+            Route::post('/{booking}/store', 'store')->name('store');
             
-            Route::post('/{car_id}/{id}/update', 'update')->name('report.update');
-            Route::post('/{car_id}/{id}/delete', 'destroy')->name('report.destroy');
+            Route::post('/{car}/{id}/update', 'update')->name('update');
+            Route::post('/{car}/{id}/delete', 'destroy')->name('destroy');
             
-            Route::get('reports/{report}/print', 'print')->name('reports.print');
+            Route::get('reports/{report}/print', 'print')->name('print');
         });
 
         //Options
-        Route::prefix('options')->controller(OptionsController::class)->group(function () {
-            Route::get('/', 'index')->name('show.options');
+        Route::prefix('options')->controller(OptionsController::class)->name('options.')->group(function () {
+            Route::get('/', 'index')->name('index');
 
             Route::middleware('permision:create_option')->group(function () {
-                Route::view('/create', 'admin.options.create')->name('create.option');
-                Route::post('/create', 'store')->name('store.option');
+                Route::view('/create', 'admin.options.create')->name('create');
+                Route::post('/create', 'store')->name('store');
             });
 
             Route::middleware('permision:edit_option')->group(function () {
-                Route::get("/{id}", 'edit')->name('edit.option');
-                Route::post("/{id}/update", 'update')->name('update.option');
-                Route::post("/{id}/delete", 'destroy')->name('delete.option');
+                Route::get("/{option}", 'edit')->name('edit');
+                Route::post("/{option}/update", 'update')->name('update');
+                Route::post("/{option}/delete", 'destroy')->name('destroy');
             });
         })->middleware('permision:create_option');
 

@@ -1,97 +1,73 @@
-import './bootstrap';
+// resources/js/app.js
 import $ from 'jquery';
 import Alpine from 'alpinejs';
 import { UIManager } from './managers/UIManager';
+import { ModalManager } from './managers/ModalManager';
+import { OptionsManager } from './managers/OptionsManager';
 
 // Core initialization
 window.Alpine = Alpine;
-Alpine.start();
 
-class App {
-    constructor() {
-        this.managers = {
-            ui: new UIManager()
-        };
-        this.initializeConditionalManagers();
-    }
+// Initialize managers
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Initialize UI Manager
+        const uiManager = new UIManager();
+        uiManager.initialize();
 
-    async initializeConditionalManagers() {
-        try {
-            await this.loadRolesManager();
-            await this.loadOptionsManager();
-            await this.loadModalManager();
-            await this.loadServiceManagers();
-        } catch (error) {
-            console.error('Error initializing managers:', error);
+        // Initialize Modal Manager
+        if (document.querySelector('.modal') || 
+            document.querySelector('.modal-trigger') || 
+            document.querySelector('.delete-btn')) {
+            const modalManager = new ModalManager();
+            modalManager.initialize();
         }
-    }
 
-    async loadRolesManager() {
-        if (this.isRolesPage()) {
+        // Initialize Options Manager for both create and edit pages
+        if (document.querySelector('.option-values-container')) {
+            const optionsManager = new OptionsManager({
+                containers: document.querySelectorAll('.option-values-container'),
+                addButtons: document.querySelectorAll('.option-add-btn'),
+                removeButtons: document.querySelectorAll('.option-remove-btn')
+            });
+            optionsManager.initialize();
+        }
+
+        // Load other conditional managers if needed
+        loadConditionalManagers();
+
+    } catch (error) {
+        console.error('Error initializing managers:', error);
+    }
+});
+
+// Load other managers based on page needs
+async function loadConditionalManagers() {
+    try {
+        // Load SelectManager if on roles page
+        if (window.location.pathname.includes('/roles') || 
+            document.querySelector('input[name="permissions[]"]')) {
             const { SelectManager } = await import('./managers/SelectManager');
-            this.managers.select = new SelectManager();
-            await this.initializeManager(this.managers.select);
+            const selectManager = new SelectManager();
+            selectManager.initialize();
         }
-    }
 
-    async loadOptionsManager() {
-        if (document.getElementById('options_container')) {
-            const { OptionsManager } = await import('./managers/OptionsManager');
-            this.managers.options = new OptionsManager();
-            await this.initializeManager(this.managers.options);
-        }
-    }
-
-    async loadModalManager() {
-        if (document.querySelector('.modal') || document.querySelector('.delete-btn')) {
-            const { ModalManager } = await import('./managers/ModalManager');
-            this.managers.modal = new ModalManager();
-            await this.initializeManager(this.managers.modal);
-        }
-    }
-
-    async loadServiceManagers() {
-        if (document.querySelector('.explanation-toggle') || document.getElementById('infoAccordion')) {
+        // Load ExplanationManager and AccordionManager if needed
+        if (document.querySelector('.explanation-toggle') || 
+            document.getElementById('infoAccordion')) {
             const { ExplanationManager } = await import('./managers/ExplanationManager');
             const { AccordionManager } = await import('./managers/AccordionManager');
             
-            this.managers.explanation = new ExplanationManager();
-            this.managers.accordion = new AccordionManager();
+            const explanationManager = new ExplanationManager();
+            const accordionManager = new AccordionManager();
             
-            await Promise.all([
-                this.initializeManager(this.managers.explanation),
-                this.initializeManager(this.managers.accordion)
-            ]);
+            explanationManager.initialize();
+            accordionManager.initialize();
         }
-    }
-
-    isRolesPage() {
-        return window.location.pathname.includes('/roles') || 
-               document.querySelector('input[name="permissions[]"]');
-    }
-
-    async initializeManager(manager) {
-        if (manager && typeof manager.initialize === 'function') {
-            try {
-                await manager.initialize();
-            } catch (error) {
-                console.error(`Error initializing ${manager.constructor.name}:`, error);
-            }
-        }
-    }
-
-    initialize() {
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                await this.initializeManager(this.managers.ui);
-            } catch (error) {
-                console.error('Error in initialization:', error);
-            }
-        });
+    } catch (error) {
+        console.error('Error in conditional managers:', error);
     }
 }
 
-const app = new App();
-app.initialize();
-
-export default App;
+// Initialize Alpine.js
+Alpine.start();
