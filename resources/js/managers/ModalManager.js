@@ -8,53 +8,101 @@ export class ModalManager {
             option: 'آپشن',
             role: "نقش"
         };
+        
+        this.activeModal = null;
     }
 
     initialize() {
+        this.setupModalTriggers();
         this.setupModalHandlers();
         this.setupDeleteHandler();
     }
 
-    setupModalHandlers() {
-        // Define global modal open/close functions
-        window.openModal = (modalId) => {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-                // Reinitialize select handlers when modal opens
-                if (window.SelectManager) {
-                    window.SelectManager.initialize();
+    setupModalTriggers() {
+        // Handle all modal triggers
+        document.querySelectorAll('.modal-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modalId = trigger.dataset.modalTarget;
+                if (modalId) {
+                    this.openModal(modalId);
                 }
-            }
-        };
+            });
+        });
+    }
 
-        window.closeModal = (modalId) => {
+    openModal(modalId) {
+        try {
             const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
+            if (!modal) {
+                throw new Error(`Modal with id ${modalId} not found`);
             }
-        };
 
-        // Setup click handlers for modal backgrounds
+            // Close any active modal first
+            if (this.activeModal) {
+                this.closeModal(this.activeModal.id);
+            }
+
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            this.activeModal = modal;
+
+            // Dispatch custom event
+            modal.dispatchEvent(new CustomEvent('modal:opened'));
+        } catch (error) {
+            console.error('Error opening modal:', error);
+        }
+    }
+
+    closeModal(modalId) {
+        try {
+            const modal = document.getElementById(modalId);
+            if (!modal) {
+                throw new Error(`Modal with id ${modalId} not found`);
+            }
+
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            this.activeModal = null;
+
+            // Reset form if exists
+            const form = modal.querySelector('form');
+            if (form) form.reset();
+
+            // Dispatch custom event
+            modal.dispatchEvent(new CustomEvent('modal:closed'));
+        } catch (error) {
+            console.error('Error closing modal:', error);
+        }
+    }
+
+    setupModalHandlers() {
+        // Handle clicking outside modal
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
-                if (!modal.querySelector('.bg-white').contains(e.target)) {
-                    closeModal(modal.id);
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent && !modalContent.contains(e.target)) {
+                    this.closeModal(modal.id);
                 }
             });
         });
 
-        // Setup click handlers for modal close buttons
+        // Handle close buttons
         document.querySelectorAll('.modal-close').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const modal = button.closest('.modal');
                 if (modal) {
-                    closeModal(modal.id);
+                    this.closeModal(modal.id);
                 }
             });
+        });
+
+        // Handle escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.activeModal) {
+                this.closeModal(this.activeModal.id);
+            }
         });
     }
 
@@ -65,31 +113,38 @@ export class ModalManager {
         if (!deleteButtons.length || !deleteModal) return;
 
         deleteButtons.forEach(button => {
-            button.onclick = (e) => {
-                e.preventDefault();
-                const { route, type } = button.dataset;
-                if (route) {
-                    this.configureDeleteModal(deleteModal, route, type);
-                    openModal('deleteModal');
-                }
-            };
-        });
-
-        // Setup close functionality for delete modal
-        deleteModal.querySelectorAll('.modal-close').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
-                closeModal('deleteModal');
+                const { route, type } = button.dataset;
+                if (!route) {
+                    console.error('Delete button missing route data attribute');
+                    return;
+                }
+                
+                this.configureDeleteModal(deleteModal, route, type);
+                this.openModal('deleteModal');
             });
         });
     }
 
     configureDeleteModal(modal, route, type) {
-        const form = modal.querySelector('#deleteForm');
-        const itemType = this.types[type] || 'آیتم';
-        
-        form.action = route;
-        modal.querySelector('h3').textContent = `تایید حذف ${itemType}`;
-        modal.querySelector('p').textContent = `آیا از حذف این ${itemType} اطمینان دارید؟`;
+        try {
+            const form = modal.querySelector('#deleteForm');
+            if (!form) {
+                throw new Error('Delete form not found in modal');
+            }
+
+            const itemType = this.types[type] || 'آیتم';
+            form.action = route;
+
+            const title = modal.querySelector('h3');
+            const message = modal.querySelector('p');
+            
+            if (title) title.textContent = `تایید حذف ${itemType}`;
+            if (message) message.textContent = `آیا از حذف این ${itemType} اطمینان دارید؟`;
+
+        } catch (error) {
+            console.error('Error configuring delete modal:', error);
+        }
     }
 }

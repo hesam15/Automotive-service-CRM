@@ -2,6 +2,7 @@
 
 namespace App\Services\Notification;
 
+use App\Models\VerifyPhone;
 use App\SmsServiceInterface;
 use App\Models\VerifyPhoneTokens;
 
@@ -30,7 +31,7 @@ class SmsVerificationService {
     }
 
     public function verifyCode(string $phone, string $code): bool{
-        $token = VerifyPhoneTokens::where('user_phone', $phone)->first();
+        $token = VerifyPhone::where('user_phone', $phone)->first();
         if ($token && $token->code === $code) {
             $token->is_used = true;
             $token->save();

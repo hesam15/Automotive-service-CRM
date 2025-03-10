@@ -83,7 +83,7 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     });
     // Customer show
     Breadcrumbs::for('customers.profile', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('customer'))->first();
+        $customer = request()->route("customer");
 
         $trail->parent('customers.index');
         $trail->push("{$customer->fullname}", route('customers.profile', ['customer' => $customer->id]));
@@ -97,14 +97,15 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
 
     //Customer Bookings
     Breadcrumbs::for('customers.bookings', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('customer'))->first();
+        $customer = request()->route("customer");
+
         $trail->parent('customers.profile', ['id' => $customer->id]);
         $trail->push('رزرو ها', route('customers.bookings', ['customer' => $customer->id]));
     });
 
     //Cars create
     Breadcrumbs::for('cars.create', function (BreadcrumbTrail $trail) {
-        $customer = Customer::where('id', request()->route('customer'))->first();
+        $customer = request()->route("customer");
 
         $trail->parent('customers.profile', ['id' => $customer->id]);
         $trail->push('ایجاد خودرو', route('cars.create', ['customer' => $customer->id]));

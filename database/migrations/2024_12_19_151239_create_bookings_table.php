@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('car_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('date');
             $table->string('time_slot');
-            $table->enum('status', ['pending', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'completed', 'expired'])->default('pending');
             $table->timestamps();
         });
     }

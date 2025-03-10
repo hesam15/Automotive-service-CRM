@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class VerifyPhoneTokens extends Model {
+class VerifyPhone extends Model {
     use HasFactory;
-    const EXPIRATION_TIME = 5;
+    protected $table = 'verify_phone_tokens';
+
     protected $fillable = [
         'code',
         'user_phone',

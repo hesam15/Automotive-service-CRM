@@ -3,34 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\LicensePlateHleper;
-use App\Models\CarBody;
+use App\Http\Requests\CarCreateRequest;
 use App\Models\Cars;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 
-class CarController extends Controller
-{
-    public function create(Customer $customer)
-    {
+class CarController extends Controller {
+    public function create(Customer $customer) {
         return view('admin.car.create', compact('customer'));
     }
 
-    public function store(Request $request, Customer $customer)
-    {
-        $request->validate([
-            'name' => 'required',
-            'color' => 'required',
-            'plate_two' => 'required',
-            'plate_letter' => 'required',
-            'plate_three' => 'required',
-            'plate_iran' => 'required',
-        ]);
-
-        $customerCars = Cars::where("customer_id", $request->customer_id)->pluck("license_plate")->toArray();
+    public function store(CarCreateRequest $request, Customer $customer) {        
+        $carsPlates = Cars::all()->pluck('licence_plate')->toArray();
 
         $licensePlate = LicensePlateHleper::generate($request->only(['plate_iran', 'plate_letter', 'plate_three', 'plate_two']));
 
-        if (!in_array($licensePlate, $customerCars) && $customer->id == $request->customer_id) {
+        if (!in_array($licensePlate, $carsPlates) && $customer->id == $request->customer_id) {
             $customer->cars()->create([
                 "customer_id" => $customer->id,
                 "name" => $request->name,

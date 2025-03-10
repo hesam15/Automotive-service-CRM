@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Models\Booking;
 use App\Models\Reports;
 use App\Models\Customer;
+use Illuminate\Container\Attributes\Auth;
 
 class DashboardController extends Controller
 {

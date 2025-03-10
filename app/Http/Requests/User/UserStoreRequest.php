@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RoleUpdateRequest extends FormRequest
+class UserStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,10 +22,11 @@ class RoleUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|exists:roles,name',
-            'persian_name' => 'required|exists:roles,persian_name',
-            'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,id'
+            'name' => 'required|string|max:25',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'phone' => 'required|unique:users',
+            'role' => 'required|exists:roles,id'
         ];
     }
 }

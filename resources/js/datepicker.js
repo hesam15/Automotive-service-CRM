@@ -4,7 +4,7 @@ window.DateTimeManager = {
     initialize() {
         if (this.initialized) return;
 
-        const newBookingDatepicker = document.querySelector('#datepicker:not([id*="-"])');
+        const newBookingDatepicker = document.querySelector('#date:not([id*="_"])');
         if (newBookingDatepicker) {
             this.initDatepicker(newBookingDatepicker, '');
         }
@@ -12,7 +12,7 @@ window.DateTimeManager = {
         const editModals = document.querySelectorAll('[id^="bookingEditModal-"]');
         editModals.forEach(modal => {
             const bookingId = modal.id.split('-')[1];
-            const datepicker = modal.querySelector('#datepicker');
+            const datepicker = modal.querySelector(`#date_${bookingId}`);
             if (datepicker) {
                 this.initDatepicker(datepicker, bookingId);
             }
@@ -47,9 +47,21 @@ window.DateTimeManager = {
     },
 
     handleDateSelection(selectedDate, bookingId) {
+        // ریست کردن time slot انتخاب شده
         const timeSlotInput = document.getElementById(bookingId ? `time_slot_${bookingId}` : 'time_slot');
-        const currentTimeSlot = timeSlotInput ? timeSlotInput.value : '';
-        this.loadTimeSlots(selectedDate, currentTimeSlot, bookingId);
+        if (timeSlotInput) {
+            timeSlotInput.value = ''; // پاک کردن مقدار قبلی
+        }
+    
+        // نمایش کانتینر time slots
+        const containerId = bookingId ? `time-slots-container-${bookingId}` : 'time-slots-container';
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.classList.remove('hidden');
+        }
+    
+        // لود کردن time slots جدید
+        this.loadTimeSlots(selectedDate, '', bookingId); // ارسال empty string به جای currentTimeSlot
     },
 
     loadTimeSlots(selectedDate, currentTimeSlot, bookingId) {
@@ -70,12 +82,12 @@ window.DateTimeManager = {
                     
                     data.all.forEach((time, index) => {
                         const isBooked = bookedTimes.includes(time);
-                        const slot = this.createTimeSlot(time, isBooked, currentTimeSlot, bookingId);
+                        // فقط زمانی currentTimeSlot رو پاس میدیم که در حالت edit هستیم
+                        const effectiveCurrentTimeSlot = bookingId ? currentTimeSlot : '';
+                        const slot = this.createTimeSlot(time, isBooked, effectiveCurrentTimeSlot, bookingId);
                         
-                        // Handle last row items
                         if (lastRowItems > 0 && index >= totalItems - lastRowItems) {
                             const colSpan = 12 / lastRowItems;
-                            console.log('Col span for last row item:', colSpan);
                             slot.className = `time-slot transform transition-all duration-300 col-span-${colSpan}`;
                         }
                         

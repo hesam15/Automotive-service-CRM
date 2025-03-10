@@ -3,9 +3,9 @@
     'title',
     'action' => '#',
     'method' => 'POST',
-    'maxWidth' => '4xl',
+    'maxWidth' => 'lg',
     'showFooter' => true,
-    'submitLabel' => 'ذخیره تغییرات',
+    'submitLabel' => 'ایجاد',
     'cancelLabel' => 'انصراف'
 ])
 
@@ -21,8 +21,9 @@
     {{-- Modal Panel --}}
     <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="modal-content relative transform overflow-hidden rounded-lg bg-white text-right shadow-xl transition-all sm:my-8 max-w-{{ $maxWidth }} w-full">                {{-- Header --}}
-                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 sm:px-6">
+            <div class="modal-content relative transform overflow-hidden rounded-lg bg-white text-right shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-{{ $maxWidth }}">
+                {{-- Header --}}
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-medium text-gray-900" id="modal-title-{{ $id }}">
                             {{ $title }}
@@ -37,7 +38,7 @@
                 </div>
 
                 {{-- Form --}}
-                <form id="editForm-{{ $id }}" 
+                <form id="createForm-{{ $id }}" 
                       action="{{ $action }}" 
                       method="{{ $method === 'GET' ? 'GET' : 'POST' }}"
                       class="relative">
@@ -47,13 +48,18 @@
                     @endunless
 
                     {{-- Body --}}
-                    <div class="bg-white px-4 py-5 sm:p-6">
-                        {{ $slot }}
+                    <div class="bg-white px-6 py-6">
+                        <div class="space-y-4">
+
+
+                            {{-- اضافه کردن محتوای اضافی --}}
+                            {{ $slot }}
+                        </div>
                     </div>
 
                     {{-- Footer --}}
                     @if($showFooter)
-                        <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6 flex flex-row-reverse gap-2">
+                        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-row-reverse gap-2">
                             <button type="submit"
                                     class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                 {{ $submitLabel }}

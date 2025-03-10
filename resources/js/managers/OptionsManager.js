@@ -1,6 +1,7 @@
 export class OptionsManager {
     constructor() {
         this.elements = null;
+        this.mode = 'multiple'; // Default mode
     }
 
     initialize() {
@@ -15,22 +16,36 @@ export class OptionsManager {
         };
 
         if (Object.values(this.elements).every(Boolean)) {
+            // Detect mode based on data attribute
+            this.mode = this.elements.container.dataset.mode || 'multiple';
             this.setupOptionButtons();
+            
+            // If it's create page and no options exist, add initial option
+            if (this.mode === 'single' && !this.elements.container.querySelector('.option-field')) {
+                this.elements.container.appendChild(this.createOptionField(0));
+            }
         }
     }
 
     setupOptionButtons() {
-        this.elements.addButton.addEventListener('click', () => {
-            const newIndex = this.elements.container.querySelectorAll('.option-field').length;
-            this.elements.container.appendChild(this.createOptionField(newIndex));
-        });
+        // Only setup add/remove buttons for multiple mode
+        if (this.mode === 'multiple') {
+            this.elements.addButton.addEventListener('click', () => {
+                const newIndex = this.elements.container.querySelectorAll('.option-field').length;
+                this.elements.container.appendChild(this.createOptionField(newIndex));
+            });
 
-        this.elements.removeButton.addEventListener('click', () => {
-            const fields = this.elements.container.getElementsByClassName('option-field');
-            if (fields.length > 1) {
-                fields[fields.length - 1].remove();
-            }
-        });
+            this.elements.removeButton.addEventListener('click', () => {
+                const fields = this.elements.container.getElementsByClassName('option-field');
+                if (fields.length > 1) {
+                    fields[fields.length - 1].remove();
+                }
+            });
+        } else {
+            // Hide add/remove buttons in single mode
+            if (this.elements.addButton) this.elements.addButton.style.display = 'none';
+            if (this.elements.removeButton) this.elements.removeButton.style.display = 'none';
+        }
     }
 
     createOptionField(index) {

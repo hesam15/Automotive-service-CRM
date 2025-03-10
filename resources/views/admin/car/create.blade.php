@@ -30,12 +30,14 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">نام خودرو</label>
                         <input type="text" name="name" value="{{ old('name') }}"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">رنگ</label>
                         <input type="text" name="color" value="{{ old('color') }}"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <x-input-error :messages="$errors->get('color')" class="mt-2" />
                     </div>
 
                     <!-- License Plate -->
@@ -43,20 +45,24 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">پلاک خودرو</label>
                         <div class="grid grid-cols-4 gap-4">
                             <div>
-                                <input type="text" name="plate_iran" maxlength="2" placeholder="ایران" value="{{ old('plate_iran') }}"
+                                <input type="number" min="0" maxlength="2" name="plate_iran" maxlength="2" placeholder="ایران" value="{{ old('plate_iran') }}"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <x-input-error :messages="$errors->get('plate_iran')" class="mt-2" />
                             </div>
                             <div>
-                                <input type="text" name="plate_three" maxlength="3" placeholder="سه رقم"  value="{{ old('plate_three') }}"
+                                <input type="number" min="0" maxlength="3" name="plate_three" maxlength="3" placeholder="سه رقم"  value="{{ old('plate_three') }}"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <x-input-error :messages="$errors->get('plate_three')" class="mt-2" />
                             </div>
                             <div>
                                 <input type="text" name="plate_letter" maxlength="1" placeholder="حرف" value="{{ old('plate_letter') }}"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blu500">
+                                <x-input-error :messages="$errors->get('plate_letter')" class="mt-2" />
                             </div>
                             <div>
-                                <input type="text" name="plate_two" maxlength="2" placeholder="دو رقم" value="{{ old('plate_two') }}"
+                                <input type="number" min="0" maxlength="2" name="plate_two" maxlength="2" placeholder="دو رقم" value="{{ old('plate_two') }}"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <x-input-error :messages="$errors->get('plate_two')" class="mt-2" />
                             </div>
                         </div>
                     </div>
@@ -73,4 +79,14 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.oninput = function() {
+            if (this.value.length >= this.maxLength) {
+                this.value = this.value.slice(0, this.maxLength);
+            }
+        }
+    });
+</script>
 @endsection

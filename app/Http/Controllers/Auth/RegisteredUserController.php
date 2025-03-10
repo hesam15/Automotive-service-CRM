@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
-use App\Models\Token;
 use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rules;
+use App\Models\VerifyPhone;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Auth\Events\Registered;
 
-use function Laravel\Prompts\error;
+use Illuminate\Auth\Events\Registered;
+use App\Http\Requests\UserStoreRequest;
 
 class RegisteredUserController extends Controller
 {
@@ -30,26 +28,17 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(UserStoreRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['required', 'max:11' ,'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        $validated = $request->validated();
+        $validated['password'] = Hash::make($validated['password']);
 
-        $token = Token::where("user_phone", $request->phone)->first();
+        $token = VerifyPhone::where("user_phone", $validated['phone'])->first();
 
-        if($token->used){
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'password' => Hash::make($request->password),
-            ]);
+        if($token->is_used){
+            $user = User::create($validated);
     
-            $user->assignRole('adminstrator');
+            $user->assignRole('1');
     
             event(new Registered($user));
 

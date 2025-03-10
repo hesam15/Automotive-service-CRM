@@ -3,30 +3,27 @@
 use App\Models\User;
 use App\Models\Booking;
 use App\Services\DatePicker;
-use App\Services\Notification;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\OptionsController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyPhoneTokensController;
+use App\Http\Controllers\Auth\VerifyPhoneController;
 use App\Models\Customer;
 use App\Models\Role;
 use Illuminate\Notifications\Notification as NotificationsNotification;
 
 //verify phone
 Route::middleware('guest')->group(function () {
-    Route::post('/sendVerify', [VerifyPhoneTokensController::class, 'create'])
+    Route::post('/sendVerify', [VerifyPhoneController::class, 'create'])
         ->name('send.verification');
-    Route::post('/verifyCode', [VerifyPhoneTokensController::class, 'verify'])->name('verify.phone');
+    Route::post('/verifyCode', [VerifyPhoneController::class, 'verify'])->name('verify.phone');
     
     // Existing routes remain unchanged
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -46,8 +43,8 @@ Route::middleware(['auth' , 'verified'])->group(function () {
 
         //Users
         Route::prefix('users')->controller(UserController::class)->group(function () {
-            Route::view('/', 'admin.users.index', ['users' => User::all(), 'roles' => Role::all()])->name('users.index');
-            Route::get('/profile/{id}', 'profile')->name('user.profile');
+            Route::get('/', 'index')->name('users.index');
+            Route::get('/profile/{user}', 'profile')->name('user.profile');
 
             Route::middleware('permision:create_user')->group(function () {
                 Route::get('/create', 'create')->name('users.create');
@@ -61,6 +58,8 @@ Route::middleware(['auth' , 'verified'])->group(function () {
                 //asign role to user
                 Route::post('/{user}/asignRole', 'assignRole')->name('users.asignRole');
             });
+
+
         });
 
         //Roles
@@ -79,18 +78,18 @@ Route::middleware(['auth' , 'verified'])->group(function () {
         })->middleware('permision:create_role');
 
         //Customers
-        Route::prefix('customers')->controller(CustomerController::class)->group(function () {
-            Route::view('/', 'index')->name('customers.index');
+        Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
+            Route::get('/', 'index')->name('index');
 
-            Route::view('/create', 'admin.customers.create')->name('customers.create');
-            Route::post('/store', 'store')->name('customers.store');
+            Route::view('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
 
-            Route::get('/{customer}', 'show')->name('customers.profile');
-            Route::get('/{customer}/bookings', 'customer')->name('customers.bookings');
+            Route::get('/{customer}', 'show')->name('profile');
+            Route::get('/{customer}/bookings', 'customer')->name('bookings');
 
             Route::middleware('permision:edit_customer')->group(function () {
-                Route::post('/{customer}', 'destroy')->name('customers.destroy');
-                Route::post('/{customer}/update', 'update')->name('customers.update');
+                Route::post('/{customer}', 'destroy')->name('destroy');
+                Route::post('/{customer}/update', 'update')->name('update');
             });
         })->middleware('permision:create_customer'); 
 

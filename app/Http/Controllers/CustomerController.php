@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LicensePlateHleper;
 use App\Helpers\PersianConvertNumberHelper;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ class CustomerController extends Controller
 {
     public function index() {
         $customers = Customer::all();
+
         return view('admin.customers.index', compact('customers'));
     }
 
@@ -45,7 +47,7 @@ class CustomerController extends Controller
         }
 
         foreach ($customer->cars as $car) {
-            $car->license_plate = explode('-', $car->license_plate);
+            $car->license_plate = LicensePlateHleper::show($car->license_plate);
         }
 
         return view("admin.customers.profile", compact('customer', 'registrationTime'));

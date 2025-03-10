@@ -16,17 +16,18 @@
                 <form action="{{route("bookings.store", $customer->id)}}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid md:grid-cols-2 gap-4 md:gap-6">
-                        <!-- نام و نام خانوادگی -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 نام و نام خانوادگی
                             </label>
                             <div class="text-base text-gray-900">
-                                {{ $customer->fullname }}
+                                <input type="text" name="customer_id" id="name" value="{{ $customer->id }}" hidden>
+                                <span>
+                                    {{ $customer->fullname }}
+                                </span>
                             </div>
                         </div>
 
-                        <!-- شماره تماس -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 شماره تلفن
@@ -36,11 +37,10 @@
                             </div>
                         </div>
 
-                        <!-- نوع خودرو -->
                         <div>
                             <label for="car" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">انتخاب خودرو</label>
                             @if($customer->cars->count() > 0)
-                                <select name="car" id="car" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <select name="car_id" id="car" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">انتخاب کنید</option>
                                     @foreach ($customer->cars as $car)
                                     @php
@@ -62,27 +62,31 @@
                                 </div>                                                        
                             @endif
                         </div>                        
-
-                        <!-- تاریخ -->
-                        <div>
-                            <label for="datepicker" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
-                            <input type="text" id="datepicker" name="date" value="{{ old('date') }}"
-                                class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
+                        
+                        <div class="form-group">
+                            <label for="date block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
+                            <input type="text" 
+                                   id="date" 
+                                   name="date" 
+                                   class="form-control w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer" 
+                                   value="{{ old('date', isset($booking) ? $booking->date : '') }}" 
+                                   readonly>
                             <x-input-error :messages="$errors->get('date')" class="mt-2" />
                         </div>
                     </div>
-
-                    <!-- ساعت مراجعه -->
+                    
                     <div id="time-slots-container">
-                        <input type="text" id="datepicker" class="form-control">
-                        <div id="time-slots-grid" class="grid grid-cols-6 gap-2">
-                            <!-- Time slots will be inserted here -->
+                        
+                        <input type="hidden" name="time_slot" id="time_slot" value="{{ old('time_slot') }}">
+                        
+                        <div id="time-slots-container">
+                            <div id="time-slots-grid" class="grid grid-cols-4 gap-4">
+                                <!-- Time slots will be loaded here -->
+                            </div>
                         </div>
-                        <input type="hidden" name="time_slot" id="time_slot" value="{{ old('time_slot') }}" required>
                         <x-input-error :messages="$errors->get('time_slot')" class="mt-2" />
                     </div>
 
-                    <!-- دکمه ثبت -->
                     <div class="pt-2">
                         <button type="submit"
                             class="w-full md:w-auto md:px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">

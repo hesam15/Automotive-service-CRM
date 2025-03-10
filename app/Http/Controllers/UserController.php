@@ -4,14 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Token;
-use App\Models\VerifyPhoneTokens;
+use App\Models\VerifyPhone;
 use Illuminate\Http\Request;
+use App\Models\VerifyPhoneTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
+use App\Http\Controllers\Auth\VerifyPhoneController;
 
 class UserController extends Controller
 {
+    public function index() {
+        $users = User::all();
+        $users->load('role');
+
+        $roles = Role::all();
+        
+        return view('admin.users.index', compact('users', 'roles'));
+    }
+
     public function profile(User $user) {
         if(Auth::id() != $user->id) {
             return redirect()->back()->with('error', 'شما اجازه دسترسی به این صفحه را ندارید.');
@@ -22,72 +34,73 @@ class UserController extends Controller
 
     // Create
     public function create() {
-        $roles = Cache::remember('permissions', now()->addHour(), function() {
+        $roles = Cache::remember('roles', now()->addHour(), function() {
             return Role::select('id', 'persian_name');
         });
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(Request $request) {
-        $token = VerifyPhoneTokens::where("user_phone", $request->phone)->first();
+    public function store(UserStoreRequest $request) {
+        $validated = $request->validated();
+
+        $token = VerifyPhoneTokens::where("user_phone", $validated['phone'])->first();
 
         if (!$token || $token->used) {
             return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
         }
 
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
-            'phone' => 'required|unique:users',
-            'role' => 'required'
-        ]);
+        $user = User::create($validated);
 
-        $user = User::create($request->only('name', 'email', 'password', 'phone'));
-        $user->assignRole($request->role);
+        if ($validated['role']){
+            $user->assignRole($validated['role']);
+        }
+        else {
+            return redirect()->back()->with('error', 'نقشی انتخاب نشده است.');
+        }
+
+        $token->delete();
 
         return redirect()->route('users.index')->with("success", "کاربر جدید با موفقیت ایجاد شد.");
     }
 
     // Update
-    public function edit(User $user)
-    {
-        $roles = Role::all();
+    public function edit(User $user) {
+        $roles = Cache::remember('roles', now()->addHour(), function() {
+            return Role::select('id', 'persian_name');
+        });
+
         $user->load('roles');
+
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
-    public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'phone' => 'required|unique:users',
-            'role' => 'required'
-        ]);
+    public function update(UserUpdateRequest $request, User $user) {
+        $validated = $request->validated();
 
-        $user->refreshRoles($request->role);
-        $user->update($request->only('name', 'email'));
+        $user->update($validated);
+        $user->refreshRoles($validated['role']);
 
         return redirect()->route('users.index')->with("success", "کاربر با موفقیت ویرایش شد.");
     }
 
-    public function updatePhone(Request $request, User $user)
-    {
-        $request->validate([
-            'phone' => 'required|unique:users,phone,' . $user->id,
+    // Update Phone
+    public function editPhone(User $user) {
+        return view('admin.users.edit-phone', compact('user'));
+    }
+
+    public function updatePhone(Request $request, User $user) {
+        $data = $request->validate([
+            'phone' => ['required', 'max:11', 'unique:users,phone,' . $user->id],
         ]);
 
-        $token = Token::where("user_phone", $request->phone)->first();
+        $token = VerifyPhone::where("user_phone", $data['phone'])->first();
 
-        if ($token && $token->used) {
-            $user->update($request->only('phone'));
-            $token->delete();
-
-            return redirect()->route('users.index')->with("success", "شماره تلفن با موفقیت ویرایش شد.");
+        if ($token->is_used) {
+            $user->update($data);
+            return redirect()->back()->with('success', 'شماره تلفن با موفقیت تغییر کرد.');
         }
 
-        return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
+        return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.');
     }
 
     // Delete

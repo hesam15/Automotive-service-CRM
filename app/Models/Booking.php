@@ -15,7 +15,8 @@ class Booking extends Model
         'car_id',
         'date',
         'time_slot',
-        'status'
+        'status',
+        'obsolete',
     ];
 
     public function customer()

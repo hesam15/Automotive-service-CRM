@@ -14,7 +14,7 @@ trait HasRole{
     }
 
     public function assignRole($role){
-        $role = Role::where('name', $role)->first();
+        $role = Role::where('id', $role)->first();
 
         $this->roles()->sync($role->id);
 

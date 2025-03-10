@@ -99,7 +99,7 @@
                                         </div>
                                     
                                         <!-- Options Container -->
-                                        <div id="options_container_{{$option->id}}">
+                                        <div id="options_container" data-mode="multiple" class="space-y-4">
                                             @foreach(json_decode($option->values) as $key => $values)
                                                 <div class="option-field grid grid-cols-2 gap-8 mt-3">
                                                     <div>
@@ -119,14 +119,14 @@
                                         </div>
                                     
                                         <!-- Action Buttons -->
-                                        <div class="flex gap-4 pt-4">
-                                            <button type="button" onclick="addOptionField('{{$option->id}}')" 
-                                                class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200">
+                                        <div class="flex gap-3">
+                                            <button type="button" id="option_add"
+                                                    class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-lg ml-1">add</i>
                                                 اضافه کردن آپشن
                                             </button>
-                                            <button type="button" onclick="removeOptionField('{{$option->id}}')"
-                                                class="inline-flex items-center px-4 py-2 bg-rose-100 text-rose-800 rounded-lg hover:bg-rose-200">
+                                            <button type="button" id="option_remove"
+                                                    class="inline-flex items-center px-4 py-2 bg-rose-100 text-rose-800 rounded-lg hover:bg-rose-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-lg ml-1">remove</i>
                                                 حذف کردن آپشن
                                             </button>

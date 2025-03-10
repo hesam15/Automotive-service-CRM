@@ -11,8 +11,7 @@
         <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-100">
             <div class="flex items-center gap-3">
                 <h4 class="text-xl font-bold text-gray-800">لیست مشتریان</h4>
-                <button onclick="openModal('createCustomerModal')" 
-                    class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-200">
+                <button type="button" class="modal-trigger inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-200" data-modal-target="createCustomerModal">
                     <span class="material-icons-round text-base ml-1">add</span>
                     افزودن مشتری
                 </button>
@@ -34,8 +33,7 @@
             <div class="px-6 py-12 flex flex-col items-center justify-center">
                 <i class="material-icons-round text-gray-400 text-6xl mb-4">person_off</i>
                 <h2 class="text-xl font-bold text-gray-800 mb-4">هیچ کاربری ثبت نشده است.</h2>
-                <button onclick="openModal('createCustomerModal')" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                <button type="button" class="modal-trigger inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200" data-modal-target="createCustomerModal">
                     <i class="material-icons-round text-xl ml-2">add</i>
                     افزودن کاربر جدید
                 </button>
@@ -78,8 +76,7 @@
                                                 <i class="material-icons-round text-sm">person</i>
                                                 <span class="text-xs mr-0.5">پروفایل</span>
                                             </a>
-                                            <button onclick="openModal('customerEditModal-{{$customer->id}}')"
-                                                class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
+                                            <button type="button" class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200" data-modal-target="customerEditModal-{{$customer->id}}">
                                                 <i class="material-icons-round text-sm">edit</i>
                                                 <span class="text-xs mr-0.5">ویرایش</span>
                                             </button>
@@ -93,21 +90,44 @@
                                 </tr>
 
                                 <!-- Edit Customer Modal -->
-                                <x-edit-modal :id="'customerEditModal-'.$customer->id" title="ویرایش مشتری" :action="route('customers.update', $customer->id)" method="POST">
+                                <x-edit-modal 
+                                    :id="'customerEditModal-'.$customer->id" 
+                                    title="ویرایش مشتری" 
+                                    :action="route('customers.update', $customer->id)"
+                                    maxWidth="md"
+                                    method="POST">
                                     @csrf
-                                    <div class="grid grid-cols-12 gap-4 md:gap-6 items-end">
-                                        <div class="col-span-6">
-                                            <label for="edit_fullname" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">نام و نام خانوادگی</label>
-                                            <input type="text" name="fullname" id="edit_fullname" value="{{ $customer->fullname }}" 
-                                                class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                            
-                                                <x-input-error :messages="$errors->get('fullname')" class="mt-2" />
-                                                </div>
-                                        <div class="col-span-6">
-                                            <label for="edit_phone" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">شماره تماس</label>
-                                            <input type="tel" name="phone" id="edit_phone" value="{{ $customer->phone }}" 
-                                                class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                            
+                                    
+                                    <div class="space-y-4">
+                                        {{-- نام و نام خانوادگی --}}
+                                        <div>
+                                            <label for="edit_fullname" class="block text-sm font-medium text-gray-700 mb-1">
+                                                نام و نام خانوادگی
+                                            </label>
+                                            <input type="text" 
+                                                name="fullname" 
+                                                id="edit_fullname" 
+                                                value="{{ $customer->fullname }}"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                placeholder="نام و نام خانوادگی را وارد کنید"
+                                                required>
+                                            <x-input-error :messages="$errors->get('fullname')" class="mt-2" />
+                                        </div>
+
+                                        {{-- شماره تماس --}}
+                                        <div>
+                                            <label for="edit_phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                                شماره تماس
+                                            </label>
+                                            <input type="tel" 
+                                                name="phone" 
+                                                id="edit_phone" 
+                                                value="{{ $customer->phone }}"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                                placeholder="شماره تماس را وارد کنید"
+                                                dir="rtl"
+                                                maxlength="11"
+                                                required>
                                             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                                         </div>
                                     </div>
@@ -119,24 +139,48 @@
             </div>
         @endif
     </div>
+
+    <x-create-modal 
+        id="createCustomerModal"
+        title="ایجاد مشتری جدید"
+        action="{{ route('customers.store') }}"
+        maxWidth="md"
+        submitLabel="ایجاد مشتری">
+        
+        <div class="space-y-4">
+            <div>
+                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">
+                    نام و نام خانوادگی
+                </label>
+                <input type="text" 
+                    name="fullname" 
+                    id="fullname"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="نام و نام خانوادگی را وارد کنید"
+                    required>
+                <x-input-error :messages="$errors->get('fullname')" class="mt-2" />
+            </div>
+
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                    شماره تماس
+                </label>
+                <input type="tel" 
+                    name="phone" 
+                    id="phone"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="شماره تماس را وارد کنید"
+                    dir="rtl"
+                    maxlength="11"
+                    required>
+                <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+            </div>
+        </div>
+    </x-create-modal>
 </div>
 
 <!-- Create Customer Modal -->
-<x-edit-modal id="createCustomerModal" title="ثبت مشتری جدید" :action="route('customers.store')" method="POST">
-    @csrf
-    <div class="grid grid-cols-12 gap-4 md:gap-6 items-end">
-        <div class="col-span-6">
-            <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">نام و نام خانوادگی</label>
-            <input type="text" name="fullname" id="fullname" 
-                class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-        </div>
-        <div class="col-span-6">
-            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">شماره تماس</label>
-            <input type="tel" name="phone" id="phone" 
-                class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-        </div>
-    </div>
-</x-edit-modal>
+
 
 <x-delete-modal />
 @endsection

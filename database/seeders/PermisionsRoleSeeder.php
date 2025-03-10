@@ -13,7 +13,7 @@ class PermisionsRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = collect([1,2,3,4,5,6,7,8,9,10,11,12])->map(function($permissionId) {
+        $permissions = collect([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])->map(function($permissionId) {
             return [
                 'permissions_id' => $permissionId,
                 'role_id' => 1

@@ -16,7 +16,7 @@ class PermisionMiddleware
     public function handle(Request $request, Closure $next, $permision): Response
     {
         if(!auth()->user()->role->permissions->contains('name', $permision)){
-            return abort(404);
+            return abort(403);
         }
         return $next($request);
     }

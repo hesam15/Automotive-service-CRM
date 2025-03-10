@@ -13,7 +13,7 @@ class RoleController extends Controller {
     public function index() {
         $roles = Role::with('permissions')->get();
         $permissions = Cache::remember('permissions', now()->addHour(), function() {
-            return Permissions::select('id', 'persian_name');
+            return Permissions::select('id', 'persian_name')->get();
         });
         
         return view('admin.roles.index', compact('roles', 'permissions'));
@@ -22,18 +22,15 @@ class RoleController extends Controller {
     // Create
     public function create() {
         $permissions = Cache::remember('permissions', now()->addHour(), function() {
-            return Permissions::select('id', 'persian_name');
+            return Permissions::select('id', 'persian_name')->get();
         });
         return view('admin.roles.create', compact('permissions'));
     }
 
     public function store(RoleStoreRequest $request) {
         $validated = $request->validated();
-
-        $role = Role::create([
-            "name" => $validated['name'],
-            "persian_name" => $validated['persian_name'],
-        ]);
+        
+        $role = Role::create($validated);
 
         if ($validated['permissions']) {
             $role->givePermissionsToRole($role, $validated['permissions']);
@@ -45,7 +42,7 @@ class RoleController extends Controller {
     // Update
     public function edit(Role $role) {
         $permissions = Cache::remember('permissions', now()->addHour(), function() {
-            return Permissions::select('id', 'persian_name');
+            return Permissions::select('id', 'persian_name')->get();
         });
 
         return view('admin.roles.edit', compact('role', 'permissions'));
@@ -53,10 +50,9 @@ class RoleController extends Controller {
 
     public function update(RoleUpdateRequest $request, Role $role) {
         $validated = $request->validated();
-        $role->update([
-            "name" => $validated['name'],
-            "persian_name" => $validated['persian_name'],
-        ]);
+
+        $role->update($validated);
+        
         if ($validated['permissions']) {
             $role->refreshPermissions($validated['permissions']);
         }
