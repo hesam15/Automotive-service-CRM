@@ -2,6 +2,16 @@
 
 @section('title', 'فرم رزرواسیون')
 
+@push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+@endpush
+
+@push('scripts')
+    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    @vite(['resources/js/datepicker.js'])
+@endpush
+
 @section('content')
 <div class="min-h-screen p-4 md:p-6">
     <div class="max-w-md md:max-w-7xl mx-auto">

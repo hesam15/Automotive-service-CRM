@@ -157,8 +157,9 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
 
     //Reports Index
     Breadcrumbs::for('report.index', function (BreadcrumbTrail $trail) {
-        $booking = Booking::where('id', request()->route('booking_id'))->first();
+        $booking = request()->route()->booking;
+        $report = request()->route()->report;
 
         $trail->parent('home');
-        $trail->push('گزارش '.$booking->customer->fullname , route('report.index', ['booking_id' => request()->route('booking_id'), 'car_id' => request()->route('car_id')]));
+        $trail->push('گزارش '.$booking->customer->fullname , route('report.index', ['booking' => $booking->id, 'report' => $report->id]));
     });

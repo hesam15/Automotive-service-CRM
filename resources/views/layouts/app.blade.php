@@ -16,24 +16,8 @@
     <!-- Core Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Third Party Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Persian Date Dependencies -->
-    @if(in_array(Route::current()->getName(), ['bookings.create', 'customers.bookings', 'customers.profile', 'bookings.index']))
-        <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
-        <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
-        <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
-        @vite(['resources/js/datepicker.js'])
-    @endif
-
-    <!-- User Verification Script -->
-    @if(Route::current()->getName() == 'users.index')
-        @vite(['resources/js/verify-code.js'])
-    @endif
-
-    <!-- Additional Page-Specific Scripts -->
-    @stack('scripts')
+    <!-- Page Specific Styles -->
+    @stack('styles')
 </head>
 
 <body class="font-sans antialiased">
@@ -60,5 +44,11 @@
             </main>
         </div>
     </div>
+
+    <!-- Core JavaScript Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Page Specific Scripts -->
+    @stack('scripts')
 </body>
 </html>

@@ -2,6 +2,16 @@
 
 @section('title', 'رزروها')
 
+@push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+@endpush
+
+@push('scripts')
+    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    @vite(['resources/js/datepicker.js'])
+@endpush
+
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
     <x-errors-success-label />

@@ -116,7 +116,7 @@
                     <span class="text-gray-700">ثبت نقش جدید</span>
                 </a>
         
-                <a href="{{ route('create.option') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                <a href="{{ route('options.create') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                     <i class="material-icons-round text-green-600 text-xl ml-3">add_circle</i>
                     <span class="text-gray-700">ثبت خدمت جدید</span>
                 </a>

@@ -1,88 +1,92 @@
+// resources/js/managers/AccordionManager.js
+
+/**
+ * Manages accordion functionality throughout the application
+ */
 export class AccordionManager {
+    /**
+     * Initialize the AccordionManager
+     */
     constructor() {
-        this.mainAccordion = {
-            button: document.getElementById('infoAccordion'),
-            content: document.getElementById('infoContent'),
-            icon: document.getElementById('accordionIcon')
-        };
+        this.initialize();
     }
 
+    /**
+     * Initialize event listeners and setup
+     */
     initialize() {
-        this.setupAccordion();
-        this.setupServiceAccordions();
+        this.setupGlobalHandlers();
     }
 
-    setupAccordion() {
-        if (this.mainAccordion.button) {
-            this.mainAccordion.button.addEventListener('click', () => {
-                this.toggleAccordion(
-                    this.mainAccordion.content, 
-                    this.mainAccordion.icon
-                );
-            });
-
-            // Set initial state to closed for main accordion
-            if (this.mainAccordion.content && this.mainAccordion.icon) {
-                this.setInitialState(
-                    this.mainAccordion.content, 
-                    this.mainAccordion.icon
-                );
-            }
-        }
-    }
-
-    setupServiceAccordions() {
-        // Define global toggle function for services
+    /**
+     * Setup global handlers and make them available on window object
+     */
+    setupGlobalHandlers() {
+        // Make toggleService available globally
         window.toggleService = (serviceKey) => {
-            const content = document.getElementById(`content_${serviceKey}`);
-            const icon = document.getElementById(`icon_${serviceKey}`);
-            this.toggleAccordion(content, icon);
+            try {
+                const content = document.getElementById(`content_${serviceKey}`);
+                const icon = document.getElementById(`icon_${serviceKey}`);
+                
+                if (!content || !icon) {
+                    console.error(`Elements not found for service key: ${serviceKey}`);
+                    return;
+                }
+
+                this.toggleAccordion(content, icon);
+            } catch (error) {
+                console.error('Error in toggleService:', error);
+            }
         };
-
-        // Set initial state for all service accordions
-        document.querySelectorAll('[id^="content_"]').forEach((content) => {
-            const serviceKey = content.id.replace('content_', '');
-            const icon = document.getElementById(`icon_${serviceKey}`);
-            this.setInitialState(content, icon);
-        });
     }
 
+    /**
+     * Toggle accordion content visibility
+     * @param {HTMLElement} content - The content element to toggle
+     * @param {HTMLElement} icon - The icon element to rotate
+     */
     toggleAccordion(content, icon) {
-        if (!content || !icon) return;
+        try {
+            // Toggle content visibility
+            if (content.classList.contains('hidden')) {
+                // Show content
+                content.classList.remove('hidden');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.classList.add('rotate-180');
+            } else {
+                // Hide content
+                content.classList.add('hidden');
+                content.style.maxHeight = '0';
+                icon.classList.remove('rotate-180');
+            }
 
-        const isHidden = content.classList.contains('hidden');
-        
-        // Toggle content visibility with smooth animation
-        if (isHidden) {
-            this.showAccordion(content, icon);
-        } else {
-            this.hideAccordion(content, icon);
+            // Add smooth transition
+            content.style.transition = 'max-height 0.3s ease-in-out';
+        } catch (error) {
+            console.error('Error in toggleAccordion:', error);
         }
     }
 
-    showAccordion(content, icon) {
-        content.classList.remove('hidden');
-        setTimeout(() => {
-            content.style.maxHeight = content.scrollHeight + 'px';
-        }, 0);
-        icon.style.transform = 'rotate(180deg)';
-    }
+    /**
+     * Close all accordions except the one specified
+     * @param {string} exceptId - ID of the accordion to keep open
+     */
+    closeOtherAccordions(exceptId) {
+        try {
+            const allContents = document.querySelectorAll('[id^="content_"]');
+            const allIcons = document.querySelectorAll('[id^="icon_"]');
 
-    hideAccordion(content, icon) {
-        content.style.maxHeight = '0px';
-        icon.style.transform = 'rotate(0deg)';
-        setTimeout(() => {
-            content.classList.add('hidden');
-        }, 200); // Match with CSS transition duration
-    }
-
-    setInitialState(content, icon) {
-        if (content) {
-            content.classList.add('hidden');
-            content.style.maxHeight = '0px';
-        }
-        if (icon) {
-            icon.style.transform = 'rotate(0deg)';
+            allContents.forEach((content) => {
+                if (content.id !== exceptId && !content.classList.contains('hidden')) {
+                    const icon = document.getElementById(content.id.replace('content_', 'icon_'));
+                    this.toggleAccordion(content, icon);
+                }
+            });
+        } catch (error) {
+            console.error('Error in closeOtherAccordions:', error);
         }
     }
 }
+
+// Create and export a singleton instance
+export const accordionManager = new AccordionManager();
