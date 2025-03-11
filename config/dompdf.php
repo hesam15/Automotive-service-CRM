@@ -45,7 +45,7 @@ return [
          * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
          * Symbol, ZapfDingbats.
          */
-        'font_dir' => storage_path('fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
+        'font_dir' => public_path('/fonts/vazir'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
 
         /**
          * The location of the DOMPDF font cache directory
@@ -215,7 +215,7 @@ return [
          *
          * @var int
          */
-        'dpi' => 96,
+        'dpi' => 120,
 
         /**
          * Enable embedded PHP
@@ -287,7 +287,7 @@ return [
         /**
          * A ratio applied to the fonts height to be more like browsers' line height
          */
-        'font_height_ratio' => 1.1,
+        'font_height_ratio' => 1.3,
 
         /**
          * Use the HTML5 Lib parser
