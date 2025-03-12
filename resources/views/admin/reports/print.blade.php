@@ -7,195 +7,199 @@
     <style>
         @font-face {
             font-family: 'Vazirmatn';
-            src: url('{{ storage_path('app/public/fonts/vazir/Vazirmatn-Regular.ttf') }}') format('truetype'),
-                 url('{{ public_path('fonts/vazir/Vazirmatn-Regular.ttf') }}') format('truetype');
+            src: url('{{ storage_path('app/public/fonts/vazir/Vazirmatn-Regular.ttf') }}') format('truetype');
             font-weight: normal;
-            font-style: normal;
         }
 
-        @font-face {
-            font-family: 'Vazirmatn';
-            src: url('{{ storage_path('app/public/fonts/vazir/Vazirmatn-Bold.ttf') }}') format('truetype'),
-                 url('{{ public_path('fonts/vazir/Vazirmatn-Bold.ttf') }}') format('truetype');
-            font-weight: bold;
-            font-style: normal;
-        }
-
-        /* تنظیمات کلی */
         * {
             font-family: 'Vazirmatn', Tahoma, Arial, sans-serif !important;
-            direction: rtl !important;
-            text-align: right !important;
-        }
-
-        /* کلاس برای متون فارسی */
-        .persian-text {
-            font-family: 'Vazirmatn', Tahoma, Arial, sans-serif !important;
-            direction: rtl !important;
-            text-align: right !important;
-            letter-spacing: 0 !important;
-            word-spacing: -1px !important;
-            font-feature-settings: "kern" 1, "liga" 1, "calt" 1 !important;
-            font-kerning: normal !important;
+            direction: rtl;
         }
 
         body {
-            direction: rtl;
-            text-align: right;
-            font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
-            line-height: 1.8;
             background-color: white;
-            padding: 20px;
+            font-size: 12px;
+            color: #2d3748;
+            line-height: 1.6;
             margin: 0;
-            font-size: 14px;
+            padding: 0;
+            
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .header h1, .header p {
-            text-align: center !important;
+        .container {
+            padding: 15px;
         }
 
         .info-section {
-            margin-bottom: 30px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .info-box {
-            background-color: #f8f9fa;
-            padding: 15px;
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-table strong {
+            color: #2c5282;
+            display: inline-block;
+            min-width: 120px;
+            margin-left: 10px;
         }
 
         .service-section {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             margin-bottom: 20px;
-            page-break-inside: avoid;
+            overflow: hidden;
         }
 
         .service-header {
-            background-color: #f8f9fa;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+            background-color: #ebf8ff;
+            padding: 12px 15px;
+            border-bottom: 1px solid #bee3f8;
         }
 
-        .service-details {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+        .service-header h3 {
+            color: #2c5282;
+            margin: 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .details-table td {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            vertical-align: top;
+            width: 25%;
         }
 
         .detail-item {
-            background-color: #fff;
             padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 4px;
+            border-radius: 6px;
+        }
+
+        .detail-item strong {
+            color: #2c5282;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .detail-item span {
+            color: #4a5568;
+            font-size: 11px;
+            line-height: 1.4;
         }
 
         .description-box {
-            background-color: #f0f7ff;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 10px;
+            background-color: #ebf8ff;
+            padding: 12px 15px;
+            margin: 15px;
+            border: 1px solid #bee3f8;
+            border-radius: 6px;
         }
 
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-        }
-
-        .footer p {
-            text-align: center !important;
-        }
-
-        /* تنظیمات اضافی برای بهبود نمایش متن فارسی */
-        h1, h2, h3, h4, h5, h6 {
+        .description-box strong {
+            color: #2c5282;
+            display: block;
+            margin-bottom: 8px;
             font-weight: bold;
-            letter-spacing: 0;
-            word-spacing: -1px;
         }
 
-        p, div, span, strong {
-            letter-spacing: 0;
-            word-spacing: -1px;
+        .description-box p {
+            color: #4a5568;
+            margin: 0;
+            line-height: 1.6;
         }
 
-        /* تنظیمات برای جلوگیری از شکستن کلمات */
-        .nowrap {
-            white-space: nowrap;
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1 class="persian-text">گزارش کارشناسی خودرو</h1>
-        <p class="persian-text">شماره گزارش: <span class="nowrap">{{ $report->id }}</span></p>
-        <p class="persian-text">تاریخ: <span class="nowrap">{{ verta($report->created_at)->format('Y/m/d') }}</span></p>
-    </div>
-
-    <div class="info-section">
-        <div class="info-grid">
-            <div class="info-box">
-                <h3 class="persian-text">اطلاعات مشتری</h3>
-                <p class="persian-text">نام: <span class="nowrap">{{ $report->booking->customer->fullname }}</span></p>
-                <p class="persian-text">شماره تماس: <span class="nowrap">{{ $report->booking->customer->phone }}</span></p>
-            </div>
-            <div class="info-box">
-                <h3 class="persian-text">اطلاعات خودرو</h3>
-                <p class="persian-text">مدل: <span class="nowrap">{{ $report->booking->car->name }}</span></p>
-                <p class="persian-text">تاریخ کارشناسی: <span class="nowrap">{{ $report->date }}</span></p>
-            </div>
+    <div class="container">
+        <div class="info-section">
+            <table class="info-table">
+                <tr>
+                    <td width="50%">
+                        <strong>نام مشتری:</strong>
+                        <span>{{ $report->booking->customer->fullname }}</span>
+                    </td>
+                    <td width="50%">
+                        <strong>مدل خودرو:</strong>
+                        <span>{{ $report->booking->car->name }}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>شماره تماس:</strong>
+                        <span>{{ $report->booking->customer->phone }}</span>
+                    </td>
+                    <td>
+                        <strong>تاریخ کارشناسی:</strong>
+                        <span>{{ $report->date }}</span>
+                    </td>
+                </tr>
+            </table>
         </div>
-    </div>
 
-    @foreach($reportOptions as $serviceName => $serviceDetails)
-        <div class="service-section">
-            <div class="service-header">
-                <h3 class="persian-text">{{ str_replace('_', ' ', $serviceName) }}</h3>
-            </div>
-            
-            <div class="service-details">
-                @foreach($serviceDetails as $key => $value)
-                    <div class="detail-item">
-                        <strong class="persian-text">{{ $key }}:</strong>
-                        <div class="persian-text">{{ $value }}</div>
-                    </div>
-                @endforeach
-            </div>
-
-            @if(isset($reportDescriptions[str_replace(' ', '_', $serviceName)]))
-                <div class="description-box">
-                    <strong class="persian-text">توضیحات تکمیلی:</strong>
-                    <p class="persian-text">{{ $reportDescriptions[str_replace(' ', '_', $serviceName)] }}</p>
+        @foreach($reportOptions as $serviceName => $serviceDetails)
+            <div class="service-section">
+                <div class="service-header">
+                    <h3>{{ str_replace('_', ' ', $serviceName) }}</h3>
                 </div>
-            @endif
-        </div>
-    @endforeach
+                
+                <table class="details-table">
+                    @foreach(array_chunk($serviceDetails, 4, true) as $chunk)
+                        <tr>
+                            @foreach($chunk as $key => $value)
+                                <td>
+                                    <div class="detail-item">
+                                        <strong>{{ $key }}:</strong>
+                                        <span>{{ $value }}</span>
+                                    </div>
+                                </td>
+                            @endforeach
+                            @for($i = count($chunk); $i < 4; $i++)
+                                <td></td>
+                            @endfor
+                        </tr>
+                    @endforeach
+                </table>
 
-    @if(isset($reportDescriptions['description']))
-        <div class="description-box">
-            <h3 class="persian-text">توضیحات کلی</h3>
-            <p class="persian-text">{{ $reportDescriptions['description'] }}</p>
-        </div>
-    @endif
+                @if(isset($reportDescriptions[str_replace(' ', '_', $serviceName)]))
+                    <div class="description-box">
+                        <strong>توضیحات تکمیلی:</strong>
+                        <p>{{ $reportDescriptions[str_replace(' ', '_', $serviceName)] }}</p>
+                    </div>
+                @endif
+            </div>
+        @endforeach
 
-    <div class="footer">
-        <p class="persian-text">این گزارش به صورت خودکار تولید شده است</p>
-        <p class="persian-text">تاریخ چاپ: <span class="nowrap">{{ verta()->format('Y/m/d H:i') }}</span></p>
+        @if(isset($reportDescriptions['description']))
+            <div class="description-box">
+                <strong>توضیحات کلی:</strong>
+                <p>{{ $reportDescriptions['description'] }}</p>
+            </div>
+        @endif
     </div>
 </body>
 </html>

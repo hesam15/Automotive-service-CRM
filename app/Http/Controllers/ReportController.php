@@ -68,71 +68,71 @@ class ReportController extends Controller
             'description' => !empty($explanations) ? json_encode($explanations, JSON_UNESCAPED_UNICODE) : null,
             'status' => 'completed',
         ]);
+
+        $booking->status = 'completed';
+        $booking->save();
     
         return redirect()->route('report.index', ['booking' => $booking->id, 'report' => $report->id])->with('success', 'گزارش با موفقیت ثبت شد');
     }
 
-    public function print(Reports $report) {
-        try {            
-            $reportOptions = json_decode($report->reports, true) ?? [];
-            $reportDescriptions = json_decode($report->description, true) ?? [];
-            
-            // تنظیمات mPDF
-            $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
-            $fontDirs = $defaultConfig['fontDir'];
-            
-            $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-            $fontData = $defaultFontConfig['fontdata'];
-            
-            // پیکربندی mPDF با تنظیمات فونت فارسی
-            $mpdf = new \Mpdf\Mpdf([
-                'mode' => 'utf-8',
-                'format' => 'A4',
-                'useOTL' => 0xFF,
-                'useKashida' => 75,
-                'margin_left' => 10,
-                'margin_right' => 10,
-                'margin_top' => 10,
-                'margin_bottom' => 10,
-                'fontDir' => array_merge($fontDirs, [
-                    public_path('fonts'),
-                ]),
-                'fontdata' => array_merge($fontData, [
-                    'vazirmatn' => [
-                        'R' => 'vazir/Vazirmatn-Regular.ttf',
-                        'B' => 'vazir/Vazirmatn-Bold.ttf',
-                        'useOTL' => 0xFF,    // فعال کردن تمام ویژگی‌های OpenType
-                        'useKashida' => 75,  // استفاده از کشیده برای تنظیم فاصله
-                    ],
-                ]),
-                'default_font' => 'vazirmatn',
-                'tempDir' => storage_path('app/public/temp'),
-            ]);
-            
-            // تنظیم جهت راست به چپ
-            $mpdf->SetDirectionality('rtl');
-            
-            // فعال کردن دسترسی به منابع خارجی
-            $mpdf->curlAllowUnsafeSslRequests = true;
-            
-            // رندر کردن ویو
-            $html = view('admin.reports.print', compact(
-                'report',
-                'reportOptions',
-                'reportDescriptions'
-            ))->render();
-            
-            // نوشتن HTML در PDF
-            $mpdf->WriteHTML($html);
-            
-            // دانلود PDF
-            return response($mpdf->Output("report-{$report->id}.pdf", \Mpdf\Output\Destination::STRING_RETURN), 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => "attachment; filename=report-{$report->id}.pdf",
-            ]);
-            
-        } catch (\Exception $e) {
-            return back()->with('error', 'خطا در ایجاد PDF: ' . $e->getMessage());
-        }
+// ReportController.php
+
+public function print(Reports $report)
+    {
+        $reportOptions = json_decode($report->reports, true) ?? [];
+        $reportDescriptions = json_decode($report->description, true) ?? [];
+        
+        // تنظیمات mPDF
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 25,
+            'margin_bottom' => 25,
+            'margin_header' => 0,
+            'margin_footer' => 0,
+            'useOTL' => 0xFF,
+            'useKashida' => 75,
+            'fontDir' => array_merge($fontDirs, [
+                public_path('fonts'),
+            ]),
+            'fontdata' => array_merge($fontData, [
+                'vazirmatn' => [
+                    'R' => 'vazir/Vazirmatn-Regular.ttf',
+                    'B' => 'vazir/Vazirmatn-Bold.ttf',
+                    'useOTL' => 0xFF,
+                    'useKashida' => 75,
+                ],
+            ]),
+            'default_font' => 'vazirmatn',
+            'tempDir' => storage_path('app/public/temp'),
+        ]);
+
+        // تنظیم هدر و فوتر
+        $mpdf->SetHTMLHeader('
+            <div style="border-bottom: 2px solid #3182ce; background: #ebf8ff; padding: 15px; text-align: center; margin-left: -50px; margin-right: -50px;">
+                <div style="font-size: 18px; color: #2c5282; margin-bottom: 5px;">گزارش کارشناسی خودرو</div>
+                <div style="font-size: 12px; color: #4a5568;">شماره گزارش: '.$report->id.' | تاریخ: '.verta($report->created_at)->format('Y/m/d').'</div>
+            </div>
+        ');
+
+        $mpdf->SetHTMLFooter('
+            <div style="border-top: 2px solid #3182ce; background: #ebf8ff; padding: 10px; text-align: center; margin-left: -50px; margin-right: -50px;">
+                <div style="font-size: 12px; color: #4a5568;">این گزارش به صورت خودکار تولید شده است</div>
+                <div style="font-size: 12px; color: #4a5568;">تاریخ چاپ: '.verta()->format('Y/m/d H:i').'</div>
+            </div>
+        ');
+
+        $html = view('admin.reports.print', compact('report', 'reportOptions', 'reportDescriptions'))->render();
+        $mpdf->WriteHTML($html);
+        
+        return $mpdf->Output("report-{$report->id}.pdf", \Mpdf\Output\Destination::INLINE);
     }
 }

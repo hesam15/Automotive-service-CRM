@@ -11,24 +11,39 @@ window.Alpine = Alpine;
 Alpine.start();
 
 // Initialize Managers
-try {
-    // Initialize Core Managers
-    const uiManager = new UIManager();
-    const modalManager = new ModalManager();
-    const optionsManager = new OptionsManager();
-    
-    // Make toggleService globally available
-    window.toggleService = (serviceKey) => {
-        const content = document.getElementById(`content_${serviceKey}`);
-        const icon = document.getElementById(`icon_${serviceKey}`);
-        if (content && icon) {
-            accordionManager.toggleAccordion(content, icon);
-        }
-    };
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        // Initialize Core Managers
+        const uiManager = new UIManager();
+        const modalManager = new ModalManager();
+        const optionsManager = new OptionsManager();
 
-} catch (error) {
-    console.error('Error initializing managers:', error);
-}
+        // Initialize each manager
+        uiManager.initialize();
+        modalManager.initialize();
+        optionsManager.initialize();
+        
+        // Store managers in window for debugging if needed
+        window.managers = {
+            uiManager,
+            modalManager,
+            optionsManager,
+            accordionManager
+        };
+        
+        // Make toggleService globally available
+        window.toggleService = (serviceKey) => {
+            const content = document.getElementById(`content_${serviceKey}`);
+            const icon = document.getElementById(`icon_${serviceKey}`);
+            if (content && icon) {
+                accordionManager.toggleAccordion(content, icon);
+            }
+        };
+
+    } catch (error) {
+        console.error('Error initializing managers:', error);
+    }
+});
 
 // Error handling
 window.addEventListener('error', (event) => {

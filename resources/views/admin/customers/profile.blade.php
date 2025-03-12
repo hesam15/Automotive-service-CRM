@@ -247,13 +247,13 @@
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
                                         @if($booking->status === 'pending')
-                                            <a href="{{ route('report.create', ['booking_id' => $booking->id]) }}"
+                                            <a href="{{ route('report.create', ['booking' => $booking->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">assignment</i>
                                                 <span class="text-xs mr-0.5">ثبت گزارش</span>
                                             </a>
                                         @elseif($booking->status === 'completed')
-                                            <a href="{{ route('report.index', ['booking_id' => $booking->id, 'car_id' => $booking->car_id]) }}"
+                                            <a href="{{ route('report.index', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">visibility</i>
                                                 <span class="text-xs mr-0.5">مشاهده گزارش</span>
