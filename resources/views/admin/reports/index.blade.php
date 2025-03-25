@@ -2,9 +2,12 @@
 
 @section('title', 'مشاهده گزارش')
 
-@push('scripts')
-    @vite(['resources/js/managers/AccordionManager.js'])
-@endpush
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    window.requiredManagers.push('accordionManager');
+</script>
+@endPushOnce
 
 @section('content')
 <div class="max-w-6xl mx-auto py-4 md:py-6 space-y-6">

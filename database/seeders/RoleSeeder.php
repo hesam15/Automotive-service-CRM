@@ -19,8 +19,8 @@ class RoleSeeder extends Seeder
                 'persian_name' => 'مدیر کل'
             ],
             [
-                'name' => 'admin',
-                'persian_name' => 'ادمین'
+                'name' => 'expert',
+                'persian_name' => 'کارشناس'
             ],
             [
                 'name' => 'clerk',

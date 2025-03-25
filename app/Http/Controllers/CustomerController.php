@@ -54,6 +54,7 @@ class CustomerController extends Controller
             $customer = Customer::create([
                 "fullname" => $request->fullname,
                 "phone" => $request->phone,
+                "service_center_id" => auth()->user()->service_center_id
             ]);
             
             return redirect()->route('customers.index')->with("success", "مشتری با موفقیت اضافه شد.");

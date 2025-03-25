@@ -4,45 +4,175 @@ namespace App\Services;
 
 use App\Helpers\PersianConvertNumberHelper;
 use App\Models\Booking;
-use Morilog\Jalali\Jalalian;
+use App\Models\ServiceCenter;
+use App\Models\Setting;
+use Carbon\Carbon;
+use Hekmatinasser\Verta\Verta;
 use Illuminate\Http\Request;
 
-class DatePicker {
-    public function getAvailableTimes(Request $request)
+class DatePicker
+{
+    private $settings;
+    private $workingHours;
+
+    public function __construct()
     {
-        $date = (new PersianConvertNumberHelper($request->date))->convertPersianToEnglish()->convertDateToEnglish()->getValue();
-        $times = [8, 21];
-    
-        // دریافت همه ساعت‌ها به صورت associative array
-        $allTimes = $this->allTimes($times);
-        
-        // دریافت و تبدیل ساعت‌های رزرو شده به associative array
-        $bookedTimes = Booking::where('date', $date)
-            ->pluck('time_slot')
-            ->toArray();
-    
-        // حذف ساعت‌های رزرو شده
-        $availableTimes = array_diff_key($allTimes, $bookedTimes);
-    
-        return response()->json([
-            'all' => $allTimes,
-            'available' => $availableTimes,
-            'booked' => $bookedTimes
-        ]);
-    }    
-    
-       
-    public function allTimes($times)
+        $this->loadSettings();
+    }
+
+    /**
+     * Load settings from database
+     */
+    private function loadSettings()
     {
-        $allTimes = [];
-        
-        for ($hour = $times[0]; $hour <= $times[1]; $hour++) {
-            $formattedHour = str_pad($hour, 2, '0', STR_PAD_LEFT);
-            $allTimes[] = "$formattedHour:00";
-            if ($hour < $times[1]) {
-                $allTimes[] = "$formattedHour:30";
+        $serviceCenter = ServiceCenter::where("id", auth()->user()->service_center_id)->first();
+        $this->settings = [
+            'fridays_closed' => $serviceCenter->fridays_off ?? false,
+            'working_hours' => explode("-", $serviceCenter->working_hours) ?? null,
+        ];
+
+        // Parse working hours from settings or use default
+        if ($this->settings['working_hours']) {
+            $this->workingHours = [
+                'start' => Carbon::createFromTime((int) $this->settings['working_hours'][0], 0, 0)->format('H:i'),
+                'end' => Carbon::createFromTime((int) $this->settings['working_hours'][1], 0, 0)->format('H:i'),
+                'interval' => 30,
+            ];
+        } else {
+            $this->workingHours = [
+                'start' => 9,
+                'end' => 21,
+                'interval' => 30,
+            ];
+        }
+    }
+
+    /**
+     * Get available times for a specific date
+     */
+    public function getAvailableTimes(Request $request) {
+        try {
+            // تبدیل تاریخ از شمسی به میلادی
+            $persianDate = (new PersianConvertNumberHelper($request->date))
+                ->convertPersianToEnglish()
+                ->convertDateToEnglish()
+                ->value;
+
+            // بررسی روز جمعه
+            $date = Carbon::parse($persianDate);
+            if ($this->settings['fridays_closed'] && $date->dayOfWeek === Carbon::FRIDAY) {
+                return response()->json([
+                    'all' => [],
+                    'available' => [],
+                    'booked' => [],
+                    'message' => 'این روز تعطیل است'
+                ]);
+            }
+
+            // دریافت همه ساعت‌های کاری
+            $allTimes = $this->generateTimeSlots();
+            
+            // دریافت ساعت‌های رزرو شده
+            $bookedTimes = Booking::where('date', $persianDate)
+                ->where('status', 'pending')
+                ->pluck('time_slot')
+                ->toArray();
+
+            // محاسبه ساعت‌های در دسترس
+            $availableTimes = array_values(array_diff($allTimes, $bookedTimes));
+
+            return response()->json([
+                'all' => $allTimes,
+                'available' => $availableTimes,
+                'booked' => $bookedTimes,
+                'settings' => [
+                    'fridays_closed' => (bool) $this->settings['fridays_closed'],
+                    'working_hours' => $this->workingHours
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'خطا در دریافت ساعات مراجعه',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate time slots based on working hours settings
+     */
+    private function generateTimeSlots()
+    {
+        $slots = [];
+
+        // تبدیل ساعت شروع و پایان به دقیقه
+        $startTime = $this->timeToMinutes($this->workingHours['start']);
+        $endTime = $this->timeToMinutes($this->workingHours['end']);
+        $interval = $this->workingHours['interval'];
+
+        for ($minutes = $startTime; $minutes <= $endTime; $minutes += $interval) {
+            $timeSlot = $this->minutesToTime($minutes);
+            
+            // بررسی زمان استراحت
+            if (!$this->isInBreakTime($timeSlot)) {
+                $slots[] = $timeSlot;
             }
         }
-        return $allTimes;
+
+        return $slots;
+    }
+
+    /**
+     * Convert time string to minutes
+     */
+    private function timeToMinutes(string $time): int
+    {
+        list($hours, $minutes) = explode(':', $time);
+        return ($hours * 60) + $minutes;
+    }
+
+    /**
+     * Convert minutes to time string
+     */
+    private function minutesToTime(int $minutes): string
+    {
+        $hours = floor($minutes / 60);
+        $mins = $minutes % 60;
+        return sprintf('%02d:%02d', $hours, $mins);
+    }
+
+    /**
+     * Check if given time is in break time
+     */
+    private function isInBreakTime(string $time): bool
+    {
+        if (!isset($this->workingHours['breaks'])) {
+            return false;
+        }
+
+        $timeMinutes = $this->timeToMinutes($time);
+
+        foreach ($this->workingHours['breaks'] as $break) {
+            $breakStart = $this->timeToMinutes($break['start']);
+            $breakEnd = $this->timeToMinutes($break['end']);
+
+            if ($timeMinutes >= $breakStart && $timeMinutes < $breakEnd) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get datepicker settings
+     */
+    public function getSettings()
+    {
+        return response()->json([
+            'fridays_closed' => (bool) $this->settings['fridays_closed'],
+            'working_hours' => $this->workingHours
+        ]);
     }
 }

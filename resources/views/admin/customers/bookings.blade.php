@@ -2,6 +2,15 @@
 
 @section('title', 'رزروها')
 
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    if (!window.requiredManagers.includes('datePickerManager')) {
+        window.requiredManagers.push('datePickerManager');
+    }
+</script>
+@endPushOnce
+
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
     <x-errors-success-label />
@@ -67,7 +76,7 @@
                                                 <span class="text-xs mr-0.5">ثبت گزارش</span>
                                             </a>
                                         @elseif($booking->status === 'completed')
-                                            <a href="{{ route('report.index', ['booking_id' => $booking->id, 'report_id' => $booking->report->id]) }}"
+                                            <a href="{{ route('report.index', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">visibility</i>
                                                 <span class="text-xs mr-0.5">مشاهده گزارش</span>
@@ -75,12 +84,6 @@
                                         @endif
 
                                         @if($booking->status === 'pending')
-                                            <button class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200"
-                                                    data-modal-target="bookingEditModal-{{$booking->id}}">
-                                                <i class="material-icons-round text-sm">edit</i>
-                                                <span class="text-xs mr-0.5">ویرایش</span>
-                                            </button>
-                                        @elseif($booking->status === 'completed')
                                             <button class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200"
                                                     data-modal-target="bookingEditModal-{{$booking->id}}">
                                                 <i class="material-icons-round text-sm">edit</i>
@@ -100,90 +103,102 @@
                         
                             <!-- Edit Booking Modal -->
                             <x-edit-modal 
-                                :id="'bookingEditModal-'.$booking->id"
-                                title="ویرایش رزرو"
-                                :action="route('bookings.update', $booking->id)"
-                                method="POST"
-                                maxWidth="4xl">
-                                
-                                <div class="space-y-4">
-                                    <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <span class="block text-sm font-medium text-gray-500">نام و نام خانوادگی</span>
-                                                <span class="block mt-1 text-gray-900">{{ $booking->customer->fullname }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="block text-sm font-medium text-gray-500">شماره تماس</span>
-                                                <span class="block mt-1 text-gray-900">{{ $booking->customer->phone }}</span>
-                                            </div>
+                            :id="'bookingEditModal-'.$booking->id"
+                            title="ویرایش رزرو"
+                            :action="route('bookings.update', $booking->id)"
+                            method="POST"
+                            maxWidth="4xl">
+                            
+                            <div class="space-y-4">
+                                {{-- Customer Info --}}
+                                <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <span class="block text-sm font-medium text-gray-500">نام و نام خانوادگی</span>
+                                            <span class="block mt-1 text-gray-900">{{ $booking->customer->fullname }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="block text-sm font-medium text-gray-500">شماره تماس</span>
+                                            <span class="block mt-1 text-gray-900">{{ $booking->customer->phone }}</span>
                                         </div>
                                     </div>
-
-                                    <input type="hidden" name="customer_id" value="{{ $booking->customer_id }}">
-
-                                    <div>
-                                        <label for="car_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
-                                            خودرو
-                                        </label>
-                                        <select name="car_id"
-                                                id="car_{{ $booking->id }}"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                                required>
-                                            @foreach($booking->customer->cars as $car)
-                                                @php
-                                                    $license_plate = explode('-', $car->license_plate);
-                                                @endphp
-                                                <option value="{{ $car->id }}" {{ $booking->car_id == $car->id ? 'selected' : '' }}>
-                                                    {{ $car->name }} - ایران {{ $license_plate[3] }} | {{ $license_plate[2] }} {{ $license_plate[1] }} {{ $license_plate[0] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="status_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
-                                            وضعیت
-                                        </label>
-                                        <select name="status" 
-                                                id="status_{{ $booking->id }}"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                                required>
-                                            <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>در انتظار</option>
-                                            <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>تکمیل شده</option>
-                                            <option value="completed" {{ $booking->status == 'expired' ? 'selected' : '' }}>منقضی شده</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="date_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
-                                            تاریخ مراجعه
-                                        </label>
+                                </div>
+                        
+                                <input type="hidden" name="customer_id" value="{{ $booking->customer_id }}">
+                        
+                                {{-- Car Selection --}}
+                                <div>
+                                    <label for="car_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        خودرو
+                                    </label>
+                                    <select name="car_id"
+                                            id="car_{{ $booking->id }}"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            required>
+                                        @foreach($booking->customer->cars as $car)
+                                            @php
+                                                $license_plate = explode('-', $car->license_plate);
+                                            @endphp
+                                            <option value="{{ $car->id }}" {{ $booking->car_id == $car->id ? 'selected' : '' }}>
+                                                {{ $car->name }} - ایران {{ $license_plate[3] }} | {{ $license_plate[2] }} {{ $license_plate[1] }} {{ $license_plate[0] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                        
+                                {{-- Booking Status --}}
+                                <div>
+                                    <label for="status_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        وضعیت
+                                    </label>
+                                    <select name="status" 
+                                            id="status_{{ $booking->id }}"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            required>
+                                        <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>در انتظار</option>
+                                        <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>تکمیل شده</option>
+                                        <option value="expired" {{ $booking->status == 'expired' ? 'selected' : '' }}>منقضی شده</option>
+                                    </select>
+                                </div>
+                        
+                                {{-- Date Picker --}}
+                                <div class="form-group">
+                                    <label for="date_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        تاریخ مراجعه
+                                    </label>
+                                    <div class="relative" data-modal-datepicker-wrapper>
                                         <input type="text" 
                                             name="date" 
                                             id="date_{{ $booking->id }}"
                                             value="{{ $booking->date }}"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm cursor-pointer" 
+                                            data-date-input
+                                            data-modal-target="bookingEditModal-{{ $booking->id }}"
+                                            autocomplete="off"
                                             readonly>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                                            ساعت مراجعه
-                                        </label>
-                                        <input type="hidden" 
-                                            name="time_slot" 
-                                            id="time_slot_{{ $booking->id }}" 
-                                            value="{{ $booking->time_slot }}">
-                                        
-                                        <div id="time-slots-container-{{ $booking->id }}">
-                                            <div id="time-slots-grid-{{ $booking->id }}" class="grid grid-cols-4 gap-2">
-                                                {{-- Time slots will be loaded here via JavaScript --}}
-                                            </div>
-                                        </div>
+                                        <div class="absolute top-full left-0 z-50 mt-1 bg-white shadow-lg rounded-lg" 
+                                             data-datepicker-container></div>
                                     </div>
                                 </div>
-                            </x-edit-modal>
+                        
+                                {{-- Time Slots --}}
+                                <div data-time-slots-container>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        ساعت مراجعه
+                                    </label>
+                                    <input type="hidden" 
+                                        name="time_slot" 
+                                        id="time_slot_{{ $booking->id }}" 
+                                        value="{{ $booking->time }}"
+                                        data-time-slot-input>
+                                    
+                                    <div class="grid grid-cols-4 gap-2"
+                                         data-time-slots-grid>
+                                        {{-- Time slots will be loaded here via JavaScript --}}
+                                    </div>
+                                </div>
+                            </div>
+                        </x-edit-modal>
                                                          
                         @endforeach
                     </tbody>  

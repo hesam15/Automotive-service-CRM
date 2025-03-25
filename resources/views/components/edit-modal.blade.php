@@ -9,8 +9,19 @@
     'cancelLabel' => 'انصراف'
 ])
 
+@aware(['requiresModal' => true])
+
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    if (!window.requiredManagers.includes('modalManager')) {
+        window.requiredManagers.push('modalManager');
+    }
+</script>
+@endPushOnce
+
 <div id="{{ $id }}" 
-     class="modal fixed inset-0 z-50 hidden overflow-y-auto" 
+     class="modal hidden fixed inset-0 z-50 overflow-y-auto" 
      aria-labelledby="modal-title-{{ $id }}" 
      role="dialog" 
      aria-modal="true">

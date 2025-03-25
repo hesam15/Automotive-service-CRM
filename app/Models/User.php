@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'service_center_id'
     ];
 
     /**
@@ -51,6 +52,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }  
+
+    public function serviceSenter() {
+        return $this->belongsTo(ServiceCenter::class);
+    }
     
     // In User model
     public function hasRole($role)

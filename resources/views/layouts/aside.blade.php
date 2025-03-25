@@ -51,54 +51,29 @@
 
                 <!-- Services Menu -->
                 @permision("create_option")
-                    <div class="relative">
-                        <button id="servicesButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['options.index', 'options.create']) ? 'bg-gray-100' : '' }}">
-                            <div class="flex items-center">
-                                <i class="material-icons-round text-gray-500 text-lg ml-2">build</i>
-                                <span class="text-gray-700">ثبت خدمات</span>
-                            </div>
-                            <i class="material-icons-round text-gray-400 text-sm transition-transform duration-200" id="servicesIcon">expand_more</i>
-                        </button>
-
-                        <div id="servicesMenu" class="overflow-hidden transition-all duration-200" style="max-height: {{ in_array(Route::currentRouteName(), ['show.options', 'create.option']) ? '160px' : '0px' }}">
-                            <div class="pr-7 mr-2 border-r border-gray-200 mt-1 space-y-1">
-                                <a href="{{route('options.index')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'show.options' ? 'bg-gray-100' : '' }}">
-                                    <i class="material-icons-round text-gray-500 text-lg ml-2">list</i>
-                                    <span class="text-gray-700">نمایش خدمات</span>
-                                </a>
-                                <a href="{{route('options.create')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'create.option' ? 'bg-gray-100' : '' }}">
-                                    <i class="material-icons-round text-gray-500 text-lg ml-2">add</i>
-                                    <span class="text-gray-700">ایجاد خدمات</span>
-                                </a>
-                            </div>
+                <div class="relative">
+                    <button id="servicesButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['options.index', 'options.create']) ? 'bg-gray-100' : '' }}">
+                        <div class="flex items-center">
+                            <i class="material-icons-round text-gray-500 text-lg ml-2">build</i>
+                            <span class="text-gray-700">ثبت خدمات</span>
+                        </div>
+                        <i class="material-icons-round text-gray-400 text-sm transition-transform duration-200" id="servicesIcon">expand_more</i>
+                    </button>
+                
+                    <div id="servicesMenu" class="overflow-hidden transition-all duration-200" style="max-height: {{ in_array(Route::currentRouteName(), ['options.index', 'options.create']) ? '160px' : '0px' }}">
+                        <div class="pr-7 mr-2 border-r border-gray-200 mt-1 space-y-1">
+                            <a href="{{route('options.index')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'options.index' ? 'bg-gray-100' : '' }}">
+                                <i class="material-icons-round text-gray-500 text-lg ml-2">list</i>
+                                <span class="text-gray-700">نمایش خدمات</span>
+                            </a>
+                            <a href="{{route('options.create')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'options.create' ? 'bg-gray-100' : '' }}">
+                                <i class="material-icons-round text-gray-500 text-lg ml-2">add</i>
+                                <span class="text-gray-700">ایجاد خدمات</span>
+                            </a>
                         </div>
                     </div>
-                @endpermision
-
-                <!-- Roles Menu -->
-                @permision("create_role")
-                    <div class="relative">
-                        <button id="rolesButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['roles.index', 'roles.create']) ? 'bg-gray-100' : '' }}">
-                            <div class="flex items-center">
-                                <i class="material-icons-round text-gray-500 text-lg ml-2">admin_panel_settings</i>
-                                <span class="text-gray-700">مدیریت نقش‌ها</span>
-                            </div>
-                            <i class="material-icons-round text-gray-400 text-sm transition-transform duration-200" id="rolesIcon">expand_more</i>
-                        </button>
-
-                        <div id="rolesMenu" class="overflow-hidden transition-all duration-200" style="max-height: {{ in_array(Route::currentRouteName(), ['roles.index', 'roles.create']) ? '160px' : '0px' }}">
-                            <div class="pr-7 mr-2 border-r border-gray-200 mt-1 space-y-1">
-                                <a href="{{route('roles.index')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'roles.index' ? 'bg-gray-100' : '' }}">
-                                    <i class="material-icons-round text-gray-500 text-lg ml-2">list</i>
-                                    <span class="text-gray-700">نمایش نقش‌ها</span>
-                                </a>
-                                <a href="{{route('roles.create')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'roles.create' ? 'bg-gray-100' : '' }}">
-                                    <i class="material-icons-round text-gray-500 text-lg ml-2">add</i>
-                                    <span class="text-gray-700">ایجاد نقش</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                
                 @endpermision
 
                 <!-- Users Menu -->

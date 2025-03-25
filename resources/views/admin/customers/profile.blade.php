@@ -2,6 +2,14 @@
 
 @section('title', 'جزئیات مشتری')
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalManager = window.app.initializeModalManager();
+    });
+</script>
+@endpush
+
 @section('content') 
 <div class="max-w-7xl mx-auto py-6 px-4">  
     <x-errors-success-label />
@@ -12,8 +20,9 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-800">اطلاعات مشتری</h2>
                 <div class="flex gap-2">
-                    <button type="button" onclick="openModal('customerEditModal-{{$customer->id}}')"
-                        class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
+                    <button type="button"
+                        data-modal-target="customerEditModal-{{ $customer->id }}"
+                        class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                         <i class="material-icons-round text-sm">edit</i>
                         <span class="text-xs mr-0.5">ویرایش</span>
                     </button>
@@ -260,14 +269,13 @@
                                             </a>
                                         @endif
 
-                                        <button type="button"
-                                            class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200"
-                                            data-modal-target="bookingEditModal-{{$booking->id}}">
-                                            <i class="material-icons-round text-sm">edit</i>
-                                            <span class="text-xs mr-0.5">ویرایش</span>
-                                        </button>
-
                                         @if($booking->status === 'pending')
+                                            <button type="button"
+                                                class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200"
+                                                data-modal-target="bookingEditModal-{{$booking->id}}">
+                                                <i class="material-icons-round text-sm">edit</i>
+                                                <span class="text-xs mr-0.5">ویرایش</span>
+                                            </button>
                                             <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" data-route="{{route("bookings.destroy", $booking->id)}}" data-type="booking">
                                                 <i class="material-icons-round text-sm">cancel</i>
                                                 <span class="text-xs mr-0.5">کنسل کردن</span>

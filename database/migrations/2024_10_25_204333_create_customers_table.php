@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('fullname');
             $table->string('phone');
+            $table->foreignId("service_center_id")->constrained()->onDelete('cascade')->onUpdate('cascade');;
             $table->timestamps();
         });
     }

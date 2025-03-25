@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\User;
-use App\Models\Booking;
 use App\Services\DatePicker;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
@@ -12,27 +10,21 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyPhoneController;
-use App\Models\Customer;
-use App\Models\Role;
-use Illuminate\Notifications\Notification as NotificationsNotification;
 
 //verify phone
-Route::middleware('guest')->group(function () {
-    Route::post('/sendVerify', [VerifyPhoneController::class, 'create'])
-        ->name('send.verification');
-    Route::post('/verifyCode', [VerifyPhoneController::class, 'verify'])->name('verify.phone');
-    
-    // Existing routes remain unchanged
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
+Route::post('/send-verification-code', [VerifyPhoneController::class, 'send']);
 
-    Route::post('register', [RegisteredUserController::class, 'store'])
-        ->name('registerUser');
-});
+Route::post('/verify-code', [VerifyPhoneController::class, 'verify']);
 
+
+// Existing routes remain unchanged
+Route::get('register', [RegisteredUserController::class, 'create'])
+->name('register');
+
+Route::post('register', [RegisteredUserController::class, 'store'])
+->name('registerUser');
 
 Route::middleware(['auth' , 'verified'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('home');
@@ -42,21 +34,21 @@ Route::middleware(['auth' , 'verified'])->group(function () {
     Route::group(['prefix' => 'dashboard'], function () {
 
         //Users
-        Route::prefix('users')->controller(UserController::class)->group(function () {
-            Route::get('/', 'index')->name('users.index');
-            Route::get('/profile/{user}', 'profile')->name('user.profile');
+        Route::prefix('users')->controller(UserController::class)->name("users.")->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/profile/{user}', 'profile')->name('profile');
 
             Route::middleware('permision:create_user')->group(function () {
-                Route::get('/create', 'create')->name('users.create');
-                Route::post('/create', 'store')->name('users.store');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/create', 'store')->name('store');
             });
-            Route::post('/{user}/delete', 'destroy')->name('users.destroy')->middleware('permision:delete_user');
+            Route::post('/{user}/delete', 'destroy')->name('destroy')->middleware('permision:delete_user');
             Route::middleware('permision:edit_customer')->group(function () {
-                Route::get('/{user}/edit', 'edit')->name('users.edit');
-                Route::post('/{user}/edit', 'update')->name('users.update');
-                Route::post('/{user}/updatePhone', 'updatePhone')->name('users.update.phone');
+                Route::get('/{user}/edit', 'edit')->name('edit');
+                Route::post('/{user}/edit', 'update')->name('update');
+                Route::post('/{user}/updatePhone', 'updatePhone')->name('update.phone');
                 //asign role to user
-                Route::post('/{user}/asignRole', 'assignRole')->name('users.asignRole');
+                Route::post('/{user}/asignRole', 'assignRole')->name('asignRole');
             });
 
 
@@ -147,6 +139,7 @@ Route::middleware(['auth' , 'verified'])->group(function () {
             });
         })->middleware('permision:create_option');
 
+        Route::get('/datepicker-settings', [DatePicker::class, 'getSettings']);
         Route::get('/available-times', [DatePicker::class, 'getAvailableTimes']);
     });
 

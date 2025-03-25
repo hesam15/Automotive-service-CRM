@@ -1,4 +1,4 @@
-export class ExplanationManager {
+class ExplanationManager {
     constructor() {
         this.containers = {};
         this.buttons = {};
@@ -79,3 +79,5 @@ export class ExplanationManager {
         textarea.placeholder = 'توضیحات خود را اینجا وارد کنید...';
     }
 }
+
+export default ExplanationManager;

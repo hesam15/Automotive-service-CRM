@@ -1,14 +1,76 @@
-export class UIManager {
+class UIManager {
+    static instance = null;
+
     constructor() {
+        if (UIManager.instance) {
+            return UIManager.instance;
+        }
+
         this.elements = {};
         this.scrollTimer = null;
+        UIManager.instance = this;
     }
 
     initialize() {
-        this.initializeSidebar();
-        this.initializeDropdowns();
-        this.initializeBreadcrumbBehavior();
-        this.initializeAlerts();
+        try {
+            this.setupToastContainer();
+            this.initializeSidebar();
+            this.initializeDropdowns();
+            this.initializeBreadcrumbBehavior();
+            this.initializeAlerts();
+        } catch (error) {
+            console.error('UIManager: Initialization failed:', error);
+        }
+    }
+
+    setupToastContainer() {
+        if (!document.getElementById('toast-container')) {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed bottom-4 right-4 z-50';
+            document.body.appendChild(container);
+        }
+    }
+
+    static showToast(message, type = 'success') {
+        if (!UIManager.instance) {
+            UIManager.instance = new UIManager();
+        }
+        UIManager.instance.setupToastContainer();
+
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        const baseClasses = 'p-4 mb-2 rounded-lg text-white';
+        const typeClasses = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+        
+        toast.className = `${baseClasses} ${typeClasses}`;
+        toast.textContent = message;
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s ease';
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        }, 10);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    static showSuccess(message) {
+        this.showToast(message, 'success');
+    }
+
+    static showError(message) {
+        this.showToast(message, 'error');
     }
 
     initializeSidebar() {
@@ -92,24 +154,38 @@ export class UIManager {
 
     initializeBreadcrumbBehavior() {
         const breadcrumbContainer = document.querySelector('.breadcrumb-container');
+        if (!breadcrumbContainer) return;
 
         window.addEventListener('scroll', () => {
-            if (breadcrumbContainer) {
-                breadcrumbContainer.style.transform = 'translateY(-100%)';
-                clearTimeout(this.scrollTimer);
-                this.scrollTimer = setTimeout(() => {
-                    breadcrumbContainer.style.transform = 'translateY(0)';
-                }, 500);
-            }
+            breadcrumbContainer.style.transform = 'translateY(-100%)';
+            clearTimeout(this.scrollTimer);
+            this.scrollTimer = setTimeout(() => {
+                breadcrumbContainer.style.transform = 'translateY(0)';
+            }, 500);
         });
     }
 
     initializeAlerts() {
-        document.querySelectorAll('.alert-dismissible').forEach(alert => {
+        const alerts = document.querySelectorAll('.alert-dismissible');
+        alerts.forEach(alert => {
             setTimeout(() => {
                 alert.classList.add('opacity-0');
                 setTimeout(() => alert.remove(), 300);
             }, 3000);
         });
     }
+
+    static getInstance() {
+        if (!UIManager.instance) {
+            UIManager.instance = new UIManager();
+        }
+        return UIManager.instance;
+    }
 }
+
+// Bind static methods
+UIManager.showToast = UIManager.showToast.bind(UIManager);
+UIManager.showSuccess = UIManager.showSuccess.bind(UIManager);
+UIManager.showError = UIManager.showError.bind(UIManager);
+
+export default UIManager;

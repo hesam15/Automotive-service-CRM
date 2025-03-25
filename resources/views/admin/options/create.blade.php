@@ -2,6 +2,13 @@
 
 @section('title', 'ثبت خدمت')
 
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    window.requiredManagers.push('optionsManager');
+</script>
+@endPushOnce
+
 @section('content')
 <div class="max-w-4xl mx-auto py-4 md:py-6">
     

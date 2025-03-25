@@ -1,16 +1,14 @@
 class PhoneVerification {
     constructor(config = {}) {
-        const defaultValidation = {
-            PHONE_LENGTH: 11,
-            CODE_LENGTH: 6,
-            TIMEOUT_SECONDS: 500,
-        };
-
-        this.config = {
-            validation: defaultValidation,
+        const defaultConfig = {
+            validation: {
+                PHONE_LENGTH: 11,
+                CODE_LENGTH: 6,
+                TIMEOUT_SECONDS: 120
+            },
             endpoints: {
-                SEND_CODE: '/sendVerify',
-                VERIFY_CODE: '/verifyCode'
+                SEND_CODE: '/send-verification-code',
+                VERIFY_CODE: '/verify-code'
             },
             classes: {
                 input: 'form-input w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500',
@@ -24,72 +22,67 @@ class PhoneVerification {
                 enterPhone: 'لطفا شماره موبایل را وارد کنید',
                 invalidPhone: 'شماره موبایل نامعتبر است',
                 enterCode: 'لطفا کد تایید را وارد کنید',
-                invalidCode: `کد تایید باید ${defaultValidation.CODE_LENGTH} رقم باشد`,
+                invalidCode: 'کد تایید باید 6 رقم باشد',
                 numbersOnly: 'کد تایید باید فقط شامل اعداد باشد',
                 verificationSuccess: 'شماره تلفن با موفقیت تایید شد',
                 verificationError: 'خطا در تایید کد',
-                formError: 'خطا در دریافت اطلاعات فرم',
+                networkError: 'خطا در ارتباط با سرور',
                 sendingCode: 'در حال ارسال...',
                 verifyingCode: 'در حال بررسی...',
                 verified: 'تایید شد',
                 resendCode: 'ارسال مجدد کد',
-                canResendCode: 'می‌توانید مجدداً درخواست کد کنید',
                 waitForCode: 'زمان باقی‌مانده تا ارسال مجدد:'
-            },
-            ...config
+            }
         };
 
+        this.config = this.mergeConfig(defaultConfig, config);
         this.state = {
             timers: new Map(),
             loading: false,
-            verificationForms: new Map()
+            verificationForms: new Map(),
+            debounceTimers: new Map()
         };
 
-        // First define all methods
-        this.showVerificationForm = (userId) => {
-            const existingForm = document.getElementById(`verification-form-${userId}`);
-            if (existingForm) {
-                existingForm.remove();
-            }
-    
-            const phoneInput = document.getElementById(`phone-${userId}`);
-            if (!phoneInput) {
-                console.error('Phone input not found');
-                return;
-            }
-    
-            const form = this.createVerificationForm(userId);
-            phoneInput.closest('.relative').insertAdjacentElement('afterend', form);
-            this.state.verificationForms.set(userId, form);
-        };
-
-        // Then bind all methods
-        this.handleVerifyButtonClick = this.handleVerifyButtonClick.bind(this);
-        this.handleVerifyCodeClick = this.handleVerifyCodeClick.bind(this);
-        this.startVerificationTimer = this.startVerificationTimer.bind(this);
-        this.resetVerification = this.resetVerification.bind(this);
-        this.handleDigitInput = this.handleDigitInput.bind(this);
-        this.handleDigitBackspace = this.handleDigitBackspace.bind(this);
-        this.updateCompleteVerificationCode = this.updateCompleteVerificationCode.bind(this);
-        this.updateButtonState = this.updateButtonState.bind(this);
-        this.resetButton = this.resetButton.bind(this);
-        this.showToast = this.showToast.bind(this);
-        this.validatePhoneInput = this.validatePhoneInput.bind(this);
-        this.validateCodeInput = this.validateCodeInput.bind(this);
-        this.handleVerificationSuccess = this.handleVerificationSuccess.bind(this);
-        this.setLoading = this.setLoading.bind(this);
-
-        // Initialize after all methods are defined and bound
+        this.bindMethods();
         this.initialize();
     }
 
+    mergeConfig(defaultConfig, userConfig) {
+        return {
+            ...defaultConfig,
+            ...userConfig,
+            validation: { ...defaultConfig.validation, ...userConfig?.validation },
+            endpoints: { ...defaultConfig.endpoints, ...userConfig?.endpoints },
+            classes: { ...defaultConfig.classes, ...userConfig?.classes },
+            messages: { ...defaultConfig.messages, ...userConfig?.messages }
+        };
+    }
+
     bindMethods() {
-        this.handleVerifyButtonClick = this.handleVerifyButtonClick.bind(this);
-        this.handleVerifyCodeClick = this.handleVerifyCodeClick.bind(this);
-        this.showVerificationForm = this.showVerificationForm.bind(this);
-        this.startVerificationTimer = this.startVerificationTimer.bind(this);
-        this.resetVerification = this.resetVerification.bind(this);
-        this.handleDigitInput = this.handleDigitInput.bind(this);
+        const methods = [
+            'handleVerifyButtonClick',
+            'handleVerifyCodeClick',
+            'showVerificationForm',
+            'startVerificationTimer',
+            'resetVerification',
+            'handleDigitInput',
+            'handleDigitBackspace',
+            'updateCompleteVerificationCode',
+            'showToast',
+            'validatePhoneInput',
+            'validateCodeInput',
+            'handleVerificationSuccess',
+            'setLoading',
+            'isValidPage',
+            'setupToastContainer',
+            'resetButton'
+        ];
+
+        methods.forEach(method => {
+            if (typeof this[method] === 'function') {
+                this[method] = this[method].bind(this);
+            }
+        });
     }
 
     initialize() {
@@ -98,150 +91,107 @@ class PhoneVerification {
         this.setupToastContainer();
     }
 
+    isValidPage() {
+        return document.querySelector('.verify-phone-btn') !== null;
+    }
+
+    setupToastContainer() {
+        if (!document.getElementById('toast-container')) {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed bottom-4 right-4 z-50';
+            document.body.appendChild(container);
+        }
+    }
+
     setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            const verifyBtn = e.target.closest('.verify-phone-btn');
-            const codeBtn = e.target.closest('button[id^="verify-code-btn-"]');
-
-            if (verifyBtn) {
-                e.preventDefault();
-                this.handleVerifyButtonClick(verifyBtn);
-            } else if (codeBtn) {
-                e.preventDefault();
-                this.handleVerifyCodeClick(codeBtn);
-            }
-        });
-
-        document.addEventListener('input', (e) => {
-            const digitInput = e.target.closest('.verification-digit');
-            if (digitInput) {
-                this.handleDigitInput(digitInput);
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            const digitInput = e.target.closest('.verification-digit');
-            if (digitInput && e.key === 'Backspace') {
-                this.handleDigitBackspace(digitInput, e);
-            }
-        });
+        document.addEventListener('click', this.handleGlobalClick.bind(this));
+        document.addEventListener('input', this.handleGlobalInput.bind(this));
+        document.addEventListener('keydown', this.handleGlobalKeydown.bind(this));
     }
 
-    createVerificationForm(userId) {
-        const verificationContainer = document.createElement('div');
-        verificationContainer.className = 'mt-4';
-        verificationContainer.id = `verification-form-${userId}`;
+    handleGlobalClick(e) {
+        const verifyBtn = e.target.closest('.verify-phone-btn');
+        const codeBtn = e.target.closest('button[id^="verify-code-btn-"]');
 
-        let verificationInputs = '';
-        for (let i = 0; i < this.config.validation.CODE_LENGTH; i++) {
-            verificationInputs += `
-                <input type="text" 
-                       class="verification-digit w-12 h-12 text-center text-xl border rounded-lg mx-1 focus:border-blue-500 focus:ring-blue-500"
-                       maxlength="1"
-                       pattern="\\d*"
-                       inputmode="numeric"
-                       data-index="${i}">
-            `;
-        }
-
-        verificationContainer.innerHTML = `
-            <div class="flex flex-col items-center">
-                <div class="verification-inputs flex justify-center mb-4">
-                    ${verificationInputs}
-                </div>
-                <div class="hidden">
-                    <input type="hidden" 
-                           id="complete-verification-code-${userId}" 
-                           name="verification_code">
-                </div>
-                <button type="button" 
-                        id="verify-code-btn-${userId}"
-                        class="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 w-full max-w-xs">
-                    تایید کد
-                </button>
-                <div id="timer-${userId}" class="text-sm text-gray-600 mt-2 block text-center"></div>
-            </div>
-        `;
-
-        return verificationContainer;
-    }
-
-    handleDigitInput(input) {
-        const value = input.value.replace(/\D/g, '');
-        input.value = value.slice(0, 1);
-
-        if (value && input.nextElementSibling?.classList.contains('verification-digit')) {
-            input.nextElementSibling.focus();
-        }
-
-        this.updateCompleteVerificationCode(input.closest('.verification-inputs'));
-    }
-
-    handleDigitBackspace(input, event) {
-        if (!input.value && input.previousElementSibling?.classList.contains('verification-digit')) {
-            event.preventDefault();
-            input.previousElementSibling.focus();
-            input.previousElementSibling.value = '';
+        if (verifyBtn) {
+            e.preventDefault();
+            this.debounce(() => this.handleVerifyButtonClick(verifyBtn), 1000);
+        } else if (codeBtn) {
+            e.preventDefault();
+            this.debounce(() => this.handleVerifyCodeClick(codeBtn), 1000);
         }
     }
 
-    updateCompleteVerificationCode(container) {
-        const userId = container.closest('[id^="verification-form-"]').id.replace('verification-form-', '');
-        const digits = Array.from(container.querySelectorAll('.verification-digit'))
-            .map(input => input.value)
-            .join('');
+    handleGlobalInput(e) {
+        const digitInput = e.target.closest('.verification-digit');
+        if (digitInput) {
+            this.handleDigitInput(digitInput);
+        }
+    }
+
+    handleGlobalKeydown(e) {
+        const digitInput = e.target.closest('.verification-digit');
+        if (digitInput && e.key === 'Backspace') {
+            this.handleDigitBackspace(digitInput, e);
+        }
+    }
+
+    debounce(func, wait) {
+        const id = Math.random().toString(36).substr(2, 9);
+        clearTimeout(this.state.debounceTimers.get(id));
         
-        const completeInput = document.getElementById(`complete-verification-code-${userId}`);
-        if (completeInput) {
-            completeInput.value = digits;
-        }
+        const timeoutId = setTimeout(() => {
+            func();
+            this.state.debounceTimers.delete(id);
+        }, wait);
+        
+        this.state.debounceTimers.set(id, timeoutId);
     }
 
-    startVerificationTimer(userId) {
-        const timerElement = document.getElementById(`timer-${userId}`);
-        const verifyButton = document.querySelector(`.verify-phone-btn[data-phone-id="${userId}"]`);
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `p-4 mb-2 rounded-lg text-white ${
+            type === 'error' ? 'bg-red-500' : 'bg-green-500'
+        }`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    validatePhoneInput(input) {
+        if (!input?.value) {
+            this.showToast(this.config.messages.enterPhone, 'error');
+            return false;
+        }
         
-        if (!timerElement || !verifyButton) return;
+        const phoneRegex = /^09[0-9]{9}$/;
+        if (!phoneRegex.test(input.value)) {
+            this.showToast(this.config.messages.invalidPhone, 'error');
+            return false;
+        }
+        
+        return true;
+    }
 
-        let timeLeft = this.config.validation.TIMEOUT_SECONDS;
-
-        if (this.state.timers.has(userId)) {
-            clearInterval(this.state.timers.get(userId));
+    validateCodeInput(code) {
+        if (!code) {
+            this.showToast(this.config.messages.enterCode, 'error');
+            return false;
         }
 
-        // Hide the original button during countdown
-        verifyButton.style.display = 'none';
+        if (code.length !== this.config.validation.CODE_LENGTH) {
+            this.showToast(this.config.messages.invalidCode, 'error');
+            return false;
+        }
 
-        const timer = setInterval(() => {
-            timeLeft--;
-            
-            if (timerElement) {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timerElement.innerHTML = `
-                    <span class="font-medium">${this.config.messages.waitForCode}</span>
-                    <span class="font-bold text-blue-600">
-                        ${minutes}:${seconds.toString().padStart(2, '0')}
-                    </span>
-                `;
-            }
+        if (!/^\d+$/.test(code)) {
+            this.showToast(this.config.messages.numbersOnly, 'error');
+            return false;
+        }
 
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                // Show the button again with resend text
-                verifyButton.style.display = 'block';
-                verifyButton.textContent = this.config.messages.resendCode;
-                verifyButton.disabled = false;
-                verifyButton.classList.remove(...this.config.classes.timerButton.split(' '));
-                verifyButton.classList.add(...this.config.classes.successButton.split(' '));
-                
-                if (timerElement) {
-                    timerElement.textContent = '';
-                }
-            }
-        }, 1000);
-
-        this.state.timers.set(userId, timer);
+        return true;
     }
 
     async handleVerifyButtonClick(button) {
@@ -261,12 +211,12 @@ class PhoneVerification {
                 this.startVerificationTimer(userId);
                 this.showToast('کد تایید ارسال شد', 'success');
             } else {
-                throw new Error(response.message || 'خطا در ارسال کد تایید');
+                throw new Error(response.message || this.config.messages.verificationError);
             }
         } catch (error) {
             console.error('Send verification error:', error);
-            this.showToast(error.message || 'خطا در ارسال کد تایید', 'error');
-            button.style.display = 'block';
+            this.showToast(error.message || this.config.messages.networkError, 'error');
+            this.resetButton(button);
         } finally {
             this.setLoading(button, false);
         }
@@ -276,152 +226,156 @@ class PhoneVerification {
         if (this.state.loading) return;
 
         const userId = button.id.replace('verify-code-btn-', '');
-        const codeInput = document.querySelector(`#verification-form-${userId} input[name="verification_code"]`);
-        const phoneInput = document.getElementById(`phone-${userId}`);
+        const form = document.getElementById(`verification-form-${userId}`);
+        const code = Array.from(form.querySelectorAll('.verification-digit'))
+            .map(input => input.value)
+            .join('');
+        const phone = document.getElementById(`phone-${userId}`).value;
 
-        if (!this.validateCodeInput(codeInput)) return;
+        if (!this.validateCodeInput(code)) return;
 
         try {
             this.setLoading(button, true, this.config.messages.verifyingCode);
-            const response = await this.sendCodeVerificationRequest(codeInput.value, phoneInput.value);
+            const response = await this.sendCodeVerificationRequest(code, phone);
 
             if (response.success) {
-                this.handleVerificationSuccess(userId, phoneInput);
+                this.handleVerificationSuccess(userId);
             } else {
                 throw new Error(response.message || this.config.messages.verificationError);
             }
         } catch (error) {
             console.error('Verification error:', error);
-            this.showToast(error.message || this.config.messages.verificationError, 'error');
+            this.showToast(error.message || this.config.messages.networkError, 'error');
         } finally {
             this.setLoading(button, false);
         }
     }
 
-    setupToastContainer() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .toast-container {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .toast {
-                padding: 12px 24px;
-                min-width: 300px;
-                border-radius: 8px;
-                color: white;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                animation: slideIn 0.3s ease-out;
-                direction: rtl;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-            .toast-success { background-color: #10B981; }
-            .toast-error { background-color: #EF4444; }
-            .toast-close {
-                cursor: pointer;
-                opacity: 0.7;
-                transition: opacity 0.2s;
-            }
-            .toast-close:hover { opacity: 1; }
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
+    showVerificationForm(userId) {
         const container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
+        container.id = `verification-form-${userId}`;
+        container.className = 'mt-4';
+        
+        const digitInputs = Array.from({ length: this.config.validation.CODE_LENGTH }, (_, i) => {
+            return `<input type="text" maxlength="1" class="verification-digit ${this.config.classes.verificationInput}" data-index="${i}" />`;
+        }).join('');
 
-    showToast(message, type = 'success') {
-        const container = document.querySelector('.toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <span>${message}</span>
-            <span class="toast-close">×</span>
+        container.innerHTML = `
+            <div class="text-center">
+                <div class="flex justify-center gap-2 mb-4">
+                    ${digitInputs}
+                </div>
+                <button id="verify-code-btn-${userId}" class="verify-code-btn ${this.config.classes.button} ${this.config.classes.successButton}">
+                    تایید کد
+                </button>
+                <div id="timer-${userId}" class="${this.config.classes.timer}"></div>
+            </div>
         `;
 
-        container.appendChild(toast);
-
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.style.animation = 'slideOut 0.3s ease-out';
-            toast.addEventListener('animationend', () => toast.remove());
-        });
-
-        setTimeout(() => {
-            if (toast.isConnected) {
-                toast.style.animation = 'slideOut 0.3s ease-out';
-                toast.addEventListener('animationend', () => toast.remove());
-            }
-        }, 5000);
-    }
-
-    // Helper methods
-    updateButtonState(button, disabled) {
-        button.disabled = disabled;
-        if (disabled) {
-            button.classList.remove(...this.config.classes.successButton.split(' '));
-            button.classList.add(...this.config.classes.timerButton.split(' '));
+        const existingForm = document.getElementById(`verification-form-${userId}`);
+        if (existingForm) {
+            existingForm.replaceWith(container);
         } else {
-            button.classList.remove(...this.config.classes.timerButton.split(' '));
-            button.classList.add(...this.config.classes.successButton.split(' '));
+            const phoneInput = document.getElementById(`phone-${userId}`);
+            phoneInput.parentNode.insertBefore(container, phoneInput.nextSibling);
         }
-    }
-    resetButton(button) {
-        button.style.display = 'block';
-        this.updateButtonState(button, false);
-        button.textContent = this.config.messages.resendCode;
+
+        this.state.verificationForms.set(userId, container);
     }
 
-    validatePhoneInput(input) {
-        if (!input?.value) {
-            this.showToast(this.config.messages.enterPhone, 'error');
-            return false;
+    startVerificationTimer(userId) {
+        const timerElement = document.getElementById(`timer-${userId}`);
+        let timeLeft = this.config.validation.TIMEOUT_SECONDS;
+
+        if (this.state.timers.has(userId)) {
+            clearInterval(this.state.timers.get(userId));
         }
-        if (input.value.length !== this.config.validation.PHONE_LENGTH) {
-            this.showToast(this.config.messages.invalidPhone, 'error');
-            return false;
-        }
-        return true;
+
+        const timer = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${this.config.messages.waitForCode} ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft === 0) {
+                clearInterval(timer);
+                this.resetVerification(userId);
+            }
+            timeLeft--;
+        }, 1000);
+
+        this.state.timers.set(userId, timer);
     }
 
-    validateCodeInput(input) {
-        if (!input?.value) {
-            this.showToast(this.config.messages.enterCode, 'error');
-            return false;
-        }
+    handleDigitInput(input) {
+        const value = input.value;
+        const index = parseInt(input.dataset.index);
         
-        if (input.value.length !== this.config.validation.CODE_LENGTH) {
-            this.showToast(this.config.messages.invalidCode, 'error');
-            return false;
+        if (value && /^\d$/.test(value)) {
+            const nextInput = input.parentElement.querySelector(`[data-index="${index + 1}"]`);
+            if (nextInput) {
+                nextInput.focus();
+            }
         }
 
-        if (!/^\d+$/.test(input.value)) {
-            this.showToast(this.config.messages.numbersOnly, 'error');
-            return false;
-        }
-
-        return true;
+        this.updateCompleteVerificationCode(input.closest('[id^="verification-form-"]'));
     }
 
-    handleVerificationSuccess(userId, phoneInput) {
-        this.showToast(this.config.messages.verificationSuccess, 'success');
-        phoneInput.setAttribute('verified', 'true');
-        this.resetVerification(userId);
+    handleDigitBackspace(input, event) {
+        const index = parseInt(input.dataset.index);
+        if (!input.value && index > 0) {
+            event.preventDefault();
+            const prevInput = input.parentElement.querySelector(`[data-index="${index - 1}"]`);
+            if (prevInput) {
+                prevInput.focus();
+                prevInput.value = '';
+            }
+        }
+    }
+
+    updateCompleteVerificationCode(form) {
+        const code = Array.from(form.querySelectorAll('.verification-digit'))
+            .map(input => input.value)
+            .join('');
+
+        const verifyButton = form.querySelector('.verify-code-btn');
+        if (verifyButton) {
+            verifyButton.disabled = code.length !== this.config.validation.CODE_LENGTH;
+        }
+    }
+
+    setLoading(element, loading, text = null) {
+        if (!element) return;
+        
+        this.state.loading = loading;
+        element.disabled = loading;
+        
+        if (loading) {
+            element.classList.add('opacity-75', 'cursor-wait');
+            if (text) {
+                const originalText = element.textContent;
+                element.setAttribute('data-original-text', originalText);
+                element.textContent = text;
+            }
+        } else {
+            element.classList.remove('opacity-75', 'cursor-wait');
+            const originalText = element.getAttribute('data-original-text');
+            if (originalText) {
+                element.textContent = originalText;
+                element.removeAttribute('data-original-text');
+            }
+        }
+    }
+
+    resetButton(button) {
+        if (!button) return;
+        
+        button.disabled = false;
+        button.classList.remove('opacity-75', 'cursor-wait');
+        const originalText = button.getAttribute('data-original-text');
+        if (originalText) {
+            button.textContent = originalText;
+            button.removeAttribute('data-original-text');
+        }
     }
 
     resetVerification(userId) {
@@ -437,44 +391,94 @@ class PhoneVerification {
         }
     }
 
-    isValidPage() {
-        return !!document.querySelector('.verify-phone-btn');
+    handleVerificationSuccess(userId) {
+        this.showToast(this.config.messages.verificationSuccess, 'success');
+        this.resetVerification(userId);
+        
+        const phoneInput = document.getElementById(`phone-${userId}`);
+        const verifyButton = document.querySelector(`[data-phone-id="${userId}"]`);
+        
+        if (phoneInput) phoneInput.disabled = true;
+        if (verifyButton) {
+            verifyButton.textContent = this.config.messages.verified;
+            verifyButton.disabled = true;
+            verifyButton.classList.remove(this.config.classes.successButton);
+            verifyButton.classList.add(this.config.classes.timerButton);
+        }
     }
 
     async sendVerificationRequest(phone) {
-        const response = await fetch(this.config.endpoints.SEND_CODE, {
-            method: 'POST',
-            headers: this.getHeaders(),
-            body: `phone=${phone}`
-        });
-        return await response.json();
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            if (!csrfToken) {
+                throw new Error('CSRF token not found');
+            }
+    
+            const response = await fetch(this.config.endpoints.SEND_CODE, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ phone }),
+                credentials: 'same-origin' // اضافه کردن این خط
+            });
+    
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || this.config.messages.networkError);
+            }
+    
+            return data;
+        } catch (error) {
+            console.error('Network error:', error);
+            throw new Error(error.message || this.config.messages.networkError);
+        }
     }
 
     async sendCodeVerificationRequest(code, phone) {
-        const response = await fetch(this.config.endpoints.VERIFY_CODE, {
-            method: 'POST',
-            headers: this.getHeaders(),
-            body: `code=${code}&phone=${phone}`
-        });
-        return await response.json();
+        try {
+            const response = await fetch(this.config.endpoints.VERIFY_CODE, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ code, phone })
+            });
+
+            if (!response.ok) {
+                throw new Error(this.config.messages.networkError);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Network error:', error);
+            throw new Error(this.config.messages.networkError);
+        }
     }
 
-    getHeaders() {
-        return {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
-            'Accept': 'application/json'
-        };
-    }
-
-    setLoading(element, loading, text = null) {
-        this.state.loading = loading;
-        element.disabled = loading;
-        if (text) element.textContent = text;
+    cleanup() {
+        this.state.timers.forEach(timer => clearInterval(timer));
+        this.state.timers.clear();
+        
+        this.state.debounceTimers.forEach(timer => clearTimeout(timer));
+        this.state.debounceTimers.clear();
     }
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.phoneVerification = new PhoneVerification();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (window.phoneVerification) {
+        window.phoneVerification.cleanup();
+    }
 });

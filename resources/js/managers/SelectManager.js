@@ -1,4 +1,4 @@
-export class SelectManager {
+class SelectManager {
     constructor() {
         this.handleSelectAll = this.handleSelectAll.bind(this);
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
@@ -69,3 +69,5 @@ export class SelectManager {
         this.elements.buttonText.textContent = newText;
     }
 }
+
+export default SelectManager;

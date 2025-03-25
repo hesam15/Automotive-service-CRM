@@ -2,15 +2,14 @@
 
 @section('title', 'فرم رزرواسیون')
 
-@push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
-@endpush
-
-@push('scripts')
-    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
-    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
-    @vite(['resources/js/datepicker.js'])
-@endpush
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    if (!window.requiredManagers.includes('datePickerManager')) {
+        window.requiredManagers.push('datePickerManager');
+    }
+</script>
+@endPushOnce
 
 @section('content')
 <div class="min-h-screen p-4 md:p-6">
@@ -23,21 +22,20 @@
             </div>
 
             <div class="p-4 md:p-6">
-                <form action="{{route("bookings.store", $customer->id)}}" method="POST" class="space-y-4">
+                <form action="{{ route('bookings.store', $customer->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid md:grid-cols-2 gap-4 md:gap-6">
+                        {{-- Customer Info --}}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 نام و نام خانوادگی
                             </label>
                             <div class="text-base text-gray-900">
                                 <input type="text" name="customer_id" id="name" value="{{ $customer->id }}" hidden>
-                                <span>
-                                    {{ $customer->fullname }}
-                                </span>
+                                <span>{{ $customer->fullname }}</span>
                             </div>
                         </div>
-
+                
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 شماره تلفن
@@ -46,7 +44,8 @@
                                 {{ $customer->phone }}
                             </div>
                         </div>
-
+                
+                        {{-- Car Selection --}}
                         <div>
                             <label for="car" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">انتخاب خودرو</label>
                             @if($customer->cars->count() > 0)
@@ -73,30 +72,39 @@
                             @endif
                         </div>                        
                         
+                        {{-- Date Picker --}}
                         <div class="form-group">
-                            <label for="date block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
-                            <input type="text" 
-                                   id="date" 
-                                   name="date" 
-                                   class="form-control w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer" 
-                                   value="{{ old('date', isset($booking) ? $booking->date : '') }}" 
-                                   readonly>
-                            <x-input-error :messages="$errors->get('date')" class="mt-2" />
+                            <label for="date" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
+                            <div class="relative">
+                                <input type="text" 
+                                       id="date" 
+                                       name="date" 
+                                       class="form-control w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer" 
+                                       value="{{ old('date', isset($booking) ? $booking->date : '') }}" 
+                                       data-date-input
+                                       autocomplete="off"
+                                       readonly>
+                                <div class="absolute top-full left-0 z-50 mt-1" data-datepicker-container></div>
+                                <x-input-error :messages="$errors->get('date')" class="mt-2" />
+                            </div>
                         </div>
                     </div>
                     
-                    <div id="time-slots-container">
-                        
-                        <input type="hidden" name="time_slot" id="time_slot" value="{{ old('time_slot') }}">
-                        
-                        <div id="time-slots-container">
-                            <div id="time-slots-grid" class="grid grid-cols-4 gap-4">
-                                <!-- Time slots will be loaded here -->
-                            </div>
+                    {{-- Time Slots --}}
+                    <div data-time-slots-container class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">ساعت مراجعه</label>
+                        <div data-time-slots-grid class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                            {{-- Time slots will be rendered here by JavaScript --}}
                         </div>
+                        <input type="hidden" 
+                               id="time_slot" 
+                               name="time_slot" 
+                               value="{{ old('time_slot', isset($booking) ? $booking->time : '') }}"
+                               data-time-slot-input>
                         <x-input-error :messages="$errors->get('time_slot')" class="mt-2" />
                     </div>
-
+                
+                    {{-- Submit Button --}}
                     <div class="pt-2">
                         <button type="submit"
                             class="w-full md:w-auto md:px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">

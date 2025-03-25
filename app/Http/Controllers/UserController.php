@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Controllers\Auth\VerifyPhoneController;
+use App\Http\Requests\User\UserStoreRequest as UserUserStoreRequest;
 
 class UserController extends Controller
 {
@@ -20,6 +21,7 @@ class UserController extends Controller
         $users->load('role');
 
         $roles = Role::all();
+        
         
         return view('admin.users.index', compact('users', 'roles'));
     }
@@ -35,24 +37,23 @@ class UserController extends Controller
     // Create
     public function create() {
         $roles = Cache::remember('roles', now()->addHour(), function() {
-            return Role::select('id', 'persian_name');
+            return Role::select('id', 'persian_name')->get();
         });
+
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(UserStoreRequest $request) {
-        $validated = $request->validated();
-
-        $token = VerifyPhoneTokens::where("user_phone", $validated['phone'])->first();
+    public function store(UserUserStoreRequest $request) {
+        $token = VerifyPhone::where("user_phone", $request['phone'])->first();
 
         if (!$token || $token->used) {
             return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
         }
 
-        $user = User::create($validated);
+        $user = User::create($request);
 
-        if ($validated['role']){
-            $user->assignRole($validated['role']);
+        if ($request['role']){
+            $user->assignRole($request['role']);
         }
         else {
             return redirect()->back()->with('error', 'نقشی انتخاب نشده است.');
@@ -81,11 +82,6 @@ class UserController extends Controller
         $user->refreshRoles($validated['role']);
 
         return redirect()->route('users.index')->with("success", "کاربر با موفقیت ویرایش شد.");
-    }
-
-    // Update Phone
-    public function editPhone(User $user) {
-        return view('admin.users.edit-phone', compact('user'));
     }
 
     public function updatePhone(Request $request, User $user) {

@@ -8,6 +8,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/DatePickerManager.js',
             ],
             refresh: true,
         }),
@@ -18,7 +19,7 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: {
-                    vendor: ['jquery', 'alpinejs'],
+                    vendor: ['alpinejs'],
                 },
                 chunkFileNames: 'assets/js/[name]-[hash].js',
                 entryFileNames: 'assets/js/[name]-[hash].js',
@@ -34,17 +35,22 @@ export default defineConfig({
         watch: {
             usePolling: true,
         },
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        }
     },
     resolve: {
         alias: {
-            '@': '/resources/js',
-            '~': '/resources/css',
-            '@components': '/resources/js/components',
-            '@managers': '/resources/js/managers',
-            '@utils': '/resources/js/utils'
+            '@': path.resolve(__dirname, 'resources/js'),
+            '~': path.resolve(__dirname, 'node_modules'),
+            '@components': path.resolve(__dirname, 'resources/js/components'),
+            '@managers': path.resolve(__dirname, 'resources/js/managers'),
+            '@utils': path.resolve(__dirname, 'resources/js/utils'),
+            '$': 'jquery',
+            'jQuery': 'jquery'
         },
     },
     optimizeDeps: {
-        include: ['jquery', 'alpinejs'],
+        include: ['alpinejs', 'jquery'],
     }
 });

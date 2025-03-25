@@ -3,16 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
-use Illuminate\View\View;
 use App\Models\VerifyPhone;
 use Illuminate\Http\Request;
 use App\Services\GenerateToken;
-use Illuminate\Validation\Rules;
-use App\Models\VerifyPhoneTokens;
-use function Laravel\Prompts\error;
 use App\Http\Controllers\Controller;
-use App\Services\Notification\SmsService;
-use App\Services\Notification\SmsVerifyCode;
 use App\Services\Notification\SmsVerificationService;
 
 class VerifyPhoneController extends Controller

@@ -1,5 +1,15 @@
 @extends('layouts.app')
 
+@section("title", "ویرایش نقش ها")
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.app.getManager("modalManager");
+    });
+</script>
+@endpush
+
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">

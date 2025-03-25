@@ -1,9 +1,10 @@
 // resources/js/managers/OptionsManager.js
-export class OptionsManager {
+class OptionsManager {
     constructor() {
         this.initialized = false;
         this.modalStates = new Map(); // برای ذخیره وضعیت اولیه هر مودال
         this.eventListeners = new Map(); // برای ذخیره event listeners
+        this.observeModals(); // اضافه کردن observer برای مودال‌های جدید
     }
 
     initialize() {
@@ -16,7 +17,42 @@ export class OptionsManager {
         // اضافه کردن event listener برای بستن مودال
         this.setupModalCloseListeners();
 
+        // اضافه کردن event listener برای باز شدن مودال
+        this.setupModalOpenListeners();
+
         this.initialized = true;
+    }
+
+    observeModals() {
+        // Observer برای تشخیص مودال‌های جدید
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 && node.matches('[id^="optionEditModal-"]')) {
+                        this.initializeModal(node);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    initializeModal(modal) {
+        const container = modal.querySelector('.option-values-container');
+        const addBtn = modal.querySelector('.option-add-btn');
+        const removeBtn = modal.querySelector('.option-remove-btn');
+
+        if (container && addBtn && removeBtn) {
+            // ذخیره وضعیت اولیه مودال
+            this.saveModalInitialState(modal.id, container.innerHTML);
+            
+            this.setupButtons(container, addBtn, removeBtn, true);
+            this.updateButtonsVisibility(container, addBtn, removeBtn);
+        }
     }
 
     initializeCreatePage() {
@@ -32,16 +68,23 @@ export class OptionsManager {
 
     initializeEditModals() {
         document.querySelectorAll('[id^="optionEditModal-"]').forEach(modal => {
-            const container = modal.querySelector('.option-values-container');
-            const addBtn = modal.querySelector('.option-add-btn');
-            const removeBtn = modal.querySelector('.option-remove-btn');
+            this.initializeModal(modal);
+        });
+    }
 
-            if (container && addBtn && removeBtn) {
-                // ذخیره وضعیت اولیه مودال
-                this.saveModalInitialState(modal.id, container.innerHTML);
-                
-                this.setupButtons(container, addBtn, removeBtn, true);
-                this.updateButtonsVisibility(container, addBtn, removeBtn);
+    setupModalOpenListeners() {
+        // اضافه کردن listener برای زمانی که مودال باز می‌شود
+        document.addEventListener('click', (e) => {
+            const modalTrigger = e.target.closest('[data-modal-target]');
+            if (modalTrigger) {
+                const modalId = modalTrigger.dataset.modalTarget;
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    // تاخیر کوچک برای اطمینان از render شدن مودال
+                    setTimeout(() => {
+                        this.initializeModal(modal);
+                    }, 100);
+                }
             }
         });
     }
@@ -50,24 +93,9 @@ export class OptionsManager {
         // حذف event listener های قبلی
         this.removeOldEventListeners(addBtn, removeBtn);
 
-        // ایجاد handler های جدید
-        const addHandler = () => {
-            const fieldsCount = container.querySelectorAll('.option-field').length;
-            
-            if (fieldsCount < 10) {
-                container.appendChild(this.createOptionField());
-                this.updateButtonsVisibility(container, addBtn, removeBtn);
-            }
-        };
-
-        const removeHandler = () => {
-            const fields = container.querySelectorAll('.option-field');
-            
-            if (fields.length > 1) {
-                fields[fields.length - 1].remove();
-                this.updateButtonsVisibility(container, addBtn, removeBtn);
-            }
-        };
+        // ایجاد handler های جدید با bind به this
+        const addHandler = this.handleAdd.bind(this, container, addBtn, removeBtn);
+        const removeHandler = this.handleRemove.bind(this, container, addBtn, removeBtn);
 
         // ذخیره handler ها برای حذف بعدی
         this.eventListeners.set(addBtn, addHandler);
@@ -76,6 +104,24 @@ export class OptionsManager {
         // اضافه کردن event listener های جدید
         addBtn.addEventListener('click', addHandler);
         removeBtn.addEventListener('click', removeHandler);
+    }
+
+    handleAdd(container, addBtn, removeBtn) {
+        const fieldsCount = container.querySelectorAll('.option-field').length;
+        
+        if (fieldsCount < 10) {
+            container.appendChild(this.createOptionField());
+            this.updateButtonsVisibility(container, addBtn, removeBtn);
+        }
+    }
+
+    handleRemove(container, addBtn, removeBtn) {
+        const fields = container.querySelectorAll('.option-field');
+        
+        if (fields.length > 1) {
+            fields[fields.length - 1].remove();
+            this.updateButtonsVisibility(container, addBtn, removeBtn);
+        }
     }
 
     removeOldEventListeners(addBtn, removeBtn) {
@@ -98,16 +144,19 @@ export class OptionsManager {
         field.innerHTML = `
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">نام خدمت</label>
-                <input type="text" 
-                    name="options[]" 
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
+                        <input type="text" 
+                               name="options[]" 
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="نام خدمت را وارد کنید"
+                               required>
+                </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">مقادیر</label>
                 <input type="text" 
                     name="values[]" 
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="مقادیر را با کاما جدا کنید">
+                    placeholder="مقادیر را با ویرگول(،) جدا کنید"
+                    required>
             </div>
         `;
         return field;
@@ -151,22 +200,21 @@ export class OptionsManager {
 
     setupModalCloseListeners() {
         // برای دکمه‌های بستن مودال
-        document.querySelectorAll('.modal-close').forEach(closeBtn => {
-            closeBtn.addEventListener('click', (e) => {
-                const modal = e.target.closest('.modal');
+        document.addEventListener('click', (e) => {
+            const closeBtn = e.target.closest('.modal-close');
+            if (closeBtn) {
+                const modal = closeBtn.closest('.modal');
                 if (modal) {
                     this.resetModalState(modal.id);
                 }
-            });
+            }
         });
 
         // برای کلیک روی backdrop
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.resetModalState(modal.id);
-                }
-            });
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.modal')) {
+                this.resetModalState(e.target.id);
+            }
         });
 
         // برای دکمه ESC
@@ -193,3 +241,5 @@ export class OptionsManager {
         addBtn.style.display = fieldsCount >= 10 ? 'none' : 'inline-flex';
     }
 }
+
+export default OptionsManager;

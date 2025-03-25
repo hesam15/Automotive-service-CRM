@@ -1,8 +1,47 @@
+import jQuery from 'jquery';
+
+// Load persian-datepicker from CDN
+const loadPersianDatepicker = async () => {
+    // Load persian-date
+    const persianDateScript = document.createElement('script');
+    persianDateScript.src = 'https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js';
+    document.head.appendChild(persianDateScript);
+
+    // Load persian-datepicker CSS
+    const persianDatepickerCSS = document.createElement('link');
+    persianDatepickerCSS.rel = 'stylesheet';
+    persianDatepickerCSS.href = 'https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css';
+    document.head.appendChild(persianDatepickerCSS);
+
+    // Load persian-datepicker
+    const persianDatepickerScript = document.createElement('script');
+    persianDatepickerScript.src = 'https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js';
+    document.head.appendChild(persianDatepickerScript);
+
+    // Wait for scripts to load
+    return new Promise((resolve) => {
+        persianDatepickerScript.onload = () => {
+            resolve();
+        };
+    });
+};
+
+window.$ = window.jQuery = jQuery;
+
 window.DateTimeManager = {
     initialized: false,
 
-    initialize() {
+    async initialize() {
         if (this.initialized) return;
+
+        // Load persian-datepicker dependencies
+        await loadPersianDatepicker();
+
+        // Make sure jQuery and persian-datepicker are loaded
+        if (typeof jQuery().persianDatepicker === 'undefined') {
+            console.error('Persian Datepicker is not loaded properly');
+            return;
+        }
 
         const newBookingDatepicker = document.querySelector('#date:not([id*="_"])');
         if (newBookingDatepicker) {
@@ -22,7 +61,6 @@ window.DateTimeManager = {
     },
 
     initDatepicker(element, bookingId) {
-        const self = this;
         jQuery(element).persianDatepicker({
             initialValue: true,
             initialValueType: 'persian',
@@ -30,10 +68,10 @@ window.DateTimeManager = {
             autoClose: true,
             maxDate: new persianDate().add('month', 3).valueOf(),
             minDate: new persianDate(),
-            onSelect: function(unix) {
+            onSelect: (unix) => {
                 const date = new persianDate(unix);
                 const formattedDate = `${date.year()}/${date.month()}/${date.date()}`;
-                self.handleDateSelection(formattedDate, bookingId);
+                this.handleDateSelection(formattedDate, bookingId);
                 
                 const containerId = bookingId ? `time-slots-container-${bookingId}` : 'time-slots-container';
                 const container = document.getElementById(containerId);

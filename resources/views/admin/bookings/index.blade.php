@@ -72,6 +72,7 @@
                                                 <span class="text-xs mr-0.5">ثبت گزارش</span>
                                             </a>
                                         @endif
+
                                         @if($booking->status === 'completed')
                                             <a href="{{ route('report.index', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
@@ -79,16 +80,17 @@
                                                 <span class="text-xs mr-0.5">مشاهده گزارش</span>
                                             </a>
                                         @endif
-                                        <button data-modal-target="bookingEditModal-{{ $booking->id }}"
-                                                class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
-                                            <i class="material-icons-round text-sm">edit</i>
-                                            <span class="text-xs mr-0.5">ویرایش</span>
-                                        </button>
+
                                         @if($booking->status === 'pending')
+                                            <button data-modal-target="bookingEditModal-{{ $booking->id }}"
+                                                    class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
+                                                <i class="material-icons-round text-sm">edit</i>
+                                                <span class="text-xs mr-0.5">ویرایش</span>
+                                            </button>
                                             <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" data-route="{{route("bookings.destroy", $booking->id)}}" data-type="booking">
                                                 <i class="material-icons-round text-sm">cancel</i>
                                                 <span class="text-xs mr-0.5">کنسل کردن</span>
-                                            </button> 
+                                            </button>
                                         @endif 
                                     </div>
                                 </td>

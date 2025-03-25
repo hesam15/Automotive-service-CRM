@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section()
+
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">

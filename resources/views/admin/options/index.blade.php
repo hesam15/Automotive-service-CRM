@@ -2,6 +2,13 @@
 
 @section('title', 'لیست آپشن‌ها')
 
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    window.requiredManagers.push('optionsManager');
+</script>
+@endPushOnce
+
 @section('content')
 <div class="max-w-7xl mx-auto py-6 px-4">
     <x-errors-success-label />
@@ -9,25 +16,37 @@
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-100 flex justify-between items-center">
             <h2 class="text-xl font-bold text-gray-800">لیست آپشن‌ها</h2>
-            <a type="button"
-                class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-200"
-                data-modal-target="optionCreateModal" href="{{ route('options.create') }}">
+            <button type="button"
+                class="modal-trigger inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-200"
+                data-modal-target="optionCreateModal">
                 <span class="material-icons-round text-base ml-1">add</span>
                 افزودن آپشن جدید
-            </a>
+            </button>
         </div>
 
         <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/3">نام آپشن</th>
-                            <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/3">مقادیر</th>
-                            <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/3">عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
+            @if($options->isEmpty())
+                <div class="px-6 py-12 flex flex-col items-center justify-center">
+                    <i class="material-icons-round text-gray-400 text-6xl mb-4">build</i>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">هیچ آپشنی ثبت نشده است.</h2>
+                    <a href="{{ route('options.create') }}" 
+                    class="modal-trigger inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200" 
+                    data-modal-target="optionCreateModal">
+                        <i class="material-icons-round text-xl ml-2">add</i>
+                        افزودن آپشن جدید
+                    </a>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/3">نام آپشن</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/3">مقادیر</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-500 w-1/3">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
                         @foreach($options as $option)
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3 text-gray-900 w-1/3">{{ $option->name }}</td>
@@ -132,10 +151,75 @@
                         @endforeach
                     </tbody>
                 </table>
-            </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>
+
+<x-create-modal 
+    id="optionCreateModal" 
+    title="افزودن آپشن جدید" 
+    :action="route('options.store')" 
+    method="POST"
+    maxWidth="2xl"
+    submitLabel="ایجاد آپشن">
+    
+    @csrf
+    <div class="space-y-4">
+        <!-- Option Name -->
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">نام آپشن</label>
+            <input type="text" 
+                   id="name" 
+                   name="name" 
+                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="نام آپشن را وارد کنید"
+                   required>
+        </div>
+
+        <!-- Option Values -->
+        <div id="option-values">
+            <label class="block text-sm font-medium text-gray-700 mb-1">مقادیر</label>
+            <div class="space-y-4 option-values-container">
+                <div class="option-field grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">نام خدمت</label>
+                        <input type="text" 
+                               name="options[]" 
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="نام خدمت را وارد کنید"
+                               required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">مقادیر</label>
+                        <input type="text" 
+                               name="values[]" 
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="مقادیر را با ویرگول(،) جدا کنید"
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex gap-3 mt-4">
+                <button type="button" 
+                        class="option-add-btn inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors duration-200"
+                        data-container="option-values">
+                    <i class="material-icons-round text-lg ml-1">add</i>
+                    اضافه کردن آپشن
+                </button>
+                <button type="button" 
+                        class="option-remove-btn inline-flex items-center px-4 py-2 bg-rose-100 text-rose-800 rounded-lg hover:bg-rose-200 transition-colors duration-200"
+                        data-container="option-values">
+                    <i class="material-icons-round text-lg ml-1">remove</i>
+                    حذف کردن آپشن
+                </button>
+            </div>
+        </div>
+    </div>
+</x-create-modal>
 
 <x-delete-modal />
 

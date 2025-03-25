@@ -1,4 +1,15 @@
 <!-- resources/views/components/delete-modal.blade.php -->
+@aware(['requiresModal' => true])
+
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    if (!window.requiredManagers.includes('modalManager')) {
+        window.requiredManagers.push('modalManager');
+    }
+</script>
+@endPushOnce
+
 <div id="deleteModal" class="modal fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50">
     <div class="fixed inset-0 flex items-center justify-center">
         <div class="modal-content bg-white rounded-xl shadow-lg overflow-hidden max-w-md w-full mx-4">

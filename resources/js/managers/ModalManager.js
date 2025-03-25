@@ -1,4 +1,4 @@
-export class ModalManager {
+class ModalManager {
     constructor() {
         this.types = {
             customer: 'مشتری',
@@ -6,7 +6,9 @@ export class ModalManager {
             booking: 'رزرو',
             report: 'گزارش',
             option: 'آپشن',
-            role: "نقش"
+            role: "نقش",
+            user: "کاربر",
+            phone: "تلفن",
         };
         
         this.activeModal = null;
@@ -148,3 +150,5 @@ export class ModalManager {
         }
     }
 }
+
+export default ModalManager;

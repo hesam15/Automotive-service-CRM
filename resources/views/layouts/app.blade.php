@@ -13,9 +13,15 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
-    <!-- Core Assets -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Persian Datepicker Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
 
+    <!-- Core Assets -->
+    @vite(['resources/css/app.css'])
+    
     <!-- Page Specific Styles -->
     @stack('styles')
 </head>
@@ -44,11 +50,26 @@
             </main>
         </div>
     </div>
-
-    <!-- Core JavaScript Dependencies -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    
+    <!-- Core Scripts -->
+    @vite(['resources/js/app.js'])
+    
     <!-- Page Specific Scripts -->
     @stack('scripts')
+
+    <script>
+        // Verify dependencies are loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery is not loaded');
+            }
+            if (typeof persianDate === 'undefined') {
+                console.error('persianDate is not loaded');
+            }
+            if (typeof $.fn.persianDatepicker === 'undefined') {
+                console.error('persianDatepicker is not loaded');
+            }
+        });
+    </script>
 </body>
 </html>

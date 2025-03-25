@@ -3,11 +3,22 @@
     'title',
     'action' => '#',
     'method' => 'POST',
-    'maxWidth' => 'lg',
+    'maxWidth' => '2xl',
     'showFooter' => true,
     'submitLabel' => 'ایجاد',
     'cancelLabel' => 'انصراف'
 ])
+
+@aware(['requiresModal' => true])
+
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    if (!window.requiredManagers.includes('modalManager')) {
+        window.requiredManagers.push('modalManager');
+    }
+</script>
+@endPushOnce
 
 <div id="{{ $id }}" 
      class="modal fixed inset-0 z-50 hidden overflow-y-auto" 
@@ -21,7 +32,18 @@
     {{-- Modal Panel --}}
     <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="modal-content relative transform overflow-hidden rounded-lg bg-white text-right shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-{{ $maxWidth }}">
+            <div class="modal-content relative transform overflow-hidden rounded-lg bg-white text-right shadow-xl transition-all w-full 
+                        {{ $maxWidth === 'sm' ? 'sm:max-w-sm' : '' }}
+                        {{ $maxWidth === 'md' ? 'sm:max-w-md' : '' }}
+                        {{ $maxWidth === 'lg' ? 'sm:max-w-lg' : '' }}
+                        {{ $maxWidth === 'xl' ? 'sm:max-w-xl' : '' }}
+                        {{ $maxWidth === '2xl' ? 'sm:max-w-2xl' : '' }}
+                        {{ $maxWidth === '3xl' ? 'sm:max-w-3xl' : '' }}
+                        {{ $maxWidth === '4xl' ? 'sm:max-w-4xl' : '' }}
+                        {{ $maxWidth === '5xl' ? 'sm:max-w-5xl' : '' }}
+                        {{ $maxWidth === '6xl' ? 'sm:max-w-6xl' : '' }}
+                        {{ $maxWidth === '7xl' ? 'sm:max-w-7xl' : '' }}">
+                
                 {{-- Header --}}
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
@@ -50,9 +72,6 @@
                     {{-- Body --}}
                     <div class="bg-white px-6 py-6">
                         <div class="space-y-4">
-
-
-                            {{-- اضافه کردن محتوای اضافی --}}
                             {{ $slot }}
                         </div>
                     </div>

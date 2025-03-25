@@ -2,6 +2,14 @@
 
 @section('title', 'داشبورد')
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.app.getManager(["modalManager"], ["optionManager"]);
+    });
+</script>
+@endpush
+
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
     <x-errors-success-label />

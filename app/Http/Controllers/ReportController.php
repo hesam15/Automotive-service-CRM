@@ -14,7 +14,7 @@ use Mpdf\Mpdf;
 class ReportController extends Controller
 {
     public function index(Booking $booking, Reports $report) {
-        $report->date = (new PersianConvertNumberHelper($report->booking->date))->convertDateToPersinan()->value;
+        $report->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
 
         if (!$report) {
             return redirect()->back()->with('error', 'گزارشی برای این رزرو یافت نشد');
@@ -66,7 +66,6 @@ class ReportController extends Controller
             'booking_id' => $booking->id,
             'reports' => json_encode($options, JSON_UNESCAPED_UNICODE),
             'description' => !empty($explanations) ? json_encode($explanations, JSON_UNESCAPED_UNICODE) : null,
-            'status' => 'completed',
         ]);
 
         $booking->status = 'completed';
@@ -81,6 +80,7 @@ public function print(Reports $report)
     {
         $reportOptions = json_decode($report->reports, true) ?? [];
         $reportDescriptions = json_decode($report->description, true) ?? [];
+        $report->date = (new PersianConvertNumberHelper($report->booking->date))->convertDateToPersinan()->value;
         
         // تنظیمات mPDF
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
@@ -118,14 +118,14 @@ public function print(Reports $report)
         // تنظیم هدر و فوتر
         $mpdf->SetHTMLHeader('
             <div style="border-bottom: 2px solid #3182ce; background: #ebf8ff; padding: 15px; text-align: center; margin-left: -50px; margin-right: -50px;">
-                <div style="font-size: 18px; color: #2c5282; margin-bottom: 5px;">گزارش کارشناسی خودرو</div>
+                <strong style="font-size: 18px; color: #2c5282; margin-bottom: 5px;">گزارش کارشناسی خودرو</strong>
                 <div style="font-size: 12px; color: #4a5568;">شماره گزارش: '.$report->id.' | تاریخ: '.verta($report->created_at)->format('Y/m/d').'</div>
             </div>
         ');
 
         $mpdf->SetHTMLFooter('
             <div style="border-top: 2px solid #3182ce; background: #ebf8ff; padding: 10px; text-align: center; margin-left: -50px; margin-right: -50px;">
-                <div style="font-size: 12px; color: #4a5568;">این گزارش به صورت خودکار تولید شده است</div>
+                <strong style="font-size: 12px; color: #4a5568;">این گزارش به صورت خودکار تولید شده است</strong>
                 <div style="font-size: 12px; color: #4a5568;">تاریخ چاپ: '.verta()->format('Y/m/d H:i').'</div>
             </div>
         ');
@@ -133,6 +133,6 @@ public function print(Reports $report)
         $html = view('admin.reports.print', compact('report', 'reportOptions', 'reportDescriptions'))->render();
         $mpdf->WriteHTML($html);
         
-        return $mpdf->Output("report-{$report->id}.pdf", \Mpdf\Output\Destination::INLINE);
+        return $mpdf->Output("report-{$report->id}.pdf", \Mpdf\Output\Destination::DOWNLOAD);
     }
 }
