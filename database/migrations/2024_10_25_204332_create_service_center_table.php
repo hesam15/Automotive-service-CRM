@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('service_centers', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->char("phone", 11)->unique()->nullable();
+            $table->char("phone", 11)->unique();
+            $table->string("manager");
+            $table->string("city_id");
+            $table->string("address");
             $table->boolean("fridays_off");
             $table->string("working_hours");
             $table->timestamps();

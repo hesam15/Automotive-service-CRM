@@ -4,16 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Helpers\LicensePlateHleper;
 use App\Helpers\PersianConvertNumberHelper;
-use Mpdf\Mpdf;
-use Carbon\Carbon;
-use Dompdf\Dompdf;
-use App\Models\Cars;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Morilog\Jalali\Jalalian;
-use Illuminate\Support\Facades\Validator;
-use Pest\ArchPresets\Custom;
 
 class CustomerController extends Controller
 {
@@ -57,10 +50,10 @@ class CustomerController extends Controller
                 "service_center_id" => auth()->user()->service_center_id
             ]);
             
-            return redirect()->route('customers.index')->with("success", "مشتری با موفقیت اضافه شد.");
+            return redirect()->route('customers.index')->with("alert", ["مشتری با موفقیت اضافه شد.", 'success']);
         }
         catch (\Exception $e) {
-            return redirect()->route("customers.index")->with("error", "اضافه کردن مشتری با ارور مواجه شد.");
+            return redirect()->route("customers.index")->with("alert", ["اضافه کردن مشتری با ارور مواجه شد.", 'danger']);
         }
     }
 
@@ -77,17 +70,17 @@ class CustomerController extends Controller
                 "phone" => $request->phone,
             ]);
 
-            return redirect(route("customers.index"))->with("success", "ویرایش با موفقیت انجام شد.");
+            return redirect(route("customers.index"))->with("alert", ["ویرایش با موفقیت انجام شد.", 'success']);
         }
         catch (\Exception $e) {
-            return redirect()->route("customers.index")->with("error", "ویرایش مشتری با ارور مواجه شد.");
+            return redirect()->route("customers.index")->with("alert", ["ویرایش مشتری با ارور مواجه شد.", 'danger']);
         }
     }
 
     public function destroy(Customer $customer) {
         $customer->delete();
 
-        return redirect(route('customers.index'))->with("success", "حذف مشتری با موفقیت انجام شد.");
+        return redirect(route('customers.index'))->with("alert", ["حذف مشتری با موفقیت انجام شد.","danger"]);
     }
 
     private function validateRequest($request) {

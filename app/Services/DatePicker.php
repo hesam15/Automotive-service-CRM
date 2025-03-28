@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\ServiceCenter;
 use App\Models\Setting;
 use Carbon\Carbon;
+use Hekmatinasser\Jalali\Jalali;
 use Hekmatinasser\Verta\Verta;
 use Illuminate\Http\Request;
 
@@ -26,16 +27,16 @@ class DatePicker
     private function loadSettings()
     {
         $serviceCenter = ServiceCenter::where("id", auth()->user()->service_center_id)->first();
+
         $this->settings = [
             'fridays_closed' => $serviceCenter->fridays_off ?? false,
             'working_hours' => explode("-", $serviceCenter->working_hours) ?? null,
         ];
-
         // Parse working hours from settings or use default
         if ($this->settings['working_hours']) {
             $this->workingHours = [
-                'start' => Carbon::createFromTime((int) $this->settings['working_hours'][0], 0, 0)->format('H:i'),
-                'end' => Carbon::createFromTime((int) $this->settings['working_hours'][1], 0, 0)->format('H:i'),
+                'start' => $this->settings['working_hours'][0],
+                'end' => $this->settings['working_hours'][1],
                 'interval' => 30,
             ];
         } else {
@@ -54,7 +55,6 @@ class DatePicker
         try {
             // تبدیل تاریخ از شمسی به میلادی
             $persianDate = (new PersianConvertNumberHelper($request->date))
-                ->convertPersianToEnglish()
                 ->convertDateToEnglish()
                 ->value;
 
@@ -74,7 +74,7 @@ class DatePicker
             
             // دریافت ساعت‌های رزرو شده
             $bookedTimes = Booking::where('date', $persianDate)
-                ->where('status', 'pending')
+                ->where('status', ['pending', 'completed'])
                 ->pluck('time_slot')
                 ->toArray();
 
@@ -87,7 +87,7 @@ class DatePicker
                 'booked' => $bookedTimes,
                 'settings' => [
                     'fridays_closed' => (bool) $this->settings['fridays_closed'],
-                    'working_hours' => $this->workingHours
+                    'working_hours' => $this->workingHours,
                 ]
             ]);
 
@@ -119,7 +119,6 @@ class DatePicker
                 $slots[] = $timeSlot;
             }
         }
-
         return $slots;
     }
 
@@ -172,7 +171,7 @@ class DatePicker
     {
         return response()->json([
             'fridays_closed' => (bool) $this->settings['fridays_closed'],
-            'working_hours' => $this->workingHours
+            'working_hours' => $this->workingHours,
         ]);
     }
 }

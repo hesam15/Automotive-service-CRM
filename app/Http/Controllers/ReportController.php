@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Dompdf\Exception;
 use App\Models\Booking;
 use App\Models\Options;
-use App\Models\Reports;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Helpers\PersianConvertNumberHelper;
@@ -13,7 +13,7 @@ use Mpdf\Mpdf;
 
 class ReportController extends Controller
 {
-    public function index(Booking $booking, Reports $report) {
+    public function index(Booking $booking, Report $report) {
         $report->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
 
         if (!$report) {
@@ -40,7 +40,7 @@ class ReportController extends Controller
         $options = [];
 
         if($booking->status == 'completed') {
-            return redirect()->back()->with('error', 'گزارش این رزرو قبلا ثبت شده است.');
+            return redirect()->back()->with('alert', ['گزارش این رزرو قبلا ثبت شده است.', "danger"]);
         }
     
         foreach ($allData as $key => $value) {
@@ -61,7 +61,7 @@ class ReportController extends Controller
             'car_id' => 'required|exists:cars,id',
         ]);
     
-        $report = Reports::create([
+        $report = Report::create([
             'car_id' => $request->car_id,
             'booking_id' => $booking->id,
             'reports' => json_encode($options, JSON_UNESCAPED_UNICODE),
@@ -71,12 +71,12 @@ class ReportController extends Controller
         $booking->status = 'completed';
         $booking->save();
     
-        return redirect()->route('report.index', ['booking' => $booking->id, 'report' => $report->id])->with('success', 'گزارش با موفقیت ثبت شد');
+        return redirect()->route('report.index', ['booking' => $booking->id, 'report' => $report->id])->with('alert', ['گزارش با موفقیت ثبت شد.', "success"]);
     }
 
 // ReportController.php
 
-public function print(Reports $report)
+public function print(Report $report)
     {
         $reportOptions = json_decode($report->reports, true) ?? [];
         $reportDescriptions = json_decode($report->description, true) ?? [];

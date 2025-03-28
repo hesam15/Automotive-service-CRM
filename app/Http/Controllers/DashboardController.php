@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\PersianConvertNumberHelper;
 use Carbon\Carbon;
 use App\Models\Booking;
-use App\Models\Reports;
+use App\Models\Report;
 use App\Models\Customer;
 use Illuminate\Container\Attributes\Auth;
 
@@ -17,7 +17,7 @@ class DashboardController extends Controller
         // Get counts for stats cards
         $customersCount = Customer::count();
         $todayBookings = Booking::whereDate('date', $today)->count();
-        $reportsCount = Reports::count();
+        $reportsCount = Report::count();
 
         // Get recent bookings
         $recentBookings = Booking::with('customer')

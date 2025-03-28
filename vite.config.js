@@ -8,7 +8,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/js/DatePickerManager.js',
+                'resources/js/managers/DatePickerManager.js',
             ],
             refresh: true,
         }),
@@ -17,6 +17,7 @@ export default defineConfig({
         sourcemap: true,
         outDir: 'public/build',
         rollupOptions: {
+            external: ['moment', 'moment-jalaali'],
             output: {
                 manualChunks: {
                     vendor: ['alpinejs'],

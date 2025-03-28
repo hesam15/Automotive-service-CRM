@@ -41,9 +41,9 @@
                 </nav>
             @endif
 
-            <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
+            {{-- <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
                 {{ Breadcrumbs::render(Request::route()->getName(), isset($value) ? $value : null) }}
-            </div>
+            </div> --}}
 
             <main class="p-4 mt-9">
                 @yield('content')
@@ -71,5 +71,11 @@
             }
         });
     </script>
+
+    @if (session('alert'))
+    <script>
+        window.alertData = @json(session('alert'));
+    </script>
+    @endif
 </body>
 </html>

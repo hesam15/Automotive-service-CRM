@@ -2,13 +2,8 @@
 
 @section('title', 'فرم رزرواسیون')
 
-@pushOnce('scripts')
-<script>
-    window.requiredManagers = window.requiredManagers || [];
-    if (!window.requiredManagers.includes('datePickerManager')) {
-        window.requiredManagers.push('datePickerManager');
-    }
-</script>
+@pushOnce('styles')
+<link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
 @endPushOnce
 
 @section('content')
@@ -55,12 +50,12 @@
                                     @php
                                         $license_plate = explode('-', $car->license_plate);
                                     @endphp
-                                        <option value="{{ $car->id }}" {{old("car") == $car->id ? "selected" : ""}}>
+                                        <option value="{{ $car->id }}" {{old("car_id") == $car->id ? "selected" : ""}}>
                                             {{ $car->name }} - ایران {{ $license_plate[3] }} | {{ $license_plate[2] }} {{ $license_plate[1] }} {{ $license_plate[0] }}
                                         </option>                                     
                                     @endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('car')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('car_id')" class="mt-2" />
                             @else
                                 <div class="w-full flex items-center justify-between px-4 py-2.5 md:py-2 bg-red-600 text-white text-sm rounded-lg">
                                     <span>هنوز خودرویی برای این مشتری ثبت نشده است.</span>
@@ -74,38 +69,53 @@
                         
                         {{-- Date Picker --}}
                         <div class="form-group">
-                            <label for="date" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
-                            <div class="relative">
-                                <input type="text" 
-                                       id="date" 
-                                       name="date" 
-                                       class="form-control w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer" 
-                                       value="{{ old('date', isset($booking) ? $booking->date : '') }}" 
-                                       data-date-input
-                                       autocomplete="off"
-                                       readonly>
-                                <div class="absolute top-full left-0 z-50 mt-1" data-datepicker-container></div>
-                                <x-input-error :messages="$errors->get('date')" class="mt-2" />
-                            </div>
+                            <label for="appointment_date" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
+                            <input 
+                                type="text" 
+                                id="appointment_date"
+                                name="date"
+                                placeholder="تاریخ مدنظر خود را انتخاب کنید"
+                                data-jdp
+                                data-jdp-min-date="today"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                                readonly>
+                            <x-input-error :messages="$errors->get('date')" class="mt-2" />
                         </div>
                     </div>
                     
-                    {{-- Time Slots --}}
-                    <div data-time-slots-container class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">ساعت مراجعه</label>
-                        <div data-time-slots-grid class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                            {{-- Time slots will be rendered here by JavaScript --}}
+                    {{-- Time Slots Container --}}
+                    <div data-time-slots-container class="mt-6 hidden">
+                        {{-- Time Slots Header --}}
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                <span class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    ساعت مراجعه
+                                </span>
+                            </h3>
                         </div>
-                        <input type="hidden" 
-                               id="time_slot" 
-                               name="time_slot" 
-                               value="{{ old('time_slot', isset($booking) ? $booking->time : '') }}"
-                               data-time-slot-input>
+
+                        {{-- Time Slots Message (Loading/Error) --}}
+                        <div data-time-slots-message class="mb-4 hidden">
+                            <div class="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                در حال بارگذاری ساعات مراجعه...
+                            </div>
+                        </div>
+
+                        {{-- Time Slots Grid --}}
+                        <div data-time-slots-grid class="grid gap-3">
+                            {{-- Time slots will be dynamically inserted here --}}
+                        </div>
+
+                        {{-- Hidden Input for Selected Time --}}
+                        <input type="hidden" name="time_slot" data-time-slot-input>
                         <x-input-error :messages="$errors->get('time_slot')" class="mt-2" />
                     </div>
                 
                     {{-- Submit Button --}}
-                    <div class="pt-2">
+                    <div class="pt-4">
                         <button type="submit"
                             class="w-full md:w-auto md:px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
                             ثبت اطلاعات
@@ -116,4 +126,12 @@
         </div>
     </div>
 </div>
+
+@pushOnce('scripts')
+    <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+    <script>
+        window.requiredManagers = window.requiredManagers || [];
+        window.requiredManagers.push('datePickerManager');
+    </script>
+@endPushOnce
 @endsection

@@ -12,6 +12,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyPhoneController;
+use App\Http\Controllers\ServiceCenterController;
+use App\Models\ServiceCenter;
 
 //verify phone
 Route::post('/send-verification-code', [VerifyPhoneController::class, 'send']);
@@ -32,6 +34,15 @@ Route::middleware(['auth' , 'verified'])->group(function () {
     Route::get("reportShow/{carId}",[CustomerController::class, 'show'])->name('show.customer.report');
     // Route::get('pdf', action: [CustomerController::class, 'pdf'])->name('download.pdf');
     Route::group(['prefix' => 'dashboard'], function () {
+        //Service Center
+        Route::prefix('serviceCenters')->controller(ServiceCenterController::class)->name("serviceCenter.")->group(function () {
+            Route::get('/create/{user}', 'create')->name("create");
+            Route::post('/create/{user}', 'store')->name("store");
+
+            Route::get('/edit/{user}', 'edit')->name("edit");
+            Route::put('/update/{serviceCenter}')->name("update");
+        });
+
 
         //Users
         Route::prefix('users')->controller(UserController::class)->name("users.")->group(function () {
@@ -146,6 +157,8 @@ Route::middleware(['auth' , 'verified'])->group(function () {
 //pdf
     Route::get('pdf', [CustomerController::class, 'showPdf'])->name('show.pdf');
     Route::get('/Dpdf/{carId}', [CustomerController::class, 'pdf'])->name('download.pdf');
+
+    Route::get('/test/{user}', [ServiceCenterController::class, 'edit']);
 
 
 // //notification

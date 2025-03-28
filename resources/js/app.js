@@ -1,5 +1,3 @@
-// app.js
-// Import all available managers
 import DatePickerManager from './managers/DatePickerManager';
 import ModalManager from './managers/ModalManager';
 import OptionsManager from './managers/OptionsManager';

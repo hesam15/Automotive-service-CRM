@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Booking;
 use App\Models\Options;
 use App\Models\Customer;
+use App\Models\ServiceCenter;
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
@@ -162,4 +163,32 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
 
         $trail->parent('home');
         $trail->push('گزارش '.$booking->customer->fullname , route('report.index', ['booking' => $booking->id, 'report' => $report->id]));
+    });
+
+//ServiceCenters
+    // ServiceCenters List
+    // Breadcrumbs::for('serviceCenters.index', function (BreadcrumbTrail $trail) {
+    //     $trail->parent('home');
+    //     $trail->push('مراکز خدمات', route('serviceCenter.index'));
+    // });
+
+    // Create ServiceCenter
+    Breadcrumbs::for('serviceCenter.create', function (BreadcrumbTrail $trail) {
+        $trail->push('ایجاد مرکز خدمات', route('serviceCenter.create', request()->route()->user->id));
+    });
+
+    // Edit ServiceCenter
+    Breadcrumbs::for('serviceCenters.edit', function (BreadcrumbTrail $trail) {
+        $serviceCenter = ServiceCenter::where('id', request()->route('serviceCenter')->id)->first();
+
+        $trail->parent('serviceCenters.index');
+        $trail->push("{$serviceCenter->name}", route('serviceCenter.edit', $serviceCenter));
+    });
+
+    // ServiceCenter Profile
+    Breadcrumbs::for('serviceCenters.profile', function (BreadcrumbTrail $trail) {
+        $serviceCenter = request()->route('serviceCenter');
+
+        $trail->parent('serviceCenters.index');
+        $trail->push("{$serviceCenter->name}", route('serviceCenters.profile', $serviceCenter));
     });

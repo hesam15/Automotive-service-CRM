@@ -21,6 +21,12 @@ const loadPersianDatepicker = async () => {
     // Wait for scripts to load
     return new Promise((resolve) => {
         persianDatepickerScript.onload = () => {
+            // Configure persian-date globally
+            if (window.persianDate) {
+                window.persianDate.toLeapYearMode('algorithmic');
+                window.persianDate.toLocale('fa');
+                window.persianDate.toCalendar('persian');
+            }
             resolve();
         };
     });
@@ -36,6 +42,9 @@ window.DateTimeManager = {
 
         // Load persian-datepicker dependencies
         await loadPersianDatepicker();
+        
+        // Test current date conversion
+        this.testCurrentDate();
 
         // Make sure jQuery and persian-datepicker are loaded
         if (typeof jQuery().persianDatepicker === 'undefined') {
@@ -60,17 +69,39 @@ window.DateTimeManager = {
         this.initialized = true;
     },
 
+    testCurrentDate() {
+        if (window.persianDate) {
+            const now = new persianDate(new Date()).toLeapYearMode('algorithmic');
+            console.log('Current Date Test:');
+            console.log('Date:', now.format('YYYY/MM/DD'));
+            console.log('Full Format:', now.format('dddd DD MMMM YYYY'));
+            console.log('Time:', now.format('HH:mm:ss'));
+            return now;
+        }
+    },
+
     initDatepicker(element, bookingId) {
+        const today = new persianDate(new Date()).toLeapYearMode('algorithmic');
+        
         jQuery(element).persianDatepicker({
             initialValue: true,
             initialValueType: 'persian',
             format: 'YYYY/MM/DD',
             autoClose: true,
-            maxDate: new persianDate().add('month', 3).valueOf(),
-            minDate: new persianDate(),
+            maxDate: today.add('month', 3).valueOf(),
+            minDate: today,
+            persianDigit: false,
+            calendarType: 'persian',
+            calendar: {
+                persian: {
+                    locale: 'fa',
+                    leapYearMode: 'algorithmic',
+                    epoch: 1348
+                }
+            },
             onSelect: (unix) => {
-                const date = new persianDate(unix);
-                const formattedDate = `${date.year()}/${date.month()}/${date.date()}`;
+                const date = new persianDate(unix).toLeapYearMode('algorithmic');
+                const formattedDate = `${date.year()}/${String(date.month()).padStart(2, '0')}/${String(date.date()).padStart(2, '0')}`;
                 this.handleDateSelection(formattedDate, bookingId);
                 
                 const containerId = bookingId ? `time-slots-container-${bookingId}` : 'time-slots-container';
@@ -99,7 +130,7 @@ window.DateTimeManager = {
         }
     
         // لود کردن time slots جدید
-        this.loadTimeSlots(selectedDate, '', bookingId); // ارسال empty string به جای currentTimeSlot
+        this.loadTimeSlots(selectedDate, '', bookingId); // ارسال empty string به جای currentTimeSlo
     },
 
     loadTimeSlots(selectedDate, currentTimeSlot, bookingId) {

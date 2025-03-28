@@ -10,6 +10,7 @@ use App\Helpers\PersianConvertNumberHelper;
 use App\Http\Requests\Booking\BookingUpdateRequest;
 use App\Http\Requests\Booking\BookingStoreRequest;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
@@ -66,18 +67,18 @@ class BookingController extends Controller
     
             return redirect()
                 ->route('bookings.index')
-                ->with("success", "رزرو با موفقیت ثبت شد.");
+                ->with("alert", ["رزرو با موفقیت ثبت شد.", "success"]);
     
         } catch (\Exception $e) {
             Log::error('Booking creation failed: ' . $e->getMessage());
-            return back()->with("error", "خطا در ثبت رزرو");
+            return back()->with("alert", ["خطا در ثبت رزرو", "danger"]);
         }
     }
 
     // Update
     public function update(BookingUpdateRequest $request, Booking $booking) {
         if (Booking::isTimeSlotAvailable($request->date, $request->time_slot)) {
-            return back()->with("error", "این زمان قبلا رزرو شده است.");
+            return back()->with("alert", ["این زمان قبلا رزرو شده است.", "danger"]);
         }
 
         try {
@@ -90,11 +91,11 @@ class BookingController extends Controller
                 ]);
             });
 
-            return back()->with("success", "ویرایش با موفقیت انجام شد.");
+            return back()->with("alert", ["ویرایش با موفقیت انجام شد.", "success"]);
         }
         catch (\Exception $e) {
             Log::error('Booking update failed: ' . $e->getMessage());
-            return back()->with("error", "خطا در ویرایش رزرو");
+            return back()->with("alert", ["خطا در ویرایش رزرو", "danger"]);
         }
     }
 
@@ -106,10 +107,10 @@ class BookingController extends Controller
                 $booking->delete();
             });
     
-            return back()->with('success', 'حذف با موفقیت انجام شد.');
+            return back()->with('alert', ['حذف با موفقیت انجام شد.', 'success']);
         } catch (\Exception $e) {
             Log::error('Booking deletion failed: ' . $e->getMessage());
-            return back()->with('error', 'خطا در حذف رزرو');
+            return back()->with('alert', ['خطا در حذف رزرو', 'danger']);
         }
     }
 }

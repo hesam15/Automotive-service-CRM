@@ -1,387 +1,147 @@
+import moment from 'moment-jalaali';
+import 'moment/locale/fa';
+
 class DatePickerManager {
     constructor() {
-        console.log('DatePickerManager: Constructor initialized');
         this.instances = new Map();
-        this.initialized = false;
-        this.settings = null;
-        this.dependencies = {
-            scripts: [
-                {
-                    name: 'jQuery',
-                    url: 'https://code.jquery.com/jquery-3.6.0.min.js',
-                    check: () => typeof jQuery !== 'undefined'
-                },
-                {
-                    name: 'persianDate',
-                    url: 'https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js',
-                    check: () => typeof persianDate !== 'undefined'
-                },
-                {
-                    name: 'persianDatepicker',
-                    url: 'https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js',
-                    check: () => typeof jQuery !== 'undefined' && typeof jQuery.fn.persianDatepicker !== 'undefined'
-                }
-            ],
-            styles: [
-                {
-                    url: 'https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css'
-                }
-            ]
-        };
-    
-        // Single initialization chain
-        this.loadSettings()
-            .then(() => this.loadDependencies())
-            .then(() => {
-                this.initializeModalTriggers();
-                this.initializeDefaultDatePicker();
-            })
-            .catch(error => {
-                console.error('DatePickerManager initialization error:', error);
-            });
+        this.initializeDefaultDatePicker();
     }
 
     initializeDefaultDatePicker() {
-        // Find elements in the main page (non-modal context)
-        const mainContext = document;
-        const elements = this.findRequiredElements(mainContext);
+        const dateInputs = document.querySelectorAll('[data-jdp]');
         
-        if (elements) {
+        if (dateInputs.length === 0) {
+            console.error('DatePickerManager: No date inputs found');
+            return;
+        }
+        
+        dateInputs.forEach((dateInput, index) => {
+            const form = dateInput.closest('form') || document;
+            const timeSlotsContainer = form.querySelector('[data-time-slots-container]');
+            const timeSlotsGrid = form.querySelector('[data-time-slots-grid]');
+            const timeSlotInput = form.querySelector('[data-time-slot-input]');
+            
+            const elements = {
+                dateInput,
+                timeSlotsContainer,
+                timeSlotsGrid,
+                timeSlotInput
+            };
+            
+            const instanceId = dateInput.id || `date-input-${index}`;
             const instance = {
-                context: mainContext,
+                context: form,
                 elements,
                 currentDate: null,
                 currentTimeSlot: null
             };
-    
-            this.instances.set('default', instance);
-            this.setupEventListeners(instance);
+            
+            this.instances.set(instanceId, instance);
             this.initializeDatePicker(instance);
-            this.checkForExistingDate(instance);
-            console.log('DatePickerManager: Default instance initialized');
-        }
-    }
-
-    initializeModalTriggers() {
-        const modalTriggers = document.querySelectorAll('.modal-trigger[data-modal-target*="bookingEditModal"]');
-        modalTriggers.forEach(trigger => {
-            trigger.addEventListener('click', () => {
-                const modalId = trigger.dataset.modalTarget;
-                const modal = document.getElementById(modalId);
-                
-                // Wait for modal to be fully visible
-                setTimeout(() => {
-                    this.initializeForModal(modal);
-                }, 100);
-            });
         });
-    }
-
-
-    initializeForModal(modal) {
-        if (!modal || this.instances.has(modal.id)) return;
-        
-        try {
-            const instance = {
-                context: modal,
-                elements: this.findRequiredElements(modal),
-                currentDate: null,
-                currentTimeSlot: null
-            };
-    
-            if (!instance.elements) {
-                throw new Error('Required elements not found in modal');
-            }
-    
-            // Set initial values if they exist
-            const dateInput = instance.elements.dateInput;
-            const timeSlotInput = instance.elements.timeSlotInput;
-            
-            if (dateInput.value) {
-                instance.currentDate = dateInput.value;
-            }
-            
-            if (timeSlotInput.value) {
-                instance.currentTimeSlot = timeSlotInput.value;
-            }
-    
-            this.instances.set(modal.id, instance);
-            this.setupEventListeners(instance);
-            this.initializeDatePicker(instance);
-            
-            // If we have an initial date, load the time slots
-            if (instance.currentDate) {
-                this.loadTimeSlots(instance.currentDate, instance);
-            }
-    
-            console.log(`DatePickerManager: Modal instance ${modal.id} initialized with date:`, instance.currentDate);
-        } catch (error) {
-            console.error('Modal initialization error:', error);
-            this.handleError(error);
-        }
-    }
-
-    findRequiredElements(context) {
-        const elements = {
-            dateInput: context.querySelector('[data-date-input]'),
-            timeSlotsContainer: context.querySelector('[data-time-slots-container]'),
-            timeSlotsGrid: context.querySelector('[data-time-slots-grid]'),
-            timeSlotInput: context.querySelector('[data-time-slot-input]')
-        };
-    
-        // For modal context, we want all elements to be present
-        if (context !== document) {
-            const missingElements = Object.entries(elements)
-                .filter(([key, element]) => !element)
-                .map(([key]) => key);
-    
-            if (missingElements.length > 0) {
-                console.error('Missing required elements:', missingElements.join(', '));
-                return null;
-            }
-        }
-    
-        // For non-modal context, we only need dateInput to be present
-        if (context === document && !elements.dateInput) {
-            console.error('Date input element not found in main context');
-            return null;
-        }
-    
-        return elements;
-    }
-
-    setupEventListeners(instance) {
-        const { context } = instance;
-
-        context.addEventListener('dateSelected', (event) => {
-            const { formatted } = event.detail;
-            instance.currentDate = formatted;
-            this.showTimeSlots(instance);
-            this.loadTimeSlots(formatted, instance);
-        });
-
-        context.addEventListener('timeSlotSelected', (event) => {
-            const { time } = event.detail;
-            instance.currentTimeSlot = time;
-            this.updateTimeSlotSelection(time, instance);
-        });
-    }
-
-    async loadDependencies() {
-        console.log('DatePickerManager: Loading dependencies...');
-        
-        this.dependencies.styles.forEach(style => this.loadStyle(style.url));
-        
-        for (const script of this.dependencies.scripts) {
-            if (!script.check()) {
-                await this.loadScript(script.url);
-            }
-        }
-
-        const missingDeps = this.dependencies.scripts.filter(script => !script.check());
-        if (missingDeps.length > 0) {
-            throw new Error(`Failed to load dependencies: ${missingDeps.map(d => d.name).join(', ')}`);
-        }
-    }
-
-    loadStyle(url) {
-        if (!document.querySelector(`link[href="${url}"]`)) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = url;
-            document.head.appendChild(link);
-        }
-    }
-
-    loadScript(url) {
-        return new Promise((resolve, reject) => {
-            if (document.querySelector(`script[src="${url}"]`)) {
-                resolve();
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = url;
-            script.async = true;
-            script.onload = resolve;
-            script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
-            document.head.appendChild(script);
-        });
-    }
-    
-    async loadSettings() {
-        try {
-            const response = await fetch('/dashboard/datepicker-settings', {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Server responded with status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            this.settings = data;
-            console.log('DatePicker settings loaded:', this.settings);
-        } catch (error) {
-            console.error('Error loading settings:', error);
-            throw error;
-        }
     }
 
     initializeDatePicker(instance) {
         const { dateInput } = instance.elements;
-        
         if (!dateInput) return;
     
-        const options = {
-            format: 'YYYY/MM/DD',
-            initialValue: true,
-            initialValueType: 'persian',
-            persianDigit: true,
-            observer: true,
-            calendar: {
-                persian: {
-                    locale: 'fa'
-                }
-            },
-            onSelect: (unix) => {
-                this.handleDateSelection(unix, instance);
-            },
-            toolbox: {
-                calendarSwitch: {
-                    enabled: false
-                }
-            },
-            navigator: {
-                scroll: {
-                    enabled: false
-                },
-                text: {
-                    btnNextText: "بعد",
-                    btnPrevText: "قبل"
-                }
-            },
-            minDate: new persianDate().startOf('day'),
-            timePicker: {
-                enabled: false
-            },
-            checkDate: (unix) => {
-                return this.isDateAvailable(unix);
-            },
-            onShow: () => {
-                setTimeout(() => {
-                    this.updateCalendarDisplay();
-                }, 0);
-            }
-        };
-    
-        $(dateInput).persianDatepicker(options);
-    }
-
-    updateCalendarDisplay() {
-        const dayElements = document.querySelectorAll('.datepicker-day-view td[data-unix]');
-        dayElements.forEach(el => {
-            const unix = parseInt(el.getAttribute('data-unix'));
-            const date = new persianDate(unix);
-            
-            // بررسی روز جمعه براساس تنظیمات
-            // در persianDate: شنبه=0، یکشنبه=1، ..., پنجشنبه=5، جمعه=7
-            if (this.settings?.fridays_closed && date.day() === 7) { // جمعه = 7
-                el.classList.add('disabled');
-                el.setAttribute('disabled', 'disabled');
-                el.classList.add('holiday');
-                el.title = 'روز تعطیل';
-            }
-        });
-    }
-
-    isDateAvailable(unix) {
-        const date = new persianDate(unix);
-        const now = new persianDate();
-        const currentHour = now.hour();
-        const currentMinute = now.minute();
-    
-        // بررسی روز جمعه براساس تنظیمات
-        // در persianDate: شنبه=0، یکشنبه=1، ..., پنجشنبه=5، جمعه=7
-        if (this.settings?.fridays_closed && date.day() === 7) { // جمعه = 7
-            return false;
-        }
-    
-        // اگر تاریخ برای روزهای آینده است، مجاز است
-        if (date.startOf('day').unix() > now.startOf('day').unix()) {
-            return true;
-        }
-    
-        // اگر تاریخ برای امروز است
-        if (date.startOf('day').unix() === now.startOf('day').unix()) {
-            return this.checkRemainingTimeSlots(currentHour, currentMinute);
-        }
-    
-        return false;
-    }
-
-    async checkRemainingTimeSlots(currentHour, currentMinute) {
         try {
-            const today = new persianDate().format('YYYY/MM/DD');
-            const response = await fetch(`/dashboard/available-times?date=${today}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+            if (typeof jalaliDatepicker === 'undefined') {
+                throw new Error('jalaliDatepicker is not loaded');
+            }
+
+            // اضافه کردن استایل برای مخفی کردن دکمه‌های مثبت و منفی
+            const style = document.createElement('style');
+            style.textContent = `
+                .jdp-icon-plus, .jdp-icon-minus {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // تنظیم تاریخ با moment
+            const m = moment();
+            const today = `${m.jYear()}/${String(m.jMonth() + 1).padStart(2, '0')}/${String(m.jDate()).padStart(2, '0')}`;
+    
+            const maxDate = moment().add(2, 'jMonth');
+            const originalMaxDate = `${maxDate.jYear()}/${String(maxDate.jMonth() + 1).padStart(2, '0')}/${String(maxDate.jDate()).padStart(2, '0')}`;
+    
+            dateInput.setAttribute('data-jdp-min-date', 'today');
+            dateInput.setAttribute('data-jdp-max-date', originalMaxDate);
+    
+            jalaliDatepicker.startWatch({
+                minDate: "attr",
+                maxDate: "attr",
+                onSelect: (unix) => {
+                    this.handleDateSelection(dateInput.value, instance);
                 }
             });
     
-            if (!response.ok) return false;
+            // تنظیم مقدار اولیه و فراخوانی handleDateSelection
+            dateInput.value = today;
+            setTimeout(() => {
+                this.handleDateSelection(today, instance);
+            }, 100);
     
-            const data = await response.json();
-            const availableSlots = data.available || [];
+            dateInput.addEventListener('change', (e) => {
+                this.handleDateSelection(e.target.value, instance);
+            });
     
-            // بررسی اینکه آیا ساعت خالی بعد از ساعت فعلی وجود دارد
-            return availableSlots.some(slot => {
-                const [slotHour, slotMinute] = slot.split(':').map(Number);
-                return slotHour > currentHour || (slotHour === currentHour && slotMinute > currentMinute);
+            document.addEventListener('jdp:change', (e) => {
+                if (e.target === dateInput) {
+                    this.handleDateSelection(e.target.value, instance);
+                }
             });
         } catch (error) {
-            console.error('Error checking remaining time slots:', error);
-            return false;
+            console.error('DatePickerManager: Error initializing jalali datepicker:', error);
+            this.handleError(error, instance);
         }
     }
 
-    handleDateSelection(unix, instance) {
+    async handleDateSelection(selectedDate, instance) {
         try {
-            const date = new persianDate(unix);
-            // فرمت کردن تاریخ به شمسی با اعداد فارسی
-            const formattedDate = date.toLocale('fa').format('YYYY/MM/DD');
-            console.log('Selected date:', formattedDate);
+            if (!selectedDate) return;
+    
+            instance.currentDate = selectedDate;
             
-            instance.elements.dateInput.value = formattedDate;
+            const { timeSlotsContainer, timeSlotsGrid } = instance.elements;
+            if (!timeSlotsContainer || !timeSlotsGrid) return;
+    
+            this.showLoadingState(instance);
             
-            instance.context.dispatchEvent(new CustomEvent('dateSelected', {
-                detail: {
-                    unix,
-                    formatted: formattedDate
-                }
-            }));
+            if (timeSlotsContainer) {
+                timeSlotsContainer.classList.remove('hidden');
+            }
+    
+            await this.loadTimeSlots(selectedDate, instance);
+    
         } catch (error) {
-            console.error('Error handling date selection:', error);
+            console.error('Error in handleDateSelection:', error);
             this.handleError(error, instance);
         }
     }
 
     async loadTimeSlots(selectedDate, instance) {
         try {
+            const { timeSlotsContainer, timeSlotsGrid } = instance.elements;
+            
+            if (!timeSlotsContainer || !timeSlotsGrid) {
+                throw new Error('Time slots elements not found');
+            }
+    
+            const url = `/dashboard/available-times?date=${selectedDate}`;
+    
+            timeSlotsContainer.classList.remove('hidden');
             this.showLoadingState(instance);
     
-            // تاریخ رو همونطور که هست (به فارسی) ارسال میکنیم
-            const response = await fetch(`/dashboard/available-times?date=${selectedDate}`, {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    'X-CSRF-TOKEN': csrfToken
                 }
             });
             
@@ -390,221 +150,152 @@ class DatePickerManager {
             }
             
             const data = await response.json();
-            console.log('Time slots data:', data);
+
+            if (data.error) {
+                this.showMessage(data.error, 'error', instance);
+                return;
+            }
     
             if (data.message) {
                 this.showMessage(data.message, 'info', instance);
                 return;
             }
     
-            const availableSlots = data.available || [];
-            const bookedSlots = new Set(data.booked || []);
-    
-            this.renderTimeSlots({ available: availableSlots, booked: Array.from(bookedSlots) }, instance);
+            this.renderTimeSlots(data, instance);
             
         } catch (error) {
-            console.error('Error loading time slots:', error);
+            console.error('Error in loadTimeSlots:', error);
             this.handleError(error, instance);
         }
     }
 
-    renderTimeSlots({ available, booked }, instance) {
-        console.log('Rendering time slots:', { available, booked });
-        const { elements } = instance;
+    renderTimeSlots(data, instance) {
+        const { timeSlotsGrid, timeSlotInput } = instance.elements;
     
-        if (!elements.timeSlotsGrid) {
-            console.error('Time slots grid element not found');
-            return;
-        }
+        if (!timeSlotsGrid) return;
     
-        elements.timeSlotsGrid.innerHTML = '';
+        const availableSlots = new Set(data.available || []);
+        const bookedSlots = new Set(data.booked || []);
+        const allTimeSlots = [...new Set([...availableSlots, ...bookedSlots])].sort();
     
-        if (!available || available.length === 0) {
+        if (allTimeSlots.length === 0) {
             this.showNoTimeSlotsMessage(instance);
             return;
         }
     
-        const currentSelection = elements.timeSlotInput?.value;
-        const bookedSet = new Set(booked);
-        const now = new persianDate();
-        const currentHour = now.hour();
-        const currentMinute = now.minute();
-        const selectedDate = new persianDate(instance.currentDate);
-        const isToday = selectedDate.startOf('day').unix() === now.startOf('day').unix();
-        
-        const allTimeSlots = [...available, ...booked].sort((a, b) => {
-            const [hoursA, minutesA] = a.split(':').map(Number);
-            const [hoursB, minutesB] = b.split(':').map(Number);
-            return (hoursA * 60 + minutesA) - (hoursB * 60 + minutesB);
-        });
+        const today = moment();
+        const selectedDate = moment(instance.currentDate, 'YYYY/MM/DD');
+        const isToday = selectedDate.isSame(today, 'day');
+        const currentTime = today.format('HH:mm');
     
-        allTimeSlots.forEach(time => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            const [slotHour, slotMinute] = time.split(':').map(Number);
-            const isBooked = bookedSet.has(time);
-            const isSelected = time === currentSelection;
-            const isPastTime = isToday && (slotHour < currentHour || (slotHour === currentHour && slotMinute <= currentMinute));
+        const slotsHtml = allTimeSlots.map(time => {
+            const isBooked = bookedSlots.has(time);
+            const isChecked = timeSlotInput && timeSlotInput.value === time;
+            const isPastTime = isToday && time < currentTime;
+
+            const commonLabelClasses = `
+                block w-full py-2.5 px-4 text-center border-2 rounded-lg
+                transition-all duration-200 ease-in-out
+            `;
+
+            const disabledClasses = `
+                border-gray-200 bg-gray-50 text-gray-400
+                cursor-not-allowed opacity-50 pointer-events-none
+            `;
+
+            const activeClasses = `
+                border-gray-200 cursor-pointer
+                peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500
+                hover:bg-blue-50 hover:border-blue-300 active:scale-95
+            `;
+
+            return `
+                <div class="w-full">
+                    <input type="radio" name="time" id="time_${time}" value="${time}" 
+                           class="hidden peer" ${isChecked ? 'checked' : ''} ${(isBooked || isPastTime) ? 'disabled' : ''}>
+                    <label for="time_${time}" 
+                           class="${commonLabelClasses} ${(isBooked || isPastTime) ? disabledClasses : activeClasses}">
+                        ${time}
+                        ${isBooked ? '<span class="block text-xs">(رزرو شده)</span>' : ''}
+                        ${isPastTime ? '<span class="block text-xs">(گذشته)</span>' : ''}
+                    </label>
+                </div>
+            `;
+        }).join('');
     
-            button.className = `
-                w-full px-3 py-2 text-sm rounded-lg transition-colors duration-200
-                ${isSelected ? 'bg-blue-500 text-white' : 
-                  isBooked || isPastTime ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50' : 
-                  'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-            `.trim();
+        timeSlotsGrid.innerHTML = `
+            <div class="w-full max-w-full">
+                <div class="grid grid-cols-4 gap-4">
+                    ${slotsHtml}
+                </div>
+            </div>
+        `;
     
-            button.textContent = time;
-            button.dataset.time = time;
-            
-            if (isBooked) {
-                button.disabled = true;
-                button.title = 'این ساعت قبلاً رزرو شده است';
-            } else if (isPastTime) {
-                button.disabled = true;
-                button.title = 'این ساعت گذشته است';
-            } else {
-                button.onclick = () => this.handleTimeSlotSelection(time, instance);
+        const radioInputs = timeSlotsGrid.querySelectorAll('input[type="radio"]');
+        radioInputs.forEach(input => {
+            if (!input.disabled) {
+                input.addEventListener('change', (e) => {
+                    this.handleTimeSlotSelection(e.target.value, instance);
+                });
             }
-            
-            elements.timeSlotsGrid.appendChild(button);
         });
     }
 
-    showLoadingState(instance) {
+    handleTimeSlotSelection(time, instance) {
         const { elements } = instance;
-        if (elements.timeSlotsGrid) {
-            elements.timeSlotsGrid.innerHTML = `
-                <div class="col-span-4 text-center py-4">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-                    <div class="mt-2">در حال بارگذاری ساعات مراجعه...</div>
+        if (elements.timeSlotInput) {
+            elements.timeSlotInput.value = time;
+        }
+        instance.currentTimeSlot = time;
+    }
+
+    showLoadingState(instance) {
+        const { timeSlotsGrid } = instance.elements;
+        if (timeSlotsGrid) {
+            timeSlotsGrid.innerHTML = `
+                <div class="col-span-4 text-center py-4 flex flex-col items-center justify-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent shadow-sm"></div>
+                    <div class="mt-2 text-gray-600 font-medium">در حال بارگذاری ساعات مراجعه...</div>
                 </div>
             `;
         }
     }
 
     showMessage(message, type = 'info', instance) {
-        const { elements } = instance;
-        if (elements.timeSlotsGrid) {
-            const colors = {
-                info: 'text-blue-500',
-                error: 'text-red-500',
-                warning: 'text-yellow-500'
-            };
+        const { timeSlotsGrid } = instance.elements;
+        if (!timeSlotsGrid) return;
     
-            elements.timeSlotsGrid.innerHTML = `
-                <div class="col-span-4 text-center py-4 ${colors[type]}">
-                    <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="${type === 'info' ? 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' : 
-                              type === 'warning' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' : 
-                              'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}" />
-                    </svg>
-                    <p class="mt-2">${message}</p>
+        const colors = {
+            info: 'bg-blue-50 text-blue-600 border border-blue-100',
+            warning: 'bg-amber-50 text-amber-600 border border-amber-100',
+            error: 'bg-red-50 text-red-600 border border-red-100',
+            success: 'bg-green-50 text-green-600 border border-green-100'
+        };
+    
+        const icons = {
+            info: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+            warning: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+            error: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+            success: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+        };
+    
+        timeSlotsGrid.innerHTML = `
+            <div class="col-span-4 text-center py-4 ${colors[type]} rounded-lg shadow-sm">
+                <div class="flex flex-col items-center justify-center space-y-2 p-2">
+                    ${icons[type] || icons.info}
+                    <p class="text-lg font-medium">${message}</p>
                 </div>
-            `;
-        }
+            </div>
+        `;
     }
 
     showNoTimeSlotsMessage(instance) {
-        const { elements } = instance;
-        if (elements.timeSlotsGrid) {
-            elements.timeSlotsGrid.innerHTML = `
-                <div class="col-span-full text-center py-8">
-                    <div class="flex flex-col items-center justify-center text-gray-500">
-                        <svg class="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" 
-                                  stroke-linejoin="round" 
-                                  stroke-width="1.5" 
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-lg font-medium">هیچ ساعت خالی برای این روز وجود ندارد</p>
-                        <p class="text-sm mt-2">لطفاً روز دیگری را انتخاب کنید</p>
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    handleTimeSlotSelection(time, instance) {
-        console.log('Time slot selected:', time);
-        instance.context.dispatchEvent(new CustomEvent('timeSlotSelected', {
-            detail: { time }
-        }));
-    }
-
-    updateTimeSlotSelection(selectedTime, instance) {
-        const { elements } = instance;
-        if (elements.timeSlotInput) {
-            elements.timeSlotInput.value = selectedTime;
-        }
-        
-        const timeSlots = elements.timeSlotsGrid.querySelectorAll('button');
-        timeSlots.forEach(slot => {
-            if (slot.dataset.time === selectedTime) {
-                slot.className = 'w-full px-3 py-2 text-sm rounded-lg transition-colors duration-200 bg-blue-500 text-white';
-            } else if (!slot.disabled) {
-                slot.className = 'w-full px-3 py-2 text-sm rounded-lg transition-colors duration-200 bg-gray-100 text-gray-700 hover:bg-gray-200';
-            }
-        });
-    }
-
-    showTimeSlots(instance) {
-        const { elements } = instance;
-        if (elements.timeSlotsContainer) {
-            elements.timeSlotsContainer.classList.remove('hidden');
-        }
-    }
-
-    checkForExistingDate(instance) {
-        const { elements } = instance;
-        const existingDate = elements.dateInput?.value;
-        if (existingDate) {
-            // اگر تاریخ از قبل وجود داره، اون رو به عنوان تاریخ فعلی ست میکنیم
-            instance.currentDate = existingDate;
-            this.showTimeSlots(instance);
-            this.loadTimeSlots(existingDate, instance);
-        }
+        this.showMessage('هیچ ساعت خالی برای این روز وجود ندارد. لطفاً روز دیگری را انتخاب کنید.', 'info', instance);
     }
 
     handleError(error, instance) {
         console.error('DatePickerManager Error:', error);
-        
-        if (instance?.elements?.timeSlotsGrid) {
-            instance.elements.timeSlotsGrid.innerHTML = `
-                <div class="col-span-4 text-center py-4 text-red-500">
-                    <p>خطا در بارگذاری ساعات مراجعه</p>
-                    <p class="text-sm mt-2">${error.message}</p>
-                </div>
-            `;
-        }
-    }
-
-    destroyInstance(modalId) {
-        const instance = this.instances.get(modalId);
-        if (instance) {
-            try {
-                if (instance.elements.dateInput && typeof jQuery !== 'undefined') {
-                    $(instance.elements.dateInput).persianDatepicker('destroy');
-                }
-                this.instances.delete(modalId);
-                console.log(`DatePickerManager: Instance ${modalId} destroyed`);
-            } catch (error) {
-                console.error(`Error destroying instance ${modalId}:`, error);
-            }
-        }
-    }
-
-    destroy() {
-        try {
-            this.instances.forEach((instance, modalId) => {
-                this.destroyInstance(modalId);
-            });
-            this.instances.clear();
-            this.initialized = false;
-            console.log('DatePickerManager: All instances destroyed');
-        } catch (error) {
-            console.error('Error destroying DatePickerManager:', error);
-        }
+        this.showMessage('خطا در بارگذاری اطلاعات. لطفاً مجدداً تلاش کنید.', 'error', instance);
     }
 }
 

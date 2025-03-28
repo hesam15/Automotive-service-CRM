@@ -9,10 +9,9 @@ use Illuminate\Http\Request;
 use App\Models\VerifyPhoneTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Controllers\Auth\VerifyPhoneController;
-use App\Http\Requests\User\UserStoreRequest as UserUserStoreRequest;
+use App\Http\Requests\User\UserStoreRequest;
 
 class UserController extends Controller
 {
@@ -43,7 +42,7 @@ class UserController extends Controller
         return view('admin.users.create', compact('roles'));
     }
 
-    public function store(UserUserStoreRequest $request) {
+    public function store(UserStoreRequest $request) {
         $token = VerifyPhone::where("user_phone", $request['phone'])->first();
 
         if (!$token || $token->used) {
@@ -56,12 +55,12 @@ class UserController extends Controller
             $user->assignRole($request['role']);
         }
         else {
-            return redirect()->back()->with('error', 'نقشی انتخاب نشده است.');
+            return redirect()->back()->with('alert', ['نقشی انتخاب نشده است.', 'danger']);
         }
 
         $token->delete();
 
-        return redirect()->route('users.index')->with("success", "کاربر جدید با موفقیت ایجاد شد.");
+        return redirect()->route('users.index')->with("alert", ["کاربر جدید با موفقیت ایجاد شد.", "success"]);
     }
 
     // Update
@@ -81,7 +80,7 @@ class UserController extends Controller
         $user->update($validated);
         $user->refreshRoles($validated['role']);
 
-        return redirect()->route('users.index')->with("success", "کاربر با موفقیت ویرایش شد.");
+        return redirect()->route('users.index')->with("alert", ["کاربر با موفقیت ویرایش شد.", "success"]);
     }
 
     public function updatePhone(Request $request, User $user) {
@@ -93,10 +92,10 @@ class UserController extends Controller
 
         if ($token->is_used) {
             $user->update($data);
-            return redirect()->back()->with('success', 'شماره تلفن با موفقیت تغییر کرد.');
+            return redirect()->back()->with('alert', ['شماره تلفن با موفقیت تغییر کرد.', "success"]);
         }
 
-        return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.');
+        return redirect()->back()->with('alert', ['کد احراز هویت تایید نشده است.', "danger"]);
     }
 
     // Delete

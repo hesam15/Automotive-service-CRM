@@ -18,6 +18,7 @@ class UIManager {
             this.initializeDropdowns();
             this.initializeBreadcrumbBehavior();
             this.initializeAlerts();
+            this.initializeSessionAlerts(); // New method
         } catch (error) {
             console.error('UIManager: Initialization failed:', error);
         }
@@ -63,6 +64,49 @@ class UIManager {
             toast.style.transform = 'translateY(20px)';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+
+    initializeSessionAlerts() {
+        if (window.alertData) {
+            const [message, type] = window.alertData;
+            UIManager.showSessionAlert(message, type);
+        }
+    }
+
+    static showSessionAlert(message, type = 'success') {
+        if (!message) return;
+        
+        const container = document.createElement('div');
+        // تغییر position به سمت راست
+        container.className = 'alert-dismissible fixed top-4 right-4 z-50 p-4 mb-4 rounded-lg text-white transition-all duration-300 transform translate-x-full';
+        
+        switch (type) {
+            case 'success':
+                container.classList.add('bg-green-500');
+                break;
+            case 'danger':
+                container.classList.add('bg-red-500');
+                break;
+            case 'info':
+                container.classList.add('bg-blue-500');
+                break;
+            default:
+                container.classList.add('bg-green-500');
+        }
+        
+        container.textContent = message;
+        document.body.appendChild(container);
+    
+        // نمایش alert با انیمیشن از سمت راست
+        setTimeout(() => {
+            container.classList.remove('translate-x-full');
+        }, 100);
+        
+        // حذف alert بعد از 5 ثانیه
+        setTimeout(() => {
+            container.classList.add('translate-x-full');
+            setTimeout(() => container.remove(), 300);
+        }, 5000); // تغییر به 5000 میلی‌ثانیه (5 ثانیه)
     }
 
     static showSuccess(message) {
@@ -187,5 +231,6 @@ class UIManager {
 UIManager.showToast = UIManager.showToast.bind(UIManager);
 UIManager.showSuccess = UIManager.showSuccess.bind(UIManager);
 UIManager.showError = UIManager.showError.bind(UIManager);
+UIManager.showSessionAlert = UIManager.showSessionAlert.bind(UIManager);
 
 export default UIManager;

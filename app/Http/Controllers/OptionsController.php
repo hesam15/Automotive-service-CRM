@@ -6,7 +6,6 @@ use App\Helpers\OptionsArrayHelper;
 use App\Models\Options;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use League\Uri\Idna\Option;
 
 class OptionsController extends Controller
 {
@@ -39,10 +38,10 @@ class OptionsController extends Controller
                 'user_id' => Auth::id(),
             ]);
     
-            return redirect()->back()->with('success', 'خدمت با موفقیت ایجاد شد.');
+            return redirect()->back()->with('alert', ['خدمت با موفقیت ایجاد شد.', "success"]);
         }
         catch (\Exception $e) {
-            return redirect()->back()->with('error', 'خطا در ایجاد خدمت.');
+            return redirect()->back()->with('alert', ['خطا در ایجاد خدمت.', "danger"]);
         }
     }
 
@@ -70,10 +69,10 @@ class OptionsController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            return redirect()->back()->with('success', 'خدمت با موفقیت بروزرسانی شد.');
+            return redirect()->back()->with('alert', ['خدمت با موفقیت بروزرسانی شد.', "success"]);
         }
         catch (\Exception $e) {
-            return redirect()->back()->with('error', 'خطا در بروزرسانی خدمت.');
+            return redirect()->back()->with('alert', ['خطا در بروزرسانی خدمت.', "danger"]);
         }
     }
 
@@ -81,6 +80,6 @@ class OptionsController extends Controller
     public function destroy(Options $option)
     {
         $option->delete();
-        return redirect()->back()->with('success', 'خدمت با موفقیت حذف شد.');
+        return redirect()->back()->with('alert', ['خدمت با موفقیت حذف شد.', "success"]);
     }
 }

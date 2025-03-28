@@ -20,7 +20,7 @@ return new class extends Migration
             $table->char("phone", 11)->unique()->nullable();
             $table->string('password');
             $table->foreignId('role_id')->default('1')->constrained();
-            $table->foreignId("service_center_id")->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId("service_center_id")->constrained()->onUpdate('cascade');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\City;
 use App\Models\PermissionsRole;
+use App\Models\Province;
 use App\Models\Role;
 use App\Models\ServiceCenter;
 use App\Models\User;
@@ -24,6 +26,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PermissionSeeder::class,
             PermisionsRoleSeeder::class,
+            ProvinceSeeder::class,
+            CitySeeder::class
         ]);
     }
 }

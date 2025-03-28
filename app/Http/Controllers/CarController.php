@@ -26,10 +26,10 @@ class CarController extends Controller {
                 'license_plate' => $licensePlate,
             ]);
 
-            return redirect(route("bookings.create", $customer->id))->with("success", "ثبت خودرو با موفقیت انجام شد.");
+            return redirect(route("bookings.create", $customer->id))->with("alert", ["ثبت خودرو با موفقیت انجام شد.", "success"]);
         }
 
-        return back()->with("error", "این خودرو قبلا ثبت شده است.");
+        return back()->with("alert", ["این خودرو قبلا ثبت شده است.", 'danger']);
     }
 
     public function update(Request $request, Cars $car)
@@ -51,13 +51,13 @@ class CarController extends Controller {
             'license_plate' => $licensePlate,
         ]);
 
-        return back()->with("success", "ویرایش خودرو با موفقیت انجام شد.");
+        return back()->with("alert", ["ویرایش خودرو با موفقیت انجام شد.", "success"]);
     }
 
     public function destroy(Cars $car)
     {
         $car->delete();
 
-        return back()->with("success", "حذف خودرو با موفقیت انجام شد.");
+        return back()->with("alert", ["حذف خودرو با موفقیت انجام شد.", "success"]);
     }
 }

@@ -53,7 +53,7 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }  
 
-    public function serviceSenter() {
+    public function serviceCenter() {
         return $this->belongsTo(ServiceCenter::class);
     }
     

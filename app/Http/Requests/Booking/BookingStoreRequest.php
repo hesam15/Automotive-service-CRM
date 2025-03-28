@@ -16,7 +16,6 @@ class BookingStoreRequest extends FormRequest
 
     protected function prepareForValidation() {
         $date = (new PersianConvertNumberHelper($this->date))
-        ->convertPersianToEnglish()
         ->convertDateToEnglish();
 
         $this->merge([
