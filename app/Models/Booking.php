@@ -31,7 +31,7 @@ class Booking extends Model
 
     public function report()
     {
-        return $this->hasOne(Reports::class);
+        return $this->hasOne(Report::class);
     }
 
     public static function isTimeSlotAvailable($date, $timeSlot)

@@ -4,6 +4,7 @@ import OptionsManager from './managers/OptionsManager';
 import AccordionManager from './managers/AccordionManager';
 import FormManager from './managers/FormManager';
 import UIManager from './managers/UIManager';
+import ExplanationManager from './managers/ExplanationManager';
 
 class App {
     constructor() {
@@ -19,7 +20,8 @@ class App {
             modalManager: ModalManager,
             optionsManager: OptionsManager,
             accordionManager: AccordionManager,
-            formManager: FormManager
+            formManager: FormManager,
+            explanationManager: ExplanationManager
         };
         
         this.initialized = false;

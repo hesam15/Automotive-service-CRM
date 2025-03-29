@@ -1,15 +1,16 @@
 <!-- Sidebar -->
-<div id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 transform translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:w-52 z-50">
+<!-- Sidebar -->
+<div id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 transform translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:w-52 z-50 flex flex-col">
     <!-- Logo -->
-    <div class="sticky top-0 z-50 bg-gray-100 backdrop-blur-sm border-b border-gray-200 p-4">
+    <div class="flex-none sticky top-0 z-50 bg-gray-100 backdrop-blur-sm border-b border-gray-200 p-4">
         <span class="text-xl font-bold text-gray-800">کارشناسی خودرو</span>
     </div>
 
-    <!-- Navigation -->
-    <nav class="h-[calc(100vh-4rem)] overflow-y-auto">
-        <div class="flex flex-col h-full p-3">
-            <!-- Main Menu -->
-            <div class="flex-1 space-y-2">
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-h-0"> <!-- min-h-0 is crucial for nested flex containers -->
+        <!-- Scrollable Navigation -->
+        <nav class="flex-1 overflow-y-auto p-3">
+            <div class="space-y-2">
                 @if($agent->isDesktop())
                 <a href="{{route('home')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'home' ? 'bg-gray-100' : '' }}">
                     <i class="material-icons-round text-gray-500 text-lg ml-2 {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : '' }}">dashboard</i>
@@ -73,7 +74,6 @@
                         </div>
                     </div>
                 </div>
-                
                 @endpermision
 
                 <!-- Users Menu -->
@@ -102,8 +102,16 @@
                     </div>
                 @endpermision
             </div>
+        </nav>
+
+        <!-- Bottom Edit Button - Always stays at bottom -->
+        <div class="flex-none p-3 border-t">
+            <a href="{{ route('serviceCenter.edit', auth()->user()->serviceCenter->id) }}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100">
+                <i class="material-icons-round text-gray-500 text-lg ml-2">edit</i>
+                <span class="text-gray-700">مشخصات مجموعه</span>
+            </a>
         </div>
-    </nav>
+    </div>
 </div>
 
 @if($agent->isMobile() || $agent->isTablet())

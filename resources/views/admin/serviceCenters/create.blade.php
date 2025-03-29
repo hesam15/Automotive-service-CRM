@@ -1,4 +1,4 @@
-<!-- resources/views/admin/serviceCenter/create.blade.php -->
+
 @extends('layouts.app')
 
 @section('title', 'افزودن مرکز سرویس')
@@ -8,8 +8,8 @@
     <x-errors-success-label />
 
     <div class="bg-white rounded-xl shadow-lg">
-        <!-- Header -->
-        <div class="px-4 py-3 md:px-6 md:py-4 border-b border-gray-200 bg-gray-100">
+        <!-- Header - Added rounded-t-xl to make top corners rounded -->
+        <div class="px-4 py-3 md:px-6 md:py-4 border-b border-gray-200 bg-gray-100 rounded-t-xl">
             <h5 class="text-base md:text-xl font-semibold text-gray-800">فرم ثبت مرکز سرویس</h5>
         </div>
 
@@ -60,7 +60,7 @@
                             </select>
                             <span class="text-gray-600">:</span>
                             <select name="working_hours[start_hour][minute]" class="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                @foreach(['00', '15', '30', '45'] as $minute)
+                                @foreach(['00','30'] as $minute)
                                     <option value="{{ $minute }}" {{ old('start_minute') == $minute ? 'selected' : '' }}>
                                         {{ $minute }}
                                     </option>
@@ -83,7 +83,7 @@
                             </select>
                             <span class="text-gray-600">:</span>
                             <select name="working_hours[end_hour][minute]" class="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                @foreach(['00', '15', '30', '45'] as $minute)
+                                @foreach(['00', '30'] as $minute)
                                     <option value="{{ $minute }}" {{ old('end_minute') == $minute ? 'selected' : '' }}>
                                         {{ $minute }}
                                     </option>

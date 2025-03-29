@@ -3,13 +3,18 @@
 @section('title', 'ویرایش مرکز سرویس')
 
 @section('content')
-<div class="max-w-7xl mx-auto py-6 px-4">
-    <x-errors-success-label />
 
-    <div class="bg-white rounded-xl shadow-lg">
-        <!-- Header -->
-        <div class="px-4 py-3 md:px-6 md:py-4 border-b border-gray-200 bg-gray-100">
-            <h5 class="text-base md:text-xl font-semibold text-gray-800">فرم ویرایش مرکز سرویس</h5>
+<div class="max-w-7xl mx-auto py-6 px-4">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header with rounded top -->
+        <div class="flex items-center justify-between p-6 bg-gray-50 border-b">
+            <h4 class="text-xl font-semibold text-gray-800">ویرایش مجموعه خدماتی</h4>
+            <button class="delete-btn inline-flex items-center px-3 py-2 bg-rose-100 text-rose-800 rounded-lg hover:bg-rose-200 transition-colors duration-200"
+                    data-route="{{ route('serviceCenter.destroy', $serviceCenter->id) }}"
+                    data-type="serviceCenter">
+                <span class="material-icons-round text-base ml-1">delete</span>
+                <span class="text-sm">حذف مجموعه</span>
+            </button>
         </div>
 
         <!-- Form Content -->
@@ -61,7 +66,7 @@
                             </select>
                             <span class="text-gray-600">:</span>
                             <select name="working_hours[start_hour][minute]" class="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                @foreach(['00', '15', '30', '45'] as $minute)
+                                @foreach(['00','30'] as $minute)
                                     <option value="{{ $minute }}"
                                         {{ old('working_hours.start_hour.minute', $serviceCenter->working_hours['start_hour']['minute']) == $minute ? 'selected' : '' }}>
                                         {{ $minute }}
@@ -86,7 +91,7 @@
                             </select>
                             <span class="text-gray-600">:</span>
                             <select name="working_hours[end_hour][minute]" class="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                @foreach(['00', '15', '30', '45'] as $minute)
+                                @foreach(['00','30'] as $minute)
                                     <option value="{{ $minute }}"
                                         {{ old('working_hours.end_hour.minute', $serviceCenter->working_hours['end_hour']['minute']) == $minute ? 'selected' : '' }}>
                                         {{ $minute }}
@@ -123,7 +128,7 @@
 
                 <!-- Submit Button -->
                 <div class="flex justify-end mt-6">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition duration-200">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
                         <span class="material-icons-round text-base ml-1">save</span>
                         ذخیره تغییرات
                     </button>
@@ -132,4 +137,7 @@
         </div>
     </div>
 </div>
+
+<x-delete-modal />
+
 @endsection

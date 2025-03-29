@@ -9,6 +9,7 @@ class ModalManager {
             role: "نقش",
             user: "کاربر",
             phone: "تلفن",
+            serviceCenter: "مجموعه"
         };
         
         this.activeModal = null;

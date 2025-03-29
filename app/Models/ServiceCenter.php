@@ -16,8 +16,8 @@ class ServiceCenter extends Model
         'working_hours'
     ];
 
-    public function users() {
-        return $this->hasMany(User::class);
+    public function user() {
+        return $this->hasOne(User::class);
     }
 
     public function customers() {

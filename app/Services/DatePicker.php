@@ -74,7 +74,7 @@ class DatePicker
             
             // دریافت ساعت‌های رزرو شده
             $bookedTimes = Booking::where('date', $persianDate)
-                ->where('status', ['pending', 'completed'])
+                ->whereIn('status', ['pending', 'completed'])
                 ->pluck('time_slot')
                 ->toArray();
 

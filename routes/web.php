@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\DatePicker;
+use App\Models\ServiceCenter;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\RoleController;
@@ -8,12 +9,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\OptionsController;
+use App\Http\Middleware\CheckServiceCenter;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyPhoneController;
 use App\Http\Controllers\ServiceCenterController;
-use App\Models\ServiceCenter;
+use App\Http\Controllers\Auth\VerifyPhoneController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 //verify phone
 Route::post('/send-verification-code', [VerifyPhoneController::class, 'send']);
@@ -28,19 +29,24 @@ Route::get('register', [RegisteredUserController::class, 'create'])
 Route::post('register', [RegisteredUserController::class, 'store'])
 ->name('registerUser');
 
-Route::middleware(['auth' , 'verified'])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('home');
+Route::get('serviceCenters/create/{user}', [ServiceCenterController::class, "create"])->name("serviceCenter.create");
+Route::post('serviceCenters/create/{user}', [ServiceCenterController::class, "store"])->name("serviceCenter.store");
 
+Route::get('/', function() {
+    return redirect()->route("home");
+});
+
+Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(function () {    
     Route::get("reportShow/{carId}",[CustomerController::class, 'show'])->name('show.customer.report');
-    // Route::get('pdf', action: [CustomerController::class, 'pdf'])->name('download.pdf');
     Route::group(['prefix' => 'dashboard'], function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('home');
+
         //Service Center
         Route::prefix('serviceCenters')->controller(ServiceCenterController::class)->name("serviceCenter.")->group(function () {
-            Route::get('/create/{user}', 'create')->name("create");
-            Route::post('/create/{user}', 'store')->name("store");
+            Route::get('/edit/{serviceCenter}', 'edit')->name("edit");
+            Route::put('/update/{serviceCenter}', 'update')->name("update");
 
-            Route::get('/edit/{user}', 'edit')->name("edit");
-            Route::put('/update/{serviceCenter}')->name("update");
+            Route::post('/destroy/{serviceCenter}', 'destroy')->name("destroy");
         });
 
 
@@ -61,8 +67,6 @@ Route::middleware(['auth' , 'verified'])->group(function () {
                 //asign role to user
                 Route::post('/{user}/asignRole', 'assignRole')->name('asignRole');
             });
-
-
         });
 
         //Roles

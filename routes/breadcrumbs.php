@@ -192,3 +192,11 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
         $trail->parent('serviceCenters.index');
         $trail->push("{$serviceCenter->name}", route('serviceCenters.profile', $serviceCenter));
     });
+
+    // Edit ServiceCenter
+    Breadcrumbs::for('serviceCenter.edit', function (BreadcrumbTrail $trail) {
+        $serviceCenter = ServiceCenter::where('id', request()->route()->originalParameters()['serviceCenter'])->first();
+        
+        $trail->parent('home');
+        $trail->push("ویرایش {$serviceCenter->name}", route('serviceCenter.edit', $serviceCenter));
+    });

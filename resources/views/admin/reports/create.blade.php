@@ -6,6 +6,7 @@
 <script>
     window.requiredManagers = window.requiredManagers || [];
     window.requiredManagers.push('accordionManager');
+    window.requiredManagers.push("explanationManager")
 </script>
 @endPushOnce
 

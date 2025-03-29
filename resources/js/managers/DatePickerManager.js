@@ -183,15 +183,17 @@ class DatePickerManager {
             return;
         }
     
-        const today = moment();
+        // اصلاح نحوه محاسبه today
+        const m = moment();
+        const today = `${m.jYear()}/${String(m.jMonth() + 1).padStart(2, '0')}/${String(m.jDate()).padStart(2, '0')}`;
         const selectedDate = moment(instance.currentDate, 'YYYY/MM/DD');
         const isToday = selectedDate.isSame(today, 'day');
-        const currentTime = today.format('HH:mm');
+        const currentTime = m.locale('en').format('HH:mm');
     
         const slotsHtml = allTimeSlots.map(time => {
             const isBooked = bookedSlots.has(time);
             const isChecked = timeSlotInput && timeSlotInput.value === time;
-            const isPastTime = isToday && time < currentTime;
+            const isPastTime = isToday && this.compareTimes(time, currentTime) <= 0;
 
             const commonLabelClasses = `
                 block w-full py-2.5 px-4 text-center border-2 rounded-lg
@@ -296,6 +298,17 @@ class DatePickerManager {
     handleError(error, instance) {
         console.error('DatePickerManager Error:', error);
         this.showMessage('خطا در بارگذاری اطلاعات. لطفاً مجدداً تلاش کنید.', 'error', instance);
+    }
+
+    // Helper method to properly compare time strings (HH:MM format)
+    compareTimes(time1, time2) {
+        const [hours1, minutes1] = time1.split(':').map(Number);
+        const [hours2, minutes2] = time2.split(':').map(Number);
+        
+        if (hours1 !== hours2) {
+            return hours1 - hours2;
+        }
+        return minutes1 - minutes2;
     }
 }
 
