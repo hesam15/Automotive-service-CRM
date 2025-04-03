@@ -2,6 +2,13 @@
 
 @section('title', 'افزودن کاربر جدید')
 
+@pushOnce('scripts')
+<script>
+    window.requiredManagers = window.requiredManagers || [];
+    window.requiredManagers.push('phoneVerificationManager');
+</script>
+@endPushOnce
+
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -28,19 +35,19 @@
                         </div>
                     
                         <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">شماره تلفن</label>
-                            <div class="relative">
-                                <div>
-                                    <input type="phone" id="phone-register" name="phone" value="{{ old('phone') }}"
-                                    placeholder="شماره تلفن خود را وارد کنید"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">شماره تلفن</label>
+                            <div class="phone-verification-form" id="phone-verification-register">
+                                <div class="relative">
+                                    <input type="tel" name="phone" value="{{ old('phone') }}"
+                                        placeholder="شماره تلفن خود را وارد کنید"
+                                        class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
+                                        dir="rtl">
                                     <button type="button"
-                                        class="verify-phone-btn absolute left-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
-                                        data-phone-id="register">
+                                        class="send-code-btn absolute left-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm">
                                         ارسال کد تایید
-                                    </button> 
-                                </div>                               
-                            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                                    </button>
+                                </div>
+                                <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                             </div>
                         </div>
                     
@@ -97,6 +104,4 @@
         </div>
     </div>
 </div>
-
-@vite('resources/js/verify-code.js')
 @endsection

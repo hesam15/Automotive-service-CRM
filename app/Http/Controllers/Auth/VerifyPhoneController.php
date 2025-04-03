@@ -41,12 +41,13 @@ class VerifyPhoneController extends Controller
         if ($this->smsVerificationService->sendVerificationCode($this->token->user_phone, $this->token->code)) {
             session([
                 'verification_code' => $this->token->code,
-                'verification_phone' => $this->token->user_phone
+                'verification_phone' => $this->token->user_phone,
             ]);
         
             return response()->json([
                 'success' => true,
                 'message' => 'کد تایید با موفقیت ارسال شد',
+                'alert' => ['کد تایید ارسال شد.', 'success'],
                 'data' => [
                     'timeout' => 500 // زمان اعتبار کد به ثانیه
                 ]
@@ -57,7 +58,8 @@ class VerifyPhoneController extends Controller
         
         return response()->json([
             'success' => false,
-            'message' => 'خطا در ارسال کد تایید'
+            'message' => 'خطا در ارسال کد تایید',
+            'alert' => ['خطا در ارسال کد', 'danger']
         ], 422);    
     }
 
@@ -71,14 +73,16 @@ class VerifyPhoneController extends Controller
 
         if ($this->smsVerificationService->verifyCode($phone, $data['code'])) {
             return response()->json([
+                'success' => true,
                 'message' => 'شماره تلفن شما با موفقیت تایید شد.',
-                'success' => true
+                'alert' => ['شماره تلفن شما با موفقیت تایید شد.', 'success']
             ]);
         }
 
         return response()->json([
             'message' => 'کد تایید اشتباه است.',
-            'success' => false
+            'success' => false,
+            'alert' => ['کد تایید اشتباه است.', 'danger']
         ], 422);
     }
 }

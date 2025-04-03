@@ -24,7 +24,7 @@
                 </a>
 
                 <!-- Customers Menu -->
-                @permision("create_customer")
+                @can("create_customer")
                     <div class="relative">
                         <button id="customersButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['customers.index', 'customers.create']) ? 'bg-gray-100' : '' }}">
                             <div class="flex items-center">
@@ -48,10 +48,10 @@
                         </div>
                     </div>
                     @endif
-                @endpermision
+                @endcan
 
                 <!-- Services Menu -->
-                @permision("create_option")
+                @can("create_option")
                 <div class="relative">
                     <button id="servicesButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['options.index', 'options.create']) ? 'bg-gray-100' : '' }}">
                         <div class="flex items-center">
@@ -74,10 +74,10 @@
                         </div>
                     </div>
                 </div>
-                @endpermision
+                @endcan
 
                 <!-- Users Menu -->
-                @permision("create_user")
+                @can("create_user")
                     <div class="relative">
                         <button id="usersButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['users.index', 'users.create']) ? 'bg-gray-100' : '' }}">
                             <div class="flex items-center">
@@ -100,7 +100,7 @@
                             </div>
                         </div>
                     </div>
-                @endpermision
+                @endcan
             </div>
         </nav>
 
@@ -122,7 +122,7 @@
         <span class="text-xs {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : 'text-gray-700' }}">داشبورد</span>
     </a>
 
-    @permision("create_customer")
+    @can("create_customer")
         <a href="{{route('customers.index')}}" class="flex flex-col items-center {{ Route::currentRouteName() == 'customers.index' ? 'text-blue-600' : '' }}">
             <i class="material-icons-round {{ Route::currentRouteName() == 'customers.index' ? 'text-blue-600' : 'text-gray-500' }} text-xl">people</i>
             <span class="text-xs {{ Route::currentRouteName() == 'customers.index' ? 'text-blue-600' : 'text-gray-700' }}">مشتریان</span>
@@ -132,6 +132,6 @@
             <i class="material-icons-round {{ Route::currentRouteName() == 'customer.form' ? 'text-blue-600' : 'text-gray-500' }} text-xl">event</i>
             <span class="text-xs {{ Route::currentRouteName() == 'customer.form' ? 'text-blue-600' : 'text-gray-700' }}">نوبت‌دهی</span>
         </a>
-    @endpermision
+    @endcan
 </div>
 @endif

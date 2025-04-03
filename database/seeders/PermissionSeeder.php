@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permissions;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Permission;
 use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class PermissionSeeder extends Seeder
 {
@@ -13,7 +13,7 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        Permissions::insert([
+        Permission::insert([
             ['name' => 'create_customer','persian_name' => 'ایجاد مشتری'], ['name' => 'edit_customer','persian_name' => 'ویرایش مشتری'],['name' => 'delete_customer', 'persian_name' => 'حذف مشتری'],
             ['name' => 'create_user','persian_name' => 'ایجاد کاربر'],['name' => 'edit_user','persian_name' => 'ویرایش کاربر'],['name' => 'delete_user','persian_name' => 'حذف کاربر'],
             ['name' => 'create_option','persian_name' => 'ایجاد خدمت'],['name' => 'edit_option','persian_name' => 'ویرایش خدمت'],['name' => 'delete_option','persian_name' => 'حذف خدمت'],

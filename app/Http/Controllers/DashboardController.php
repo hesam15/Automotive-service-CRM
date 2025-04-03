@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\PersianConvertNumberHelper;
 use Carbon\Carbon;
-use App\Models\Booking;
 use App\Models\Report;
+use App\Models\Booking;
 use App\Models\Customer;
+use Spatie\Permission\Models\Role;
 use Illuminate\Container\Attributes\Auth;
+use App\Helpers\PersianConvertNumberHelper;
+use App\Models\Permission;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
         $today = Booking::todayBookings();
         // Get counts for stats cards
         $customersCount = Customer::count();

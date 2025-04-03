@@ -62,12 +62,6 @@
             if (typeof jQuery === 'undefined') {
                 console.error('jQuery is not loaded');
             }
-            if (typeof persianDate === 'undefined') {
-                console.error('persianDate is not loaded');
-            }
-            if (typeof $.fn.persianDatepicker === 'undefined') {
-                console.error('persianDatepicker is not loaded');
-            }
         });
     </script>
 

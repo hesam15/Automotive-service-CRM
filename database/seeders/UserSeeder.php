@@ -12,13 +12,14 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        $user = User::create([
             'name' => 'admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
             'phone' => '09123456789',
-            'role_id' => '1',
             'service_center_id' => '1'
         ]);
+
+        $user->assignRole(1);
     }
 }

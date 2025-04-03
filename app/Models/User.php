@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -55,15 +56,5 @@ class User extends Authenticatable
 
     public function serviceCenter() {
         return $this->belongsTo(ServiceCenter::class);
-    }
-    
-    // In User model
-    public function hasRole($role)
-    {
-        return $this->role->name === $role;
-    }
-
-    public function hasPermission($permission){
-        $permissions = $this->role->permissions->toArray();
     }
 }

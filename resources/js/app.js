@@ -1,3 +1,5 @@
+import './bootstrap';
+import Alpine from 'alpinejs';
 import DatePickerManager from './managers/DatePickerManager';
 import ModalManager from './managers/ModalManager';
 import OptionsManager from './managers/OptionsManager';
@@ -5,6 +7,13 @@ import AccordionManager from './managers/AccordionManager';
 import FormManager from './managers/FormManager';
 import UIManager from './managers/UIManager';
 import ExplanationManager from './managers/ExplanationManager';
+import PhoneVerificationManager from './managers/PhoneVerificationManager';
+
+window.Alpine = Alpine;
+Alpine.start();
+
+// Define global managers object
+window.managers = window.managers || {};
 
 class App {
     constructor() {
@@ -21,7 +30,8 @@ class App {
             optionsManager: OptionsManager,
             accordionManager: AccordionManager,
             formManager: FormManager,
-            explanationManager: ExplanationManager
+            explanationManager: ExplanationManager,
+            phoneVerificationManager: PhoneVerificationManager
         };
         
         this.initialized = false;
@@ -89,16 +99,10 @@ class App {
     }
 
     checkDependencies() {
+        // Now we only check for jQuery as it's our only core dependency
         const dependencies = {
             jQuery: typeof jQuery !== 'undefined'
         };
-
-        // Only check persianDate if DatePickerManager is required
-        if (this.requiredManagers.includes('datePickerManager')) {
-            dependencies.persianDate = typeof persianDate !== 'undefined';
-            dependencies.persianDatepicker = typeof jQuery !== 'undefined' && 
-                                          typeof jQuery.fn.persianDatepicker !== 'undefined';
-        }
         
         console.log('App: Dependencies status:', dependencies);
         return Object.values(dependencies).every(dep => dep === true);
@@ -115,11 +119,16 @@ class App {
             if (!this.managers[managerName]) {
                 const ManagerClass = this.availableManagers[managerName];
                 this.managers[managerName] = new ManagerClass();
+                
+                // Add to global managers object
+                window.managers[managerName] = this.managers[managerName];
             }
             
             const manager = this.managers[managerName];
             if (typeof manager.initialize === 'function') {
                 await manager.initialize();
+            } else if (typeof manager.init === 'function') {
+                await manager.init();
             }
         }
     }
@@ -130,9 +139,14 @@ class App {
             const ManagerClass = this.availableManagers[name];
             this.managers[name] = new ManagerClass();
             
+            // Add to global managers object
+            window.managers[name] = this.managers[name];
+            
             // Initialize if possible
             if (typeof this.managers[name].initialize === 'function') {
                 this.managers[name].initialize();
+            } else if (typeof this.managers[name].init === 'function') {
+                this.managers[name].init();
             }
         }
         return this.managers[name];
@@ -159,6 +173,17 @@ function initializeApp() {
 document.addEventListener('DOMContentLoaded', () => {
     // Always initialize the app since we now have core managers
     const app = initializeApp();
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    if (appInstance) {
+        Object.values(appInstance.managers).forEach(manager => {
+            if (typeof manager.destroy === 'function') {
+                manager.destroy();
+            }
+        });
+    }
 });
 
 export default initializeApp();

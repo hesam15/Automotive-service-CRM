@@ -55,12 +55,12 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
             Route::get('/', 'index')->name('index');
             Route::get('/profile/{user}', 'profile')->name('profile');
 
-            Route::middleware('permision:create_user')->group(function () {
+            Route::middleware('can:create_user')->group(function () {
                 Route::get('/create', 'create')->name('create');
                 Route::post('/create', 'store')->name('store');
             });
-            Route::post('/{user}/delete', 'destroy')->name('destroy')->middleware('permision:delete_user');
-            Route::middleware('permision:edit_customer')->group(function () {
+            Route::post('/{user}/delete', 'destroy')->name('destroy')->middleware('can:delete_user');
+            Route::middleware('can:edit_customer')->group(function () {
                 Route::get('/{user}/edit', 'edit')->name('edit');
                 Route::post('/{user}/edit', 'update')->name('update');
                 Route::post('/{user}/updatePhone', 'updatePhone')->name('update.phone');
@@ -76,13 +76,13 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
             Route::get('/create', 'create')->name('roles.create');
             Route::post('/create', 'store')->name('roles.store');
 
-            Route::middleware('permision:edit_role')->group(function () {
+            Route::middleware('can:edit_role')->group(function () {
                 Route::get("/{role}/edit", 'edit')->name('roles.edit');
                 Route::post("/{role}/edit", 'update')->name('roles.update');
             });
 
-            Route::post("/{role}/delete", 'destroy')->name('roles.destroy')->middleware('permision:delete_role');
-        })->middleware('permision:create_role');
+            Route::post("/{role}/delete", 'destroy')->name('roles.destroy')->middleware('can:delete_role');
+        })->middleware('can:create_role');
 
         //Customers
         Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
@@ -94,11 +94,11 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
             Route::get('/{customer}', 'show')->name('profile');
             Route::get('/{customer}/bookings', 'bookings')->name('bookings');
 
-            Route::middleware('permision:edit_customer')->group(function () {
+            Route::middleware('can:edit_customer')->group(function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');
                 Route::post('/{customer}/update', 'update')->name('update');
             });
-        })->middleware('permision:create_customer'); 
+        })->middleware('can:create_customer'); 
 
         //Bookings
         Route::prefix("bookings")->controller(BookingController::class)->group(function () {
@@ -112,7 +112,7 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
             Route::post('/{customer}/delete', 'destroy')->name('bookings.destroy');
 
             Route::post('/{customer}/updateStatus', 'updateStatus')->name('bookings.updateStatus');
-        })->middleware('permision:create_customer');
+        })->middleware('can:create_customer');
 
         //Cars
         Route::prefix('cars')->controller(CarController::class)->group(function () {
@@ -123,7 +123,7 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
 
             Route::post('/{id}/update', 'update')->name('cars.update');
             Route::post('/{id}/delete', 'destroy')->name('cars.destroy');
-        })->middleware('permision:create_customer');
+        })->middleware('can:create_customer');
 
         //Reports
         Route::prefix('report')->controller(ReportController::class)->name('report.')->group(function () {
@@ -142,17 +142,17 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
         Route::prefix('options')->controller(OptionsController::class)->name('options.')->group(function () {
             Route::get('/', 'index')->name('index');
 
-            Route::middleware('permision:create_option')->group(function () {
+            Route::middleware('can:create_option')->group(function () {
                 Route::view('/create', 'admin.options.create')->name('create');
                 Route::post('/create', 'store')->name('store');
             });
 
-            Route::middleware('permision:edit_option')->group(function () {
+            Route::middleware('can:edit_option')->group(function () {
                 Route::get("/{option}", 'edit')->name('edit');
                 Route::post("/{option}/update", 'update')->name('update');
                 Route::post("/{option}/delete", 'destroy')->name('destroy');
             });
-        })->middleware('permision:create_option');
+        })->middleware('can:create_option');
 
         Route::get('/datepicker-settings', [DatePicker::class, 'getSettings']);
         Route::get('/available-times', [DatePicker::class, 'getAvailableTimes']);
