@@ -59,7 +59,9 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
                 Route::get('/create', 'create')->name('create');
                 Route::post('/create', 'store')->name('store');
             });
+
             Route::post('/{user}/delete', 'destroy')->name('destroy')->middleware('can:delete_user');
+
             Route::middleware('can:edit_customer')->group(function () {
                 Route::get('/{user}/edit', 'edit')->name('edit');
                 Route::post('/{user}/edit', 'update')->name('update');
@@ -67,22 +69,9 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
                 //asign role to user
                 Route::post('/{user}/asignRole', 'assignRole')->name('asignRole');
             });
+
+            Route::get('/create/apiKey', 'createApiKey')->name("create.api-key");
         });
-
-        //Roles
-        Route::prefix('roles')->controller(RoleController::class)->group(function () {
-            Route::get('/', 'index')->name('roles.index');
-
-            Route::get('/create', 'create')->name('roles.create');
-            Route::post('/create', 'store')->name('roles.store');
-
-            Route::middleware('can:edit_role')->group(function () {
-                Route::get("/{role}/edit", 'edit')->name('roles.edit');
-                Route::post("/{role}/edit", 'update')->name('roles.update');
-            });
-
-            Route::post("/{role}/delete", 'destroy')->name('roles.destroy')->middleware('can:delete_role');
-        })->middleware('can:create_role');
 
         //Customers
         Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
@@ -162,7 +151,7 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
     Route::get('pdf', [CustomerController::class, 'showPdf'])->name('show.pdf');
     Route::get('/Dpdf/{carId}', [CustomerController::class, 'pdf'])->name('download.pdf');
 
-    Route::get('/test/{user}', [ServiceCenterController::class, 'edit']);
+    Route::get('/test/{serviceCenter}', [ServiceCenterController::class, 'show']);
 
 
 // //notification

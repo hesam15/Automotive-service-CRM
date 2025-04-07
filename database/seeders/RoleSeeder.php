@@ -25,6 +25,10 @@ class RoleSeeder extends Seeder
             [
                 'name' => 'clerk',
                 'persian_name' => 'منشی'
+            ],
+            [
+                'name' => 'customer',
+                'persian_name' => 'مشتری'
             ]
         ]);
     }

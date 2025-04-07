@@ -9,8 +9,6 @@
     'cancelLabel' => 'انصراف'
 ])
 
-@aware(['requiresModal' => true])
-
 @pushOnce('scripts')
 <script>
     window.requiredManagers = window.requiredManagers || [];

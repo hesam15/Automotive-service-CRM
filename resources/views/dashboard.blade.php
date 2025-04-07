@@ -3,6 +3,13 @@
 @section('title', 'داشبورد مدیریت')
 
 @section('content')
+
+@if(session('token'))
+    <div class="alert alert-success">
+        {{ session('token') }}
+    </div>
+@endif
+
 <div class="max-w-7xl mx-auto py-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Quick Stats Cards -->
@@ -109,11 +116,6 @@
                 <a href="{{ route('users.create') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                     <i class="material-icons-round text-orange-600 text-xl ml-3">manage_accounts</i>
                     <span class="text-gray-700">ثبت کاربر جدید</span>
-                </a>
-        
-                <a href="{{ route('roles.create') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                    <i class="material-icons-round text-purple-600 text-xl ml-3">admin_panel_settings</i>
-                    <span class="text-gray-700">ثبت نقش جدید</span>
                 </a>
         
                 <a href="{{ route('options.create') }}" class="flex items-center px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">

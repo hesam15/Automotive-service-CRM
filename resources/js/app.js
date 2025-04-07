@@ -8,6 +8,7 @@ import FormManager from './managers/FormManager';
 import UIManager from './managers/UIManager';
 import ExplanationManager from './managers/ExplanationManager';
 import PhoneVerificationManager from './managers/PhoneVerificationManager';
+import ApiKeyManager from './managers/ApiKeyManager';
 
 window.Alpine = Alpine;
 Alpine.start();
@@ -31,11 +32,12 @@ class App {
             accordionManager: AccordionManager,
             formManager: FormManager,
             explanationManager: ExplanationManager,
-            phoneVerificationManager: PhoneVerificationManager
+            phoneVerificationManager: PhoneVerificationManager,
+            apiKeyManager: ApiKeyManager
         };
         
         this.initialized = false;
-        this.coreManagers = ['uiManager'];
+        this.coreManagers = ['uiManager', 'apiKeyManager'];
         this.requiredManagers = [];
         this.init();
     }

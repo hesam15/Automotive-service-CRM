@@ -104,4 +104,18 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('users.index');
     }
+
+    public function createApiKey() {
+        $user = auth()->user();
+
+        if($user->tokens()) {
+            $user->tokens()->delete();
+        }
+
+        $token = $user->createToken($user->serviceCenter->name)->plainTextToken;
+
+        return response()->json([
+            'api_key' => $token
+        ]);    
+    }
 }

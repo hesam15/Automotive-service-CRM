@@ -47,11 +47,11 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     });
 
     // User Profile
-    Breadcrumbs::for('user.profile', function (BreadcrumbTrail $trail) {
-        $user = User::where('id', request()->route('id'))->first();
+    Breadcrumbs::for('users.profile', function (BreadcrumbTrail $trail) {
+        $user = request()->route()->user;
         
         $trail->parent('home');
-        $trail->push("{$user->name}", route('user.profile', $user->name));
+        $trail->push("{$user->name}", route('users.profile', $user->name));
     });
 
 

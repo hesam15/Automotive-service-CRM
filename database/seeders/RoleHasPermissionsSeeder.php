@@ -15,13 +15,38 @@ class RoleHasPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = collect([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])->map(function($permissionId) {
+        $adminstratorPermissions = collect([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])->map(function($permissionId) {
             return [
                 'permission_id' => $permissionId,
                 'role_id' => 1
             ];
         });
 
-        RoleHasPermissions::insert($permissions->toArray());
+        $expertPermissions = collect([7,8,9,10,11])->map(function($permissionId) {
+            return [
+                'permission_id' => $permissionId,
+                'role_id' => 2
+            ];
+        });
+
+        $clerkPermissions = collect([1,2,3,4,5,6,7,8,9,13,14,15])->map(function($permissionId) {
+            return [
+                'permission_id' => $permissionId,
+                'role_id' => 3
+            ];
+        });
+
+        $customerPermissions = collect([13,14,15])->map(function($permissionId) {
+            return [
+                'permission_id' => $permissionId,
+                'role_id' => 4
+            ];
+        });
+
+        $roles = [$adminstratorPermissions, $expertPermissions, $clerkPermissions, $customerPermissions];
+
+        foreach($roles as $role) {
+            RoleHasPermissions::insert($role->toArray());
+        }
     }
 }
