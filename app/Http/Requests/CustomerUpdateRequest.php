@@ -5,14 +5,14 @@ namespace App\Http\Requests;
 use App\Rules\CustomerPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CustomerStoreRequest extends FormRequest
+class CustomerUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return auth()->user()->can('create_customers');
+        return auth()->user()->can('edit_customers');
     }
 
     /**

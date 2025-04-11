@@ -92,7 +92,7 @@
                                                 </a>
                                             @endcan
 
-                                            @can('update_customers')                                                
+                                            @can('edit_customers')                                                
                                                 <button type="button" class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200" data-modal-target="customerEditModal-{{$customer->id}}">
                                                     <i class="material-icons-round text-sm">edit</i>
                                                     <span class="text-xs mr-0.5">ویرایش</span>

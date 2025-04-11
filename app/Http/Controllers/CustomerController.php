@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use App\Helpers\LicensePlateHleper;
 use App\Helpers\PersianConvertNumberHelper;
 use App\Http\Requests\CustomerStoreRequest;
+use App\Http\Requests\CustomerUpdateRequest;
 
 class CustomerController extends Controller
 {
@@ -65,9 +66,7 @@ class CustomerController extends Controller
         return view("admin.customers.edit", compact('customer'));
     }
 
-    public function update(Request $request, Customer $customer) {
-        $this->validateRequest($request);
-
+    public function update(CustomerUpdateRequest $request, Customer $customer) {
         try {
             $customer->update([
                 "fullname" => $request->fullname,
