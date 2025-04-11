@@ -9,6 +9,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Helpers\LicensePlateHleper;
+use Illuminate\Support\Facades\Gate;
 use App\Helpers\PersianConvertNumberHelper;
 use App\Http\Requests\CustomerStoreRequest;
 use App\Http\Requests\CustomerUpdateRequest;
@@ -69,7 +70,7 @@ class CustomerController extends Controller
     public function update(CustomerUpdateRequest $request, Customer $customer) {
         try {
             $customer->update([
-                "fullname" => $request->fullname,
+                "name" => $request->name,
                 "phone" => $request->phone,
             ]);
 

@@ -21,12 +21,13 @@ class CustomerPhoneUnique implements ValidationRule
         foreach ($customers as $customer) {
             if($customer->phone == $value) {
                 $customerWithPhone = $customer;
+                break;
             }
         }
 
         $requestCustomer = request()->route('customer');
         
-        if($customerWithPhone->id !== $requestCustomer->id && $customers->contains('phone', $value)) {
+        if($customerWithPhone !== null && $customerWithPhone->id !== $requestCustomer->id && $customers->contains('phone', $value)) {
             $fail("یک مشتری با این شماره تلفن قبلا در مجموعه شما ثبت شده است");
         }
     }

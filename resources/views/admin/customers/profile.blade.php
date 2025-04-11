@@ -37,7 +37,7 @@
             <div class="space-y-3">
                 <div class="flex justify-between">
                     <span class="text-gray-600">نام و نام خانوادگی:</span>
-                    <span class="font-medium">{{ $customer->fullname }}</span>
+                    <span class="font-medium">{{ $customer->name }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">شماره تماس:</span>
@@ -54,8 +54,8 @@
                 @csrf
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-6">
-                        <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">نام و نام خانوادگی</label>
-                        <input type="text" id="fullname" name="fullname" value="{{ $customer->fullname }}"
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">نام و نام خانوادگی</label>
+                        <input type="text" id="name" name="name" value="{{ $customer->name }}"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="col-span-6">
@@ -298,7 +298,7 @@
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <span class="block text-sm font-medium text-gray-500">نام و نام خانوادگی</span>
-                                                <span class="block mt-1 text-gray-900">{{ $booking->customer->fullname }}</span>
+                                                <span class="block mt-1 text-gray-900">{{ $booking->customer->name }}</span>
                                             </div>
                                             <div>
                                                 <span class="block text-sm font-medium text-gray-500">شماره تماس</span>
