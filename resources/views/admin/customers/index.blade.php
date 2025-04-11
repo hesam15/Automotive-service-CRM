@@ -61,38 +61,48 @@
                         <tbody class="divide-y divide-gray-200">
                             @foreach($customers as $customer)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-2 text-base text-gray-900 w-1/5">{{ $customer->fullname }}</td>
+                                    <td class="px-4 py-2 text-base text-gray-900 w-1/5">{{ $customer->name }}</td>
                                     <td class="px-4 py-2 text-base text-gray-900 w-1/5">{{ $customer->phone }}</td>
                                     <td class="px-4 py-2 text-base text-gray-900 w-1/5">
                                         <div class="flex items-center gap-2">
-                                            <a href="{{ route('customers.bookings', $customer->id) }}" 
-                                                class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
-                                                <i class="material-icons-round text-sm">list_alt</i>
-                                                <span class="text-xs mr-0.5">تمام نوبت ها</span>
-                                            </a>
-                                            <a href="{{ route('bookings.create', $customer->id) }}" 
-                                                class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
-                                                <i class="material-icons-round text-sm">event_available</i>
-                                                <span class="text-xs mr-0.5">نوبت جدید</span>
-                                            </a>
+                                            @can('view_bookings')                                                
+                                                <a href="{{ route('customers.bookings', $customer->id) }}" 
+                                                    class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
+                                                    <i class="material-icons-round text-sm">list_alt</i>
+                                                    <span class="text-xs mr-0.5">تمام نوبت ها</span>
+                                                </a>
+                                            @endcan
+                                            
+                                            @can('create_bookings')                                                
+                                                <a href="{{ route('bookings.create', $customer->id) }}" 
+                                                    class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
+                                                    <i class="material-icons-round text-sm">event_available</i>
+                                                    <span class="text-xs mr-0.5">نوبت جدید</span>
+                                                </a>
+                                            @endcan
                                         </div>
                                     </td>
                                     <td class="px-4 py-2 w-2/5">
                                         <div class="flex items-center gap-1">
-                                            <a href="{{ route('customers.profile', ['customer' => $customer->id]) }}" 
-                                                class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
-                                                <i class="material-icons-round text-sm">person</i>
-                                                <span class="text-xs mr-0.5">پروفایل</span>
-                                            </a>
-                                            <button type="button" class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200" data-modal-target="customerEditModal-{{$customer->id}}">
-                                                <i class="material-icons-round text-sm">edit</i>
-                                                <span class="text-xs mr-0.5">ویرایش</span>
-                                            </button>
-                                            <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" 
-                                                data-route="{{route('customers.destroy', $customer->id)}}" data-type="customer">
-                                                <i class="material-icons-round text-sm">delete</i>
-                                                <span class="text-xs mr-0.5">حذف</span>
-                                            </button>
+                                            @can('view_customers')
+                                                <a href="{{ route('customers.profile', ['customer' => $customer->id]) }}" 
+                                                    class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
+                                                    <i class="material-icons-round text-sm">person</i>
+                                                    <span class="text-xs mr-0.5">پروفایل</span>
+                                                </a>
+                                            @endcan
+
+                                            @can('update_customers')                                                
+                                                <button type="button" class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200" data-modal-target="customerEditModal-{{$customer->id}}">
+                                                    <i class="material-icons-round text-sm">edit</i>
+                                                    <span class="text-xs mr-0.5">ویرایش</span>
+                                                </button>
+                                                <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" 
+                                                    data-route="{{route('customers.destroy', $customer->id)}}" data-type="customer">
+                                                    <i class="material-icons-round text-sm">delete</i>
+                                                    <span class="text-xs mr-0.5">حذف</span>
+                                                </button>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
@@ -109,17 +119,17 @@
                                     <div class="space-y-4">
                                         {{-- نام و نام خانوادگی --}}
                                         <div>
-                                            <label for="edit_fullname" class="block text-sm font-medium text-gray-700 mb-1">
+                                            <label for="edit_name" class="block text-sm font-medium text-gray-700 mb-1">
                                                 نام و نام خانوادگی
                                             </label>
                                             <input type="text" 
-                                                name="fullname" 
-                                                id="edit_fullname" 
-                                                value="{{ $customer->fullname }}"
+                                                name="name" 
+                                                id="edit_name" 
+                                                value="{{ $customer->name }}"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                                 placeholder="نام و نام خانوادگی را وارد کنید"
                                                 required>
-                                            <x-input-error :messages="$errors->get('fullname')" class="mt-2" />
+                                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
                                         </div>
 
                                         {{-- شماره تماس --}}
@@ -157,16 +167,16 @@
         
         <div class="space-y-4">
             <div>
-                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
                     نام و نام خانوادگی
                 </label>
                 <input type="text" 
-                    name="fullname" 
-                    id="fullname"
+                    name="name" 
+                    id="name"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="نام و نام خانوادگی را وارد کنید"
                     required>
-                <x-input-error :messages="$errors->get('fullname')" class="mt-2" />
+                <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
 
             <div>

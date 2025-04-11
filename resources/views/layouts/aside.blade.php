@@ -22,7 +22,7 @@
                 </a>
 
                 <!-- Customers Menu -->
-                @can("create_customers")
+                @can("view_customers")
                     <div class="relative">
                         <button id="customersButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['customers.index', 'customers.create']) ? 'bg-gray-100' : '' }}">
                             <div class="flex items-center">
@@ -38,10 +38,12 @@
                                     <i class="material-icons-round text-gray-500 text-lg ml-2">list</i>
                                     <span class="text-gray-700">لیست مشتریان</span>
                                 </a>
-                                <a href="{{route('customers.create')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'customers.create' ? 'bg-gray-100' : '' }}">
-                                    <i class="material-icons-round text-gray-500 text-lg ml-2">event</i>
-                                    <span class="text-gray-700">ثبت نام مشتری</span>
-                                </a>
+                                @can('create_customers')
+                                    <a href="{{route('customers.create')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'customers.create' ? 'bg-gray-100' : '' }}">
+                                        <i class="material-icons-round text-gray-500 text-lg ml-2">event</i>
+                                        <span class="text-gray-700">ثبت نام مشتری</span>
+                                    </a>
+                                @endcan
                             </div>
                         </div>
                     </div>

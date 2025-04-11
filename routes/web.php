@@ -75,15 +75,16 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
         //Customers
         Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
-            Route::get('/', 'index')->name('index')->can('view_customers');
+            Route::can('view_customers')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/{customer}', 'show')->name('profile');
+                Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
+            });
 
             Route::prefix("/create")->can('create_customers')->group(function () {
                 Route::view('/', 'admin.customers.create')->name('create');
                 Route::post('/', 'store')->name('store');
             });
-
-            Route::get('/{customer}', 'show')->name('profile');
-            Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
 
             Route::can('edit_customer')->group(function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');

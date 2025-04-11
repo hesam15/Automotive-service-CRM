@@ -17,8 +17,8 @@
                     @csrf
                     <div class="grid grid-cols-12 gap-4 md:gap-6 items-end">
                         <div class="col-span-5">
-                            <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">نام و نام خانوادگی</label>
-                            <input type="text" name="fullname" id="fullname" class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">نام و نام خانوادگی</label>
+                            <input type="text" name="name" id="name" class="w-full px-3 md:px-4 py-2.5 md:py-2 text-sm border border-gray-300 rounded-lg md:rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                         </div>
                         <div class="col-span-5">
                             <label for="phone" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">شماره تماس</label>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
-    protected $fillable = ['fullname', 'phone'];
+    protected $fillable = ['name', 'phone'];
 
     public function cars(){
         return $this->hasMany(Cars::class);
@@ -17,7 +17,11 @@ class Customer extends Model
         return $this->hasMany(Booking::class);
     }
 
-    public function serviceSenter() {
+    public function serviceCenters() {
         return $this->belongsToMany(ServiceCenter::class);
+    }
+
+    public function hasServiceCenter(ServiceCenter $serviceCenter) {
+        return $this->serviceSenters->contains($serviceCenter);
     }
 }

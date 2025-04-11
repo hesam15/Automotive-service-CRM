@@ -20,6 +20,6 @@ class UserSeeder extends Seeder
             'service_center_id' => '1'
         ]);
 
-        $user->assignRole(1);
+        $user->assignRole('adminstrator');
     }
 }

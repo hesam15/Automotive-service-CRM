@@ -46,15 +46,12 @@ class CustomerController extends Controller
 
     public function store(CustomerStoreRequest $request) {
         try {
-            $customer = User::create([
-                "name" => $request->fullname,
+            $customer = Customer::create([
+                "name" => $request->name,
                 "phone" => $request->phone,
-                "email" => "example@gmail.com",
-                "password" => 12345678,
-                "service_center_id" => auth()->user()->service_center_id
             ]);
 
-            $customer->assignRole('customer');
+            $customer->serviceCenters()->attach(auth()->user()->serviceCenter);
             
             return redirect()->route('customers.index')->with("alert", ["مشتری با موفقیت اضافه شد.", 'success']);
         }

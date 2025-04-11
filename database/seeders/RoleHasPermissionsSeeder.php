@@ -36,14 +36,7 @@ class RoleHasPermissionsSeeder extends Seeder
             ];
         });
 
-        $customerPermissions = collect([13,14,15])->map(function($permissionId) {
-            return [
-                'permission_id' => $permissionId,
-                'role_id' => 4
-            ];
-        });
-
-        $roles = [$adminstratorPermissions, $expertPermissions, $clerkPermissions, $customerPermissions];
+        $roles = [$adminstratorPermissions, $expertPermissions, $clerkPermissions];
 
         foreach($roles as $role) {
             RoleHasPermissions::insert($role->toArray());
