@@ -15,7 +15,7 @@
 
         <!-- Form Content -->
         <div class="p-6">
-            <form action="{{ route('serviceCenter.store', $user->id) }}" method="POST">
+            <form action="{{ route('serviceCenters.store', $user->id) }}" method="POST">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Service Center Details -->
@@ -28,7 +28,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">نام مدیر</label>
-                        <input type="text" name="manager" value="{{ old('manager') }}"
+                        <input type="text" name="manager" value="{{ old('manager') ?? $user->name }}"
                             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <x-input-error :messages="$errors->get('manager')" class="mt-2" />
                     </div>

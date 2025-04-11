@@ -165,7 +165,7 @@ class PhoneVerificationManager {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'same-origin',
@@ -227,7 +227,7 @@ class PhoneVerificationManager {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'same-origin',
@@ -349,6 +349,13 @@ class PhoneVerificationManager {
     handleVerificationSuccess(formId) {
         const formElements = this.state.verificationForms.get(formId);
         if (!formElements) return;
+
+        // اضافه کردن hidden input برای حفظ مقدار phone
+        const hiddenPhoneInput = document.createElement('input');
+        hiddenPhoneInput.type = 'hidden';
+        hiddenPhoneInput.name = 'phone';
+        hiddenPhoneInput.value = formElements.phoneInput.value;
+        formElements.form.appendChild(hiddenPhoneInput);
 
         formElements.codeInputs.forEach(input => {
             input.disabled = true;

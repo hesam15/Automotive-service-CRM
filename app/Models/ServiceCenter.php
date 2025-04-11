@@ -21,7 +21,7 @@ class ServiceCenter extends Model
     }
 
     public function customers() {
-        return $this->hasMany(Customer::class);
+        return $this->belongsToMany(Customer::class);
     }
 
     public function province() {

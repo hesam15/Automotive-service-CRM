@@ -3,6 +3,8 @@
 namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UserStoreRequest extends FormRequest
 {
@@ -11,7 +13,38 @@ class UserStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        if(!auth()->check()) {
+            return true;
+        }
+
+        return auth()->user()->can('create_user');
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+
+        if(request()->is('api/*')) {
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ], 422);
+    
+            throw new HttpResponseException($response);
+        } else {
+            throw new HttpResponseException(
+                redirect()->back()
+                         ->withErrors($errors)
+                         ->withInput());
+        }
     }
 
     /**
@@ -21,12 +54,14 @@ class UserStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        $nullRole = request()->route()->named("register.user") ? "nullable" : "required";
+
         return [
             'name' => 'required|string|max:25',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
+            'password' => 'required|min:8',
             'phone' => 'required|unique:users',
-            'role' => 'required|exists:roles,id'
+            'role' => $nullRole.'|exists:roles,name',
         ];
     }
 }

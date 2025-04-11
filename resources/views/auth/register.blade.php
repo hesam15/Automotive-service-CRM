@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>ثبت نام</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +33,8 @@
 
                     <x-errors-success-label/>
 
-                    <form method="POST" action="{{ route("registerUser") }}" class="space-y-6">
+                    <form method="POST" action="{{ route("register.user") }}" class="space-y-6">
+                        @csrf
                         <div class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">نام</label>

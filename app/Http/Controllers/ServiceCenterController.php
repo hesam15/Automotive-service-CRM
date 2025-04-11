@@ -19,15 +19,9 @@ class ServiceCenterController extends Controller
         return view("supporter.serviceCenters.index" , compact("serviceCenters"));
     }
 
-    public function show(ServiceCenter $serviceCenter) {
-        $user = auth()->user();
+    // public function show(ServiceCenter $serviceCenter) {
 
-        if(!in_array($user->id, $serviceCenter->users->pluck('id')->toArray())) {
-            abort(403);
-        };
-
-        dd($user->tokens->first()->token->plainTextToken);
-    }
+    // }
 
     public function create(User $user) {
         return view("admin.serviceCenters.create", compact("user"));

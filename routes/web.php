@@ -29,40 +29,40 @@ Route::get('register', [RegisteredUserController::class, 'create'])
 Route::post('register', [RegisteredUserController::class, 'store'])
 ->name('registerUser');
 
-Route::get('serviceCenters/create/{user}', [ServiceCenterController::class, "create"])->name("serviceCenter.create");
-Route::post('serviceCenters/create/{user}', [ServiceCenterController::class, "store"])->name("serviceCenter.store");
-
 Route::get('/', function() {
     return redirect()->route("home");
 });
 
-Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(function () {    
-    Route::get("reportShow/{carId}",[CustomerController::class, 'show'])->name('show.customer.report');
+Route::prefix('dashboard/serviceCenters/create')->name("serviceCenters.")->middleware(['auth', 'role:adminstrator'])->controller(ServiceCenterController::class)->group(function () {
+    Route::get('/{user}', "create")->name("create");
+    Route::post('/{user}', 'store')->name("store");
+});
+
+Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstrator|expert|clerk'])->group(function () {    
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [DashboardController::class, 'index'])->name('home');
 
         //Service Center
         Route::prefix('serviceCenters')->controller(ServiceCenterController::class)->name("serviceCenter.")->group(function () {
-            Route::get('/edit/{serviceCenter}', 'edit')->name("edit");
-            Route::put('/update/{serviceCenter}', 'update')->name("update");
+            Route::get('/edit/{serviceCenter}', 'edit')->can('edit_serviceCenters')->name("edit");
+            Route::put('/update/{serviceCenter}', 'update')->can('edit_serviceCenters')->name("update");
 
-            Route::post('/destroy/{serviceCenter}', 'destroy')->name("destroy");
+            Route::post('/destroy/{serviceCenter}', 'destroy')->can('delete_serviceCenters')->name("destroy");
         });
-
 
         //Users
         Route::prefix('users')->controller(UserController::class)->name("users.")->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/profile/{user}', 'profile')->name('profile');
+            Route::get('/', 'index')->name('index')->can('view_users');
+            Route::get('/profile', 'profile')->name('profile');
 
-            Route::middleware('can:create_user')->group(function () {
-                Route::get('/create', 'create')->name('create');
-                Route::post('/create', 'store')->name('store');
+            Route::can('create_users')->prefix("/create")->group(function () {
+                Route::get('/', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
             });
 
-            Route::post('/{user}/delete', 'destroy')->name('destroy')->middleware('can:delete_user');
+            Route::post('/{user}/delete', 'destroy')->name('destroy')->can('delete_users');
 
-            Route::middleware('can:edit_customer')->group(function () {
+            Route::can('edit_users')->group(function () {
                 Route::get('/{user}/edit', 'edit')->name('edit');
                 Route::post('/{user}/edit', 'update')->name('update');
                 Route::post('/{user}/updatePhone', 'updatePhone')->name('update.phone');
@@ -70,38 +70,42 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
                 Route::post('/{user}/asignRole', 'assignRole')->name('asignRole');
             });
 
-            Route::get('/create/apiKey', 'createApiKey')->name("create.api-key");
+            Route::get('/create/apiKey', 'createApiKey')->name("create.api-key")->can('create_api_key');
         });
 
         //Customers
         Route::prefix('customers')->controller(CustomerController::class)->name('customers.')->group(function () {
-            Route::get('/', 'index')->name('index');
+            Route::get('/', 'index')->name('index')->can('view_customers');
 
-            Route::view('/create', 'admin.customers.create')->name('create');
-            Route::post('/store', 'store')->name('store');
+            Route::prefix("/create")->can('create_customers')->group(function () {
+                Route::view('/', 'admin.customers.create')->name('create');
+                Route::post('/', 'store')->name('store');
+            });
 
             Route::get('/{customer}', 'show')->name('profile');
-            Route::get('/{customer}/bookings', 'bookings')->name('bookings');
+            Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
 
-            Route::middleware('can:edit_customer')->group(function () {
+            Route::can('edit_customer')->group(function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');
                 Route::post('/{customer}/update', 'update')->name('update');
             });
-        })->middleware('can:create_customer'); 
+        })->can('create_customer'); 
 
         //Bookings
-        Route::prefix("bookings")->controller(BookingController::class)->group(function () {
-            Route::get('/list', 'index')->name('bookings.index');
+        Route::prefix("bookings")->name('bookings.')->controller(BookingController::class)->group(function () {
+            Route::get('/list', 'index')->name('index');
             // Route::get('/{id}', [BookingController::class, 'show'])->name('bookings.show');
 
-            Route::get('/{customer}/create', 'create')->name('bookings.create');
-            Route::post('/{customer}/store', 'store')->name('bookings.store');
+            Route::get('/{customer}/create', 'create')->name('create');
+            Route::post('/{customer}/store', 'store')->name('store');
 
-            Route::post('/{customer}/update', 'update')->name('bookings.update');
-            Route::post('/{customer}/delete', 'destroy')->name('bookings.destroy');
-
-            Route::post('/{customer}/updateStatus', 'updateStatus')->name('bookings.updateStatus');
-        })->middleware('can:create_customer');
+            Route::can('edit_bookings')->group(function () {
+                Route::post('/{customer}/update', 'update')->name('update');
+                Route::post('/{customer}/delete', 'destroy')->name('destroy');
+    
+                Route::post('/{customer}/updateStatus', 'updateStatus')->name('updateStatus');
+            });
+        });
 
         //Cars
         Route::prefix('cars')->controller(CarController::class)->group(function () {
@@ -112,7 +116,7 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
 
             Route::post('/{id}/update', 'update')->name('cars.update');
             Route::post('/{id}/delete', 'destroy')->name('cars.destroy');
-        })->middleware('can:create_customer');
+        })->can('create_customer');
 
         //Reports
         Route::prefix('report')->controller(ReportController::class)->name('report.')->group(function () {
@@ -131,35 +135,23 @@ Route::middleware(['auth' , 'verified', CheckServiceCenter::class])->group(funct
         Route::prefix('options')->controller(OptionsController::class)->name('options.')->group(function () {
             Route::get('/', 'index')->name('index');
 
-            Route::middleware('can:create_option')->group(function () {
+            Route::can('create_option')->group(function () {
                 Route::view('/create', 'admin.options.create')->name('create');
                 Route::post('/create', 'store')->name('store');
             });
 
-            Route::middleware('can:edit_option')->group(function () {
+            Route::can('edit_option')->group(function () {
                 Route::get("/{option}", 'edit')->name('edit');
                 Route::post("/{option}/update", 'update')->name('update');
                 Route::post("/{option}/delete", 'destroy')->name('destroy');
             });
-        })->middleware('can:create_option');
+        })->can('create_option');
 
         Route::get('/datepicker-settings', [DatePicker::class, 'getSettings']);
         Route::get('/available-times', [DatePicker::class, 'getAvailableTimes']);
     });
 
-//pdf
-    Route::get('pdf', [CustomerController::class, 'showPdf'])->name('show.pdf');
-    Route::get('/Dpdf/{carId}', [CustomerController::class, 'pdf'])->name('download.pdf');
-
-    Route::get('/test/{serviceCenter}', [ServiceCenterController::class, 'show']);
-
-
-// //notification
-//     Route::get("sendSMS" , function(){
-//         $notification = app(Notification::class);
-//         $user = App\Models\User::find(1);
-//         $notification->sendSMS($user);        
-//     });
+    Route::get("reportShow/{carId}",[CustomerController::class, 'show'])->name('show.customer.report');
 });
 
 require __DIR__.'/auth.php';

@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('fullname');
+            $table->string('name');
             $table->string('phone');
-            $table->foreignId("service_center_id")->constrained()->onDelete('cascade')->onUpdate('cascade');;
             $table->timestamps();
         });
     }

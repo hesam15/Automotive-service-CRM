@@ -14,11 +14,12 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         Permission::insert([
-            ['name' => 'create_customer','persian_name' => 'ایجاد مشتری'], ['name' => 'edit_customer','persian_name' => 'ویرایش مشتری'],['name' => 'delete_customer', 'persian_name' => 'حذف مشتری'],
-            ['name' => 'create_user','persian_name' => 'ایجاد کاربر'],['name' => 'edit_user','persian_name' => 'ویرایش کاربر'],['name' => 'delete_user','persian_name' => 'حذف کاربر'],
-            ['name' => 'create_option','persian_name' => 'ایجاد خدمت'],['name' => 'edit_option','persian_name' => 'ویرایش خدمت'],['name' => 'delete_option','persian_name' => 'حذف خدمت'],
-            ['name' => 'create_report','persian_name' => 'ایجاد گزارش'],['name' => 'edit_report','persian_name' => 'ویرایش گزارش'],['name' => 'delete_report','persian_name' => 'حذف گزارش'],
-            ['name' => 'create_booking','persian_name' => 'ایجاد رزرو'],['name' => 'edit_booking','persian_name' => 'ویرایش رزرو'],['name' => 'delete_booking','persian_name' => 'حذف رزرو'],
+            ['name' => 'create_serviceCenters'],['name' => 'edit_serviceCenters'],['name' => 'delete_serviceCenters'],
+            ['name' => 'create_users'], ['name' => 'edit_users'], ['name' => 'delete_users'], ['name' => 'view_users'], ['name' => 'create_api_key'],
+            ['name' => 'view_customers'],['name' => 'create_customers'], ['name' => 'edit_customers'], ['name' => 'delete_customers'],
+            ['name' => 'create_options'], ['name' => 'edit_options'], ['name' => 'delete_options'],
+            ['name' => 'create_reports'], ['name' => 'edit_reports'], ['name' => 'delete_reports'],
+            ['name' => 'view_bookings'],['name' => 'create_bookings'], ['name' => 'edit_bookings'], ['name' => 'delete_bookings'],
         ]);
     }
 }

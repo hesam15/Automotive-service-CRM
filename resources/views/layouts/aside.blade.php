@@ -1,9 +1,7 @@
-<!-- Sidebar -->
-<!-- Sidebar -->
-<div id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 transform translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:w-52 z-50 flex flex-col">
+<<div id="sidebar" class="fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 transform translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:w-52 z-50 flex flex-col">
     <!-- Logo -->
-    <div class="flex-none sticky top-0 z-50 bg-gray-100 backdrop-blur-sm border-b border-gray-200 p-4">
-        <span class="text-xl font-bold text-gray-800">کارشناسی خودرو</span>
+    <div class="flex-none sticky top-0 z-50 bg-gray-100 backdrop-blur-sm border-b border-gray-200 p-4 text-center">
+        <span class="text-xl font-bold text-gray-800">{{ auth()->user()->serviceCenter->name }}</span>
     </div>
 
     <!-- Main Content Area -->
@@ -24,7 +22,7 @@
                 </a>
 
                 <!-- Customers Menu -->
-                @can("create_customer")
+                @can("create_customers")
                     <div class="relative">
                         <button id="customersButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['customers.index', 'customers.create']) ? 'bg-gray-100' : '' }}">
                             <div class="flex items-center">
@@ -51,7 +49,7 @@
                 @endcan
 
                 <!-- Services Menu -->
-                @can("create_option")
+                @can("create_options")
                 <div class="relative">
                     <button id="servicesButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['options.index', 'options.create']) ? 'bg-gray-100' : '' }}">
                         <div class="flex items-center">
@@ -77,7 +75,7 @@
                 @endcan
 
                 <!-- Users Menu -->
-                @can("create_user")
+                @can("create_users")
                     <div class="relative">
                         <button id="usersButton" class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ in_array(Route::currentRouteName(), ['users.index', 'users.create']) ? 'bg-gray-100' : '' }}">
                             <div class="flex items-center">
@@ -104,7 +102,7 @@
             </div>
         </nav>
 
-        @if (!auth()->user()->tokens()->exists())
+        @if (!auth()->user()->tokens()->exists() && auth()->user()->can("create_api_key"))
             <div class="flex-none p-3">
                 <a href="#" 
                     id="apiKeyButton"
@@ -116,13 +114,15 @@
             </div>
         @endif
 
-        <!-- Bottom Edit Button - Always stays at bottom -->
-        <div class="flex-none p-3 border-t">
-            <a href="{{ route('serviceCenter.edit', auth()->user()->serviceCenter->id) }}" class="flex items-center justify-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100">
-                <i class="material-icons-round text-gray-500 text-lg ml-2">edit</i>
-                <span class="text-gray-700">مشخصات مجموعه</span>
-            </a>
-        </div>
+        @can("edit_serviceCenters")
+            <!-- Bottom Edit Button - Always stays at bottom -->
+            <div class="flex-none p-3 border-t">
+                <a href="{{ route('serviceCenter.edit', auth()->user()->serviceCenter->id) }}" class="flex items-center justify-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100">
+                    <i class="material-icons-round text-gray-500 text-lg ml-2">edit</i>
+                    <span class="text-gray-700">مشخصات مجموعه</span>
+                </a>
+            </div>
+        @endcan
     </div>
 </div>
 
@@ -148,7 +148,7 @@
 </div>
 @endif
 
-@if (!auth()->user()->tokens()->exists())
+@if (!auth()->user()->tokens()->exists() && auth()->user()->can("create_api_key"))
     <x-modal id="apiKeyModal" title="API Key شما">
         <div>
             <p class="mb-2 text-sm text-gray-600">API Key شما با موفقیت ایجاد شد:</p>

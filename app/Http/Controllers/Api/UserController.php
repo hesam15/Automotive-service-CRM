@@ -23,9 +23,7 @@ class UserController extends Controller {
         return UserResource::collection(User::all());
     }
 
-    public function store(Request $request) {
-
-
+    public function store(UserStoreRequest $request) {
         $user = User::create($request->all());
 
         if ($request['role']){
@@ -40,42 +38,6 @@ class UserController extends Controller {
         return json_encode($token);
     }
 
-    // Update
-    public function edit(User $user) {
-        $roles = Cache::remember('roles', now()->addHour(), function() {
-            return Role::select('id', 'persian_name');
-        });
-
-        $user->load('roles');
-
-        return view('admin.users.edit', compact('user', 'roles'));
-    }
-
-    public function update(UserUpdateRequest $request, User $user) {
-        $validated = $request->validated();
-
-        $user->update($validated);
-        $user->refreshRoles($validated['role']);
-
-        return redirect()->route('users.index')->with("alert", ["کاربر با موفقیت ویرایش شد.", "success"]);
-    }
-
-    public function updatePhone(Request $request, User $user) {
-        $data = $request->validate([
-            'phone' => ['required', 'max:11', 'unique:users,phone,' . $user->id],
-        ]);
-
-        $token = VerifyPhone::where("user_phone", $data['phone'])->first();
-
-        if ($token->is_used) {
-            $user->update($data);
-            return redirect()->back()->with('alert', ['شماره تلفن با موفقیت تغییر کرد.', "success"]);
-        }
-
-        return redirect()->back()->with('alert', ['کد احراز هویت تایید نشده است.', "danger"]);
-    }
-
-    // Delete
     public function destroy(User $user)
     {
         $user->delete();

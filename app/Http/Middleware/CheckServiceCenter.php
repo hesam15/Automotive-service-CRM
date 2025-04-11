@@ -16,7 +16,7 @@ class CheckServiceCenter
     public function handle(Request $request, Closure $next): Response
     {
         if(auth()->user()->serviceCenter == null) {
-            return redirect()->route("serviceCenter.create", auth()->user()->id);
+            return redirect()->route("serviceCenters.create", auth()->user()->id)->with("alert", ['لطفا ابتدا مجموعه خود را ثبت کنید.', 'info']);
         }
 
         return $next($request);

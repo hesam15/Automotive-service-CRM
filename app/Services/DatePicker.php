@@ -25,7 +25,7 @@ class DatePicker
      * Load settings from database
      */
     private function loadSettings()
-    {
+    {   
         $serviceCenter = ServiceCenter::where("id", auth()->user()->service_center_id)->first();
 
         $this->settings = [
@@ -57,6 +57,12 @@ class DatePicker
             $persianDate = (new PersianConvertNumberHelper($request->date))
                 ->convertDateToEnglish()
                 ->value;
+
+            if($persianDate < now()->format('Y-m-d')) {
+                return response()->json([
+                    'error' => 'این تاریخ گذشته است.',
+                ], 500);
+            }
 
             // بررسی روز جمعه
             $date = Carbon::parse($persianDate);

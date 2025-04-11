@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\LicensePlateHleper;
-use App\Helpers\PersianConvertNumberHelper;
+use App\Models\Role;
+use App\Models\User;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Helpers\LicensePlateHleper;
+use App\Helpers\PersianConvertNumberHelper;
+use App\Http\Requests\CustomerStoreRequest;
 
 class CustomerController extends Controller
 {
@@ -40,19 +44,22 @@ class CustomerController extends Controller
         return view('admin.customers.bookings', compact('customer', 'bookings'));
     }
 
-    public function store(Request $request) {
-        $this->validateRequest($request);
-
+    public function store(CustomerStoreRequest $request) {
         try {
-            $customer = Customer::create([
-                "fullname" => $request->fullname,
+            $customer = User::create([
+                "name" => $request->fullname,
                 "phone" => $request->phone,
+                "email" => "example@gmail.com",
+                "password" => 12345678,
                 "service_center_id" => auth()->user()->service_center_id
             ]);
+
+            $customer->assignRole('customer');
             
             return redirect()->route('customers.index')->with("alert", ["مشتری با موفقیت اضافه شد.", 'success']);
         }
         catch (\Exception $e) {
+            return dd($e->getMessage());
             return redirect()->route("customers.index")->with("alert", ["اضافه کردن مشتری با ارور مواجه شد.", 'danger']);
         }
     }
@@ -81,12 +88,5 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect(route('customers.index'))->with("alert", ["حذف مشتری با موفقیت انجام شد.","danger"]);
-    }
-
-    private function validateRequest($request) {
-        $request->validate([
-            'fullname' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'unique:customers'],
-        ]);
     }
 }

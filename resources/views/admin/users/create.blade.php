@@ -85,7 +85,7 @@
                             <select name="role"
                                 class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->id }}">{{ $role->persian_name }}</option>
+                                    <option value="{{ $role->name }}">{{ $role->persian_name }}</option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />

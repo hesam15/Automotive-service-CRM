@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 
 use Illuminate\Auth\Events\Registered;
-use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\User\UserStoreRequest;
 
 class RegisteredUserController extends Controller
 {
@@ -38,7 +38,7 @@ class RegisteredUserController extends Controller
         if($token->is_used){
             $user = User::create($validated);
     
-            $user->assignRole('1');
+            $user->assignRole('adminstrator');
     
             event(new Registered($user));
 
@@ -46,10 +46,10 @@ class RegisteredUserController extends Controller
     
             Auth::login($user);
     
-            return redirect(route('home', absolute: false));
+            return redirect(route('serviceCenters.create', compact('user'),absolute: false));
         }
         
-        return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
+        return redirect()->back()->with("alert", ['کد احراز هویت تایید نشده است.', 'danger'])->withInput();
 
     }
 }

@@ -45,20 +45,17 @@
                             </td>
                             <td class="px-6 py-3">
                                 <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                                    {{ $user->role->persian_name }}
+                                    {{ $user->roles->first()->persian_name }}
                                 </span>
                             </td>
                             <td class="px-6 py-3">
                                 <div class="flex gap-2">
-                                    <button type="button"
-                                        class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200"
-                                        data-modal-target="userEditModal-{{$user->id}}">
+                                    <button type="button" class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200" data-modal-target="userEditModal-{{$user->id}}">
                                         <i class="material-icons-round text-sm">edit</i>
                                         <span class="text-xs mr-0.5">ویرایش</span>
                                     </button>
-                                    <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200"
-                                        data-route="{{ route('users.destroy', $user->id) }}"
-                                        data-type="user">
+                                    <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" 
+                                        data-route="{{route('users.destroy', $user->id)}}" data-type="user">
                                         <i class="material-icons-round text-sm">delete</i>
                                         <span class="text-xs mr-0.5">حذف</span>
                                     </button>
@@ -110,8 +107,9 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">نقش کاربر</label>
                                 <select name="role" 
                                     class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200 @error('role') border-red-500 @enderror">
+                                    
                                     @foreach($roles as $role)
-                                        <option value="{{ $role->id }}" {{ $user->role->id == $role->id ? 'selected' : '' }}>
+                                        <option value="{{ $role->id }}" {{ $user->roles->first()->id == $role->id ? 'selected' : '' }}>
                                             {{ $role->persian_name }}
                                         </option>
                                     @endforeach

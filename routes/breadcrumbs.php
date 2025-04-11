@@ -48,7 +48,7 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
 
     // User Profile
     Breadcrumbs::for('users.profile', function (BreadcrumbTrail $trail) {
-        $user = request()->route()->user;
+        $user = auth()->user();
         
         $trail->parent('home');
         $trail->push("{$user->name}", route('users.profile', $user->name));
@@ -173,8 +173,8 @@ Breadcrumbs::for('customer.form', function (BreadcrumbTrail $trail) {
     // });
 
     // Create ServiceCenter
-    Breadcrumbs::for('serviceCenter.create', function (BreadcrumbTrail $trail) {
-        $trail->push('ایجاد مرکز خدمات', route('serviceCenter.create', request()->route()->user->id));
+    Breadcrumbs::for('serviceCenters.create', function (BreadcrumbTrail $trail) {
+        $trail->push('ایجاد مرکز خدمات', route('serviceCenters.create', request()->route()->user->id));
     });
 
     // Edit ServiceCenter

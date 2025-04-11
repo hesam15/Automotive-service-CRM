@@ -2,41 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
 use App\Models\User;
 use App\Models\VerifyPhone;
 use Illuminate\Http\Request;
-use App\Models\VerifyPhoneTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use App\Http\Requests\UserUpdateRequest;
-use App\Http\Controllers\Auth\VerifyPhoneController;
+use App\Http\Requests\User\UserUpdateRequest;
 use App\Http\Requests\User\UserStoreRequest;
+use App\Models\Role;
 
 class UserController extends Controller
 {
     public function index() {
         $users = User::all();
-        $users->load('role');
+        $users->load('roles');
 
         $roles = Role::all();
-        
         
         return view('admin.users.index', compact('users', 'roles'));
     }
 
-    public function profile(User $user) {
-        if(Auth::id() != $user->id) {
-            return redirect()->back()->with('error', 'شما اجازه دسترسی به این صفحه را ندارید.');
-        }
-
+    public function profile() {
+        $user = auth()->user();
         return view('admin.users.profile', compact('user'));
     }
 
     // Create
     public function create() {
         $roles = Cache::remember('roles', now()->addHour(), function() {
-            return Role::select('id', 'persian_name')->get();
+            return Role::select('name', 'persian_name')->get();
         });
 
         return view('admin.users.create', compact('roles'));
@@ -46,15 +40,17 @@ class UserController extends Controller
         $token = VerifyPhone::where("user_phone", $request['phone'])->first();
 
         if (!$token || $token->used) {
-            return redirect()->back()->with('error', 'کد احراز هویت تایید نشده است.')->withInput();
+            return redirect()->back()->with('alert', ['کد احراز هویت تایید نشده است.', 'danger'])->withInput();
         }
+        $request->merge([
+            'service_center_id' => auth()->user()->service_center_id
+        ]);
 
-        $user = User::create($request);
+        $user = User::create($request->all());
 
         if ($request['role']){
             $user->assignRole($request['role']);
-        }
-        else {
+        } else {
             return redirect()->back()->with('alert', ['نقشی انتخاب نشده است.', 'danger']);
         }
 
@@ -78,7 +74,7 @@ class UserController extends Controller
         $validated = $request->validated();
 
         $user->update($validated);
-        $user->refreshRoles($validated['role']);
+        $user->syncRoles($validated['role']);
 
         return redirect()->route('users.index')->with("alert", ["کاربر با موفقیت ویرایش شد.", "success"]);
     }
@@ -102,7 +98,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('users.index');
+        return redirect()->route('users.index')->with("alert", ['کاربر با موفقیت حذف شد.', 'danger']);
     }
 
     public function createApiKey() {
