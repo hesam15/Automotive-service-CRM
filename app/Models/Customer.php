@@ -22,6 +22,6 @@ class Customer extends Model
     }
 
     public function hasServiceCenter(ServiceCenter $serviceCenter) {
-        return $this->serviceSenters->contains($serviceCenter);
+        return $this->serviceCenters->contains($serviceCenter);
     }
 }

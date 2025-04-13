@@ -75,8 +75,9 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
         //Customers
         Route::prefix('/customers')->controller(CustomerController::class)->name('customers.')->group(function () {
+            Route::get('/', 'index')->name('index');
+
             Route::middleware('can:index,customer')->group(function () {
-                Route::get('/', 'index')->name('index');
                 Route::get('/{customer}', 'show')->name('profile');
                 Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
             });
@@ -90,7 +91,7 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
                 Route::post('/{customer}', 'destroy')->name('destroy');
                 Route::post('/{customer}/update', 'update')->name('update');
             })->can('update', 'customer');
-        })->can('index', 'customer'); 
+        })->can('view_customers'); 
 
         //Bookings
         Route::prefix("bookings")->name('bookings.')->controller(BookingController::class)->group(function () {

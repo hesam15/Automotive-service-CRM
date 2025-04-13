@@ -2,14 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
-use App\Models\User;
 use App\Models\Booking;
 use App\Models\Customer;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Helpers\LicensePlateHleper;
-use Illuminate\Support\Facades\Gate;
 use App\Helpers\PersianConvertNumberHelper;
 use App\Http\Requests\CustomerStoreRequest;
 use App\Http\Requests\CustomerUpdateRequest;
