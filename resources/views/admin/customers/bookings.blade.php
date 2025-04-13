@@ -19,7 +19,7 @@
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-100">
             <div class="flex items-center gap-3">
-                <h4 class="text-xl font-bold text-gray-800">رزروهای {{ $customer->fullname }}</h4>
+                <h4 class="text-xl font-bold text-gray-800">رزروهای {{ $customer->name }}</h4>
             </div>
             <!-- Search Form -->
             <div class="w-64">
@@ -115,7 +115,7 @@
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <span class="block text-sm font-medium text-gray-500">نام و نام خانوادگی</span>
-                                            <span class="block mt-1 text-gray-900">{{ $booking->customer->fullname }}</span>
+                                            <span class="block mt-1 text-gray-900">{{ $booking->customer->name }}</span>
                                         </div>
                                         <div>
                                             <span class="block text-sm font-medium text-gray-500">شماره تماس</span>

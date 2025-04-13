@@ -8,28 +8,30 @@ use Illuminate\Auth\Access\Response;
 
 class CustomerPolicy
 {
+    private $checkCustomerServiceCeter;
+
     /**
      * Create a new policy instance.
      */
-    public function __construct()
+    public function __construct(User $user, Customer $customer)
     {
-        //
+        $this->checkCustomerServiceCeter = $customer->hasServiceCenter($user->serviceCenter);
     }
 
     public function index(User $user ,Customer $customer) {
-        return $user->can('view_customers') && $customer->hasServiceCenter($user->serviceCenter)
+        return $user->can('view_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();
     }
 
     public function create(User $user, Customer $customer) {
-        return $user->can('create_customers') && $customer->hasServiceCenter($user->serviceCenter)
+        return $user->can('create_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();
     }
 
     public function update(User $user, Customer $customer) {
-        return $user->can('update_customers') && $customer->hasServiceCenter($user->serviceCenter)
+        return $user->can('update_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();
     }

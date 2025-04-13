@@ -21,7 +21,7 @@
                     <!-- Owner Info -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">مالک خودرو</label>
-                        <div class="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">{{ $customer->fullname }}</div>
+                        <div class="px-3 py-2 bg-gray-50 rounded-lg text-gray-900">{{ $customer->name }}</div>
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">
                     </div>
 
