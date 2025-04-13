@@ -33,22 +33,22 @@ Route::get('/', function() {
     return redirect()->route("home");
 });
 
-Route::prefix('dashboard/serviceCenters/create')->name("serviceCenters.")->middleware(['auth', 'role:adminstrator'])->controller(ServiceCenterController::class)->group(function () {
+Route::prefix('dashboard/serviceCenters/create')->name("serviceCenters.")->middleware(['auth', 'role:adminstrator', 'can:create_serviceCetners'])->controller(ServiceCenterController::class)->group(function () {
     Route::get('/{user}', "create")->name("create");
     Route::post('/{user}', 'store')->name("store");
 });
 
 Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstrator|expert|clerk'])->group(function () {    
-    Route::group(['prefix' => 'dashboard'], function () {
+    Route::prefix('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('home');
 
         //Service Center
         Route::prefix('serviceCenters')->controller(ServiceCenterController::class)->name("serviceCenter.")->group(function () {
-            Route::get('/edit/{serviceCenter}', 'edit')->can('edit_serviceCenters')->name("edit");
-            Route::put('/update/{serviceCenter}', 'update')->can('edit_serviceCenters')->name("update");
+            Route::get('/edit/{serviceCenter}', 'edit')->name("edit");
+            Route::put('/update/{serviceCenter}', 'update')->name("update");
 
-            Route::post('/destroy/{serviceCenter}', 'destroy')->can('delete_serviceCenters')->name("destroy");
-        });
+            Route::post('/delete/{serviceCenter}', 'delete')->name("destroy");
+        })->can('update', 'serviceCenter');
 
         //Users
         Route::prefix('users')->controller(UserController::class)->name("users.")->group(function () {
@@ -74,38 +74,39 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
         });
 
         //Customers
-        Route::prefix('/service-ceter/{serviceCenter}/customers')->controller(CustomerController::class)->name('customers.')->group(function () {
+        Route::prefix('/customers')->controller(CustomerController::class)->name('customers.')->group(function () {
             Route::middleware('can:index,customer')->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/{customer}', 'show')->name('profile');
                 Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
             });
 
-            Route::prefix("/create")->can('create_customers')->group(function () {
+            Route::prefix("/create")->group(function () {
                 Route::view('/', 'admin.customers.create')->name('create');
                 Route::post('/', 'store')->name('store');
-            });
+            })->can('create', 'customer');
 
             Route::middleware('can:update,customer')->group(function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');
                 Route::post('/{customer}/update', 'update')->name('update');
-            });
+            })->can('update', 'customer');
         })->can('index', 'customer'); 
 
         //Bookings
         Route::prefix("bookings")->name('bookings.')->controller(BookingController::class)->group(function () {
             Route::get('/list', 'index')->name('index');
-            // Route::get('/{id}', [BookingController::class, 'show'])->name('bookings.show');
 
-            Route::get('/{customer}/create', 'create')->name('create');
-            Route::post('/{customer}/store', 'store')->name('store');
+            Route::prefix('/{customer}')->group(function() {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+            })->can('create', 'booking');
 
-            Route::can('edit_bookings')->group(function () {
-                Route::post('/{customer}/update', 'update')->name('update');
-                Route::post('/{customer}/delete', 'destroy')->name('destroy');
+            Route::prefix('/{customer}')->group(function () {
+                Route::post('/update', 'update')->name('update');
+                Route::post('/delete', 'destroy')->name('destroy');
     
-                Route::post('/{customer}/updateStatus', 'updateStatus')->name('updateStatus');
-            });
+                Route::post('/update-status', 'updateStatus')->name('updateStatus');
+            })->can('update', 'booking');
         });
 
         //Cars
