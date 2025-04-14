@@ -13,19 +13,14 @@ class CustomerPolicy
     /**
      * Create a new policy instance.
      */
-    public function __construct(User $user, Customer $customer)
+    public function __construct(Customer $customer)
     {
+        $user = auth()->user();
         $this->checkCustomerServiceCeter = $customer->hasServiceCenter($user->serviceCenter);
     }
 
     public function show(User $user) {
         return $user->can('view_customers') && $this->checkCustomerServiceCeter
-            ? Response::allow()
-            : Response::denyAsNotFound();
-    }
-
-    public function create(User $user) {
-        return $user->can('create_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();
     }

@@ -72,17 +72,17 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
         //Customers
         Route::prefix('/customers')->controller(CustomerController::class)->name('customers.')->group(function () {
-            Route::get('/', 'index')->name('index')->can('view_customers');
+            Route::get('/', 'index')->name('index');
+
+            Route::prefix("/create")->group(function () {
+                Route::view('/', 'admin.customers.create')->name('create');
+                Route::post('/', 'store')->name('store');
+            })->can('create_customers');
 
             Route::prefix('/{customer}')->group(function () {
                 Route::get('/', 'show')->name('profile');
                 Route::get('/bookings', 'bookings')->name('bookings')->can('view_bookings');
             })->can('show', 'customer');
-
-            Route::prefix("/create")->group(function () {
-                Route::view('/', 'admin.customers.create')->name('create');
-                Route::post('/', 'store')->name('store');
-            })->can('create', 'customer');
 
             Route::middleware('can:update,customer')->group(function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');
@@ -117,8 +117,8 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
             })->can('create', 'car');
 
             Route::prefix('/{car}')->group(function () {
-                Route::post('/update', 'update')->name('cars.update');
-                Route::post('/delete', 'destroy')->name('cars.destroy');
+                Route::post('/update', 'update')->name('update');
+                Route::post('/delete', 'destroy')->name('destroy');
             })->can('update', 'car');
         });
 

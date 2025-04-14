@@ -12,7 +12,7 @@ use App\Http\Requests\CustomerUpdateRequest;
 class CustomerController extends Controller
 {
     public function index() {
-        $customers = Customer::all();
+        $customers = auth()->user()->serviceCenter->customers;
 
         return view('admin.customers.index', compact('customers'));
     }
@@ -42,7 +42,16 @@ class CustomerController extends Controller
     }
 
     public function store(CustomerStoreRequest $request) {
+        $customers = Customer::all();
+
         try {
+            if($customers->contains('phone', $request->phone) && $customers->contains('name', $request->name)) {
+                $customer = Customer::where('phone', $request->phone)->first();
+                $customer->serviceCenters()->syncWithoutDetaching(auth()->user()->serviceCenter);
+
+                return redirect()->route('customers.index')->with("alert", ["مشتری با موفقیت اضافه شد.", 'success']);
+            }
+
             $customer = Customer::create([
                 "name" => $request->name,
                 "phone" => $request->phone,

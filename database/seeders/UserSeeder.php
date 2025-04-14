@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create([
+        $user1 = User::create([
             'name' => 'admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
@@ -20,6 +20,16 @@ class UserSeeder extends Seeder
             'service_center_id' => '1'
         ]);
 
-        $user->assignRole('adminstrator');
+        $user1->assignRole('adminstrator');
+
+        $user2 = User::create([
+            'name' => 'حسام الدین زراعتکار',
+            'email' => 'hesam@gmail.com',
+            'password' => bcrypt('12345678'),
+            'phone' => '09059202884',
+            'service_center_id' => '2'
+        ]);
+
+        $user2->assignRole('adminstrator');
     }
 }

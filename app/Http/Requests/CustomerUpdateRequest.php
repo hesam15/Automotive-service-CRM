@@ -14,6 +14,7 @@ class CustomerUpdateRequest extends FormRequest
     {
         return auth()->user()->can('edit_customers');
     }
+    
 
     /**
      * Get the validation rules that apply to the request.

@@ -16,12 +16,19 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $serviceCenter = auth()->user()->serviceCenter;
+        $reportsCount = 0;
+
+        foreach($serviceCenter->customers as $customer) {
+            foreach($customer->cars as $car) {
+                $reportsCount += $car->reports->count();
+            }
+        }
 
         $today = Booking::todayBookings();
         // Get counts for stats cards
-        $customersCount = Customer::count();
+        $customersCount = $serviceCenter->customers->count();
         $todayBookings = Booking::whereDate('date', $today)->count();
-        $reportsCount = Report::count();
 
         // Get recent bookings
         $recentBookings = Booking::with('customer')

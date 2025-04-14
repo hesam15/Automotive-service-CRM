@@ -22,5 +22,15 @@ class ServiceCenterSeeder extends Seeder
             'fridays_off' => true,
             'working_hours' => "8:30-21:30"
         ]);
+
+        ServiceCenter::create([
+            'name' => "کارشناسی حسام",
+            'phone' => "09059202884",
+            'manager' => 'hesam',
+            'city_id' => '444',
+            'address' => 'فکوری 5، شهرستانی 7',
+            'fridays_off' => true,
+            'working_hours' => "8:30-21:30"
+        ]);
     }
 }
