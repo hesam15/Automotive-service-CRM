@@ -1,10 +1,8 @@
 <?php
 
 use App\Services\DatePicker;
-use App\Models\ServiceCenter;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CarController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BookingController;
@@ -16,27 +14,25 @@ use App\Http\Controllers\ServiceCenterController;
 use App\Http\Controllers\Auth\VerifyPhoneController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
-//verify phone
-Route::post('/send-verification-code', [VerifyPhoneController::class, 'send']);
-
-Route::post('/verify-code', [VerifyPhoneController::class, 'verify']);
-
-
-// Existing routes remain unchanged
-Route::get('register', [RegisteredUserController::class, 'create'])
-->name('register');
-
-Route::post('register', [RegisteredUserController::class, 'store'])
-->name('registerUser');
-
 Route::get('/', function() {
-    return redirect()->route("home");
+    return redirect()->route('home');
 });
 
-Route::prefix('dashboard/serviceCenters/create')->name("serviceCenters.")->middleware(['auth', 'role:adminstrator', 'can:create_serviceCetners'])->controller(ServiceCenterController::class)->group(function () {
+//verify phone
+Route::controller(VerifyPhoneController::class)->group(function () {
+    Route::post('/send-verification-code', 'send');
+    Route::post('/verify-code', 'verify');
+});
+
+Route::controller(RegisteredUserController::class)->group(function () {
+    Route::get('register', 'create')->name('register');
+    Route::post('register', 'store')->name('registerUser');
+});
+
+Route::prefix('dashboard/serviceCenters/create')->name("serviceCenters.")->controller(ServiceCenterController::class)->group(function () {
     Route::get('/{user}', "create")->name("create");
     Route::post('/{user}', 'store')->name("store");
-});
+})->middleware(['auth', 'role:adminstrator', 'can:create_serviceCetners']);
 
 Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstrator|expert|clerk'])->group(function () {    
     Route::prefix('dashboard')->group(function () {
@@ -51,7 +47,7 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
         })->can('update', 'serviceCenter');
 
         //Users
-        Route::prefix('users')->controller(UserController::class)->name("users.")->group(function () {
+        Route::prefix('/users')->controller(UserController::class)->name("users.")->group(function () {
             Route::get('/', 'index')->name('index')->can('view_users');
             Route::get('/profile', 'profile')->name('profile');
 
@@ -60,7 +56,7 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
                 Route::post('/', 'store')->name('store');
             });
 
-            Route::post('/{user}/delete', 'destroy')->name('destroy')->can('delete_users');
+            Route::post('/{user}/delete', 'destroy')->name('destroy')->can('delete', 'user');
 
             Route::can('edit_users')->group(function () {
                 Route::get('/{user}/edit', 'edit')->name('edit');
@@ -154,9 +150,9 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
             })->can('create_options');
 
             Route::prefix('/{option}')->group(function () {
-                Route::get("/{option}", 'edit')->name('edit');
-                Route::post("/{option}/update", 'update')->name('update');
-                Route::post("/{option}/delete", 'destroy')->name('destroy');
+                Route::get("/", 'edit')->name('edit');
+                Route::post("/update", 'update')->name('update');
+                Route::post("/delete", 'destroy')->name('destroy');
             })->can('update', 'option');
         });
 

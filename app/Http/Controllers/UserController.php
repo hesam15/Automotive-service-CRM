@@ -97,7 +97,12 @@ class UserController extends Controller
     // Delete
     public function destroy(User $user)
     {
+        if($user->hasRole('adminstrator') && count($user->serviceCenter->users) == 1) {
+            $user->serviceCenter->delete();
+        }
+
         $user->delete();
+
         return redirect()->route('users.index')->with("alert", ['کاربر با موفقیت حذف شد.', 'danger']);
     }
 

@@ -13,11 +13,7 @@ class UserStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if(!auth()->check()) {
-            return true;
-        }
-
-        return auth()->user()->can('create_user');
+        return auth()->user()->can('create_users') || !auth()->check();
     }
 
     /**
