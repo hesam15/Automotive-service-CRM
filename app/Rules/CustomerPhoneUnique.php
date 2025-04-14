@@ -18,17 +18,19 @@ class CustomerPhoneUnique implements ValidationRule
         $customers = auth()->user()->serviceCenter->customers;
         $customerWithPhone = null;
 
+        $updateRequestCustomer = request()->route()->customer;
+
         foreach ($customers as $customer) {
             if($customer->phone == $value) {
                 $customerWithPhone = $customer;
                 break;
             }
         }
-
-        $requestCustomer = request()->route('customer');
         
-        if($customers->contains('phone', $value) || $customerWithPhone !== null && $customerWithPhone->id !== $requestCustomer->id && $customers->contains('phone', $value)) {
+        if($customers->contains('phone', $value) && $customerWithPhone->id !== $updateRequestCustomer->id) {
             $fail("یک مشتری با این شماره تلفن قبلا در مجموعه شما ثبت شده است.");
+        } elseif($customerWithPhone->id == $updateRequestCustomer->id) {
+            $fail("هیچ تغییری ایجاد نشد.");
         }
     }
 }

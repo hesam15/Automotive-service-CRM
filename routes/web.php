@@ -84,7 +84,7 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
                 Route::get('/bookings', 'bookings')->name('bookings')->can('view_bookings');
             })->can('show', 'customer');
 
-            Route::middleware('can:update,customer')->group(function () {
+            Route::group([], function () {
                 Route::post('/{customer}', 'destroy')->name('destroy');
                 Route::post('/{customer}/update', 'update')->name('update');
             })->can('update', 'customer');

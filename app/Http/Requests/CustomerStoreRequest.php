@@ -6,7 +6,6 @@ use App\Models\Customer;
 use App\Rules\CustomerPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CustomerStoreRequest extends FormRequest

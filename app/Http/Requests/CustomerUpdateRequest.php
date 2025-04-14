@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Rules\CustomerPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CustomerUpdateRequest extends FormRequest
 {
@@ -13,6 +15,25 @@ class CustomerUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         return auth()->user()->can('edit_customers');
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+
+
+        if($errors->has('phone')) {
+            $errorMessage = $errors->get('phone')[0];
+
+            if(str_contains($errorMessage, "هیچ تغییری ایجاد نشد.")) {
+                throw new HttpResponseException(
+                    redirect()->back()
+                            ->with([
+                                'alert' => [$errorMessage, 'danger'],
+                            ])
+                );
+            }
+        }
     }
     
 
