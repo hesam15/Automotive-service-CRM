@@ -127,40 +127,42 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
         //Reports
         Route::prefix('booking/{booking}/report')->controller(ReportController::class)->name('report.')->group(function () {
-            Route::get('/list', 'index')->name('index')->can('view_reports');
+            Route::get('/list', 'index')->name('index')->can('index', 'report');
 
             Route::get('/{report}', 'show')->name('show');
 
-            Route::get('/create', 'create')->name('create');
-            Route::post('/store', 'store')->name('store');
+            Route::group([], function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+            })->can('create', 'report');
             
-            Route::post('/{report}/update', 'update')->name('update');
-            Route::post('/delete', 'destroy')->name('destroy');
-            
-            Route::get('/print', 'print')->name('print');
+            Route::group([], function () {
+                Route::post('/update', 'update')->name('update');
+                Route::post('/delete', 'destroy')->name('destroy');
+            })->can('update', 'report');
+
+            Route::get('/{report}/print', 'print')->name('print');
         });
 
         //Options
         Route::prefix('options')->controller(OptionsController::class)->name('options.')->group(function () {
-            Route::get('/', 'index')->name('index');
+            Route::get('/', 'index')->name('index')->can('view_options');
 
-            Route::can('create_option')->group(function () {
+            Route::group([], function () {
                 Route::view('/create', 'admin.options.create')->name('create');
                 Route::post('/create', 'store')->name('store');
-            });
+            })->can('create_options');
 
-            Route::can('edit_option')->group(function () {
+            Route::prefix('/{option}')->group(function () {
                 Route::get("/{option}", 'edit')->name('edit');
                 Route::post("/{option}/update", 'update')->name('update');
                 Route::post("/{option}/delete", 'destroy')->name('destroy');
-            });
-        })->can('create_option');
+            })->can('update', 'option');
+        });
 
         Route::get('/datepicker-settings', [DatePicker::class, 'getSettings']);
         Route::get('/available-times', [DatePicker::class, 'getAvailableTimes']);
     });
-
-    Route::get("reportShow/{carId}",[CustomerController::class, 'show'])->name('show.customer.report');
 });
 
 require __DIR__.'/auth.php';

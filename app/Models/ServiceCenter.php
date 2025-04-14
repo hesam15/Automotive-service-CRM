@@ -20,6 +20,10 @@ class ServiceCenter extends Model
         return $this->hasMany(User::class);
     }
 
+    public function options() {
+        return $this->hasMany(Option::class);
+    }
+
     public function customers() {
         return $this->belongsToMany(Customer::class);
     }

@@ -13,7 +13,7 @@ use Mpdf\Mpdf;
 
 class ReportController extends Controller
 {
-    public function index(Booking $booking, Report $report) {
+    public function show(Booking $booking, Report $report) {
         $report->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
 
         if (!$report) {
@@ -31,7 +31,7 @@ class ReportController extends Controller
             $option->values = json_decode($option->values);
         }
 
-        return view('admin.reports.create', compact('booking', 'options'));
+        return  view('admin.reports.create', compact('booking', 'options'));
     }
 
     public function store(Request $request, Booking $booking) {

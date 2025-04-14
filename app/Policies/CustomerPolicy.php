@@ -18,19 +18,19 @@ class CustomerPolicy
         $this->checkCustomerServiceCeter = $customer->hasServiceCenter($user->serviceCenter);
     }
 
-    public function show(User $user ,Customer $customer) {
+    public function show(User $user) {
         return $user->can('view_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();
     }
 
-    public function create(User $user, Customer $customer) {
+    public function create(User $user) {
         return $user->can('create_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();
     }
 
-    public function update(User $user, Customer $customer) {
+    public function update(User $user) {
         return $user->can('update_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();

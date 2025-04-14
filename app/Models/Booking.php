@@ -26,7 +26,7 @@ class Booking extends Model
 
     public function car()
     {
-        return $this->belongsTo(Cars::class);
+        return $this->belongsTo(Car::class);
     }
 
     public function report()

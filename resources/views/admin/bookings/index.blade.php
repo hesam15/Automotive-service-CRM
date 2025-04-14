@@ -74,7 +74,7 @@
                                         @endif
 
                                         @if($booking->status === 'completed')
-                                            <a href="{{ route('report.index', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
+                                            <a href="{{ route('report.show', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">visibility</i>
                                                 <span class="text-xs mr-0.5">مشاهده گزارش</span>

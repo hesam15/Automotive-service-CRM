@@ -70,7 +70,7 @@
                         <tbody class="divide-y divide-gray-200">
                             @foreach($recentBookings as $booking)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-900"><a href="{{route("customers.profile" , $booking->customer->fullname)}}">{{ $booking->customer->fullname }}</a></td>
+                                <td class="px-4 py-3 text-sm text-gray-900"><a href="{{route("customers.profile" , $booking->customer->name)}}">{{ $booking->customer->name }}</a></td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->car->name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->date }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->time_slot }}</td>
@@ -87,7 +87,7 @@
                                             کارشناسی
                                         </a>
                                     @else
-                                        <a href="{{ route("report.index", ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
+                                        <a href="{{ route("report.show", ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
                                             class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                             <span class="material-icons-round text-sm ml-1">description</span>
                                             مشاهده گزارش
