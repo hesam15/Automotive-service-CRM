@@ -58,13 +58,14 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
             Route::post('/{user}/delete', 'destroy')->name('destroy')->can('delete', 'user');
 
-            Route::can('edit_users')->group(function () {
-                Route::get('/{user}/edit', 'edit')->name('edit');
-                Route::post('/{user}/edit', 'update')->name('update');
-                Route::post('/{user}/updatePhone', 'updatePhone')->name('update.phone');
-                //asign role to user
-                Route::post('/{user}/asignRole', 'assignRole')->name('asignRole');
-            });
+            Route::prefix('/{user}')->group(function () {
+                Route::get('/edit', 'edit')->name('edit');
+                Route::post('/edit', 'update')->name('update');
+
+                Route::post('/updatePhone', 'updatePhone')->name('update.phone');
+
+                Route::post('/asignRole', 'assignRole')->name('asignRole');
+            })->can('update', 'user');
 
             Route::get('/create/apiKey', 'createApiKey')->name("create.api-key")->can('create_api_key');
         });
@@ -73,10 +74,10 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
         Route::prefix('/customers')->controller(CustomerController::class)->name('customers.')->group(function () {
             Route::get('/', 'index')->name('index')->can('view_customers');
 
-            Route::middleware('can:show,customer')->group(function () {
-                Route::get('/{customer}', 'show')->name('profile');
-                Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
-            });
+            Route::prefix('/{customer}')->group(function () {
+                Route::get('/', 'show')->name('profile');
+                Route::get('/bookings', 'bookings')->name('bookings')->can('view_bookings');
+            })->can('show', 'customer');
 
             Route::prefix("/create")->group(function () {
                 Route::view('/', 'admin.customers.create')->name('create');

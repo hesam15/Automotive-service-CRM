@@ -15,8 +15,14 @@ class UserPolicy
         //
     }
 
+    public function update(User $user, User $targetUser) {
+        return $user->can('update_users') && $user->serviceCenter == $targetUser->serviceCenter
+            ? Response::allow()
+            : Response::denyAsNotFound();
+    }
+
     public function delete(User $user, User $targetUser) {
-        return $user->hasRole('adminstrator') && $user->serviceCenter == $targetUser->serviceCenter || !$user->hasRole('adminstrator') && $user->id == $targetUser->id
+        return $user->hasRole('adminstrator') && $user->serviceCenter == $targetUser->serviceCenter || !$user->hasRole('adminstrator') && $user->can('delete_users') && $user->id == $targetUser->id
             ? Response::allow()
             : Response::deny();
     }
