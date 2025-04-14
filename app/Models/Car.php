@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Report;
 use Illuminate\Database\Eloquent\Model;
-use SebastianBergmann\CodeCoverage\Report\Xml\Report;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Cars extends Model
+class Car extends Model
 {
     use HasFactory;
 

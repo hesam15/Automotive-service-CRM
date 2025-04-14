@@ -18,7 +18,7 @@ class CustomerPolicy
         $this->checkCustomerServiceCeter = $customer->hasServiceCenter($user->serviceCenter);
     }
 
-    public function index(User $user ,Customer $customer) {
+    public function show(User $user ,Customer $customer) {
         return $user->can('view_customers') && $this->checkCustomerServiceCeter
             ? Response::allow()
             : Response::denyAsNotFound();

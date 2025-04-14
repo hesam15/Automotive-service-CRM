@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Cars;
+use App\Models\Car;
 use App\Models\Booking;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,7 +17,7 @@ class Report extends Model
 
     public function car()
     {
-        return $this->belongsTo(Cars::class);
+        return $this->belongsTo(Car::class);
     }
 
     public function booking()

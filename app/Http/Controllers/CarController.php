@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\LicensePlateHleper;
 use App\Http\Requests\CarCreateRequest;
-use App\Models\Cars;
+use App\Models\Car;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 
@@ -14,12 +14,12 @@ class CarController extends Controller {
     }
 
     public function store(CarCreateRequest $request, Customer $customer) {        
-        $carsPlates = Cars::all()->pluck('licence_plate')->toArray();
+        $CarPlates = Car::all()->pluck('licence_plate')->toArray();
 
         $licensePlate = LicensePlateHleper::generate($request->only(['plate_iran', 'plate_letter', 'plate_three', 'plate_two']));
 
-        if (!in_array($licensePlate, $carsPlates) && $customer->id == $request->customer_id) {
-            $customer->cars()->create([
+        if (!in_array($licensePlate, $CarPlates) && $customer->id == $request->customer_id) {
+            $customer->Car()->create([
                 "customer_id" => $customer->id,
                 "name" => $request->name,
                 'color' => $request->color,
@@ -32,7 +32,7 @@ class CarController extends Controller {
         return back()->with("alert", ["این خودرو قبلا ثبت شده است.", 'danger']);
     }
 
-    public function update(Request $request, Cars $car)
+    public function update(Request $request, Car $car)
     {
         $request->validate([
             'name' => 'required',
@@ -54,7 +54,7 @@ class CarController extends Controller {
         return back()->with("alert", ["ویرایش خودرو با موفقیت انجام شد.", "success"]);
     }
 
-    public function destroy(Cars $car)
+    public function destroy(Car $car)
     {
         $car->delete();
 

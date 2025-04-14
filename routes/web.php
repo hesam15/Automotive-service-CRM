@@ -75,9 +75,9 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
         //Customers
         Route::prefix('/customers')->controller(CustomerController::class)->name('customers.')->group(function () {
-            Route::get('/', 'index')->name('index');
+            Route::get('/', 'index')->name('index')->can('view_customers');
 
-            Route::middleware('can:index,customer')->group(function () {
+            Route::middleware('can:show,customer')->group(function () {
                 Route::get('/{customer}', 'show')->name('profile');
                 Route::get('/{customer}/bookings', 'bookings')->name('bookings')->can('view_bookings');
             });
@@ -95,7 +95,7 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
 
         //Bookings
         Route::prefix("bookings")->name('bookings.')->controller(BookingController::class)->group(function () {
-            Route::get('/list', 'index')->name('index');
+            Route::get('/list', 'index')->name('index')->can('view_bookings');
 
             Route::prefix('/{customer}')->group(function() {
                 Route::get('/create', 'create')->name('create');
@@ -111,15 +111,19 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
         });
 
         //Cars
-        Route::prefix('cars')->controller(CarController::class)->group(function () {
-            Route::get('/list', 'index')->name('cars.index');
+        Route::prefix('cars')->name('cars.')->controller(CarController::class)->group(function () {
+            Route::get('/list', 'index')->name('index')->can('view_cars');
 
-            Route::get('{customer}/create', 'create')->name('cars.create');
-            Route::post('{customer}/store', 'store')->name('cars.store');
+            Route::prefix('/{customer}')->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+            })->can('create', 'car');
 
-            Route::post('/{id}/update', 'update')->name('cars.update');
-            Route::post('/{id}/delete', 'destroy')->name('cars.destroy');
-        })->can('create_customer');
+            Route::prefix('/{car}')->group(function () {
+                Route::post('/update', 'update')->name('cars.update');
+                Route::post('/delete', 'destroy')->name('cars.destroy');
+            })->can('update', 'car');
+        });
 
         //Reports
         Route::prefix('report')->controller(ReportController::class)->name('report.')->group(function () {
