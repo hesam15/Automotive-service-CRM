@@ -74,10 +74,7 @@ class ReportController extends Controller
         return redirect()->route('report.index', ['booking' => $booking->id, 'report' => $report->id])->with('alert', ['گزارش با موفقیت ثبت شد.', "success"]);
     }
 
-// ReportController.php
-
-public function print(Report $report)
-    {
+    public function print(Report $report) {
         $reportOptions = json_decode($report->reports, true) ?? [];
         $reportDescriptions = json_decode($report->description, true) ?? [];
         $report->date = (new PersianConvertNumberHelper($report->booking->date))->convertDateToPersinan()->value;

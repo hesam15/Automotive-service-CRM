@@ -126,16 +126,18 @@ Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstr
         });
 
         //Reports
-        Route::prefix('report')->controller(ReportController::class)->name('report.')->group(function () {
-            Route::get('bookings/{booking}/reports/{report}', 'index')->name('index');
+        Route::prefix('booking/{booking}/report')->controller(ReportController::class)->name('report.')->group(function () {
+            Route::get('/list', 'index')->name('index')->can('view_reports');
 
-            Route::get('/{booking}/create', 'create')->name('create');
-            Route::post('/{booking}/store', 'store')->name('store');
+            Route::get('/{report}', 'show')->name('show');
+
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
             
-            Route::post('/{car}/{id}/update', 'update')->name('update');
-            Route::post('/{car}/{id}/delete', 'destroy')->name('destroy');
+            Route::post('/{report}/update', 'update')->name('update');
+            Route::post('/delete', 'destroy')->name('destroy');
             
-            Route::get('reports/{report}/print', 'print')->name('print');
+            Route::get('/print', 'print')->name('print');
         });
 
         //Options
