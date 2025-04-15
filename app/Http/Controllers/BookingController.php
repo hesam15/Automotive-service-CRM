@@ -53,17 +53,18 @@ class BookingController extends Controller
         if (Booking::isTimeSlotAvailable($request->date, $request->time_slot)) {
             return back()->with("error", "این زمان قبلا رزرو شده است.");
         }
+        
+
 
         try {
-            DB::transaction(function () use ($customer, $request) {
-                $customer->bookings()->create([
-                    "date" => $request->date,
-                    "time_slot" => $request->time_slot,
-                    "car_id" => $request->car_id,
-                    "customer_id" => $request->customer_id,
-                    "status" => "pending"
-                ]);
-            });
+            Booking::create([
+                "date" => $request->date,
+                "time_slot" => $request->time_slot,
+                "service_center_id" => auth()->user()->serviceCenter->id,
+                'car_id' => $request->car_id,
+                "customer_id" => $request->customer_id,
+                "status" => "pending"
+            ]);
     
             return redirect()
                 ->route('bookings.index')

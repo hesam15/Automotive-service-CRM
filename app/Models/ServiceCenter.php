@@ -28,6 +28,10 @@ class ServiceCenter extends Model
         return $this->belongsToMany(Customer::class);
     }
 
+    public function bookings() {
+        return $this->hasMany(Booking::class);
+    }
+
     public function province() {
         return $this->hasOne(Province::class);
     }

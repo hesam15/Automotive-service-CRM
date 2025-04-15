@@ -20,6 +20,9 @@ class CustomerController extends Controller
     public function show(Customer $customer) {
         $registrationTime = (new PersianConvertNumberHelper($customer->created_at))->convertDateToPersinan()->getValue();
 
+        $bookings = $customer->bookings->where('service_center_id', auth()->user()->serviceCenter->id);
+        dd($bookings);
+
         foreach ($customer->bookings as $booking) {
             $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->getValue();
         }

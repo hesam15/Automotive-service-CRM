@@ -19,7 +19,7 @@ class CarController extends Controller {
         $licensePlate = LicensePlateHleper::generate($request->only(['plate_iran', 'plate_letter', 'plate_three', 'plate_two']));
 
         if (!in_array($licensePlate, $CarPlates) && $customer->id == $request->customer_id) {
-            $customer->Car()->create([
+            Car::create([
                 "customer_id" => $customer->id,
                 "name" => $request->name,
                 'color' => $request->color,

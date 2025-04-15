@@ -12,6 +12,7 @@ class Booking extends Model
 
     protected $fillable = [
         'customer_id',
+        'service_center_id',
         'car_id',
         'date',
         'time_slot',
@@ -24,14 +25,17 @@ class Booking extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function car()
-    {
-        return $this->belongsTo(Car::class);
-    }
-
     public function report()
     {
         return $this->hasOne(Report::class);
+    }
+
+    public function car() {
+        return $this->belongsTo(Car::class);
+    }
+
+    public function serviceCenter() {
+        return $this->belongsTo(ServiceCenter::class);
     }
 
     public static function isTimeSlotAvailable($date, $timeSlot)
