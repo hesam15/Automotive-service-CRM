@@ -27,9 +27,9 @@ class CustomerPhoneUnique implements ValidationRule
             }
         }
         
-        if($customers->contains('phone', $value) && $customerWithPhone->id !== $updateRequestCustomer->id) {
+        if($customers->contains('phone', $value) || $customerWithPhone != null && $customerWithPhone->id !== $updateRequestCustomer->id) {
             $fail("یک مشتری با این شماره تلفن قبلا در مجموعه شما ثبت شده است.");
-        } elseif($customerWithPhone->id == $updateRequestCustomer->id) {
+        } elseif($customerWithPhone != null && $customerWithPhone->id == $updateRequestCustomer->id) {
             $fail("هیچ تغییری ایجاد نشد.");
         }
     }

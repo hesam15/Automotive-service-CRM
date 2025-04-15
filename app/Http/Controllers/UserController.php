@@ -14,7 +14,7 @@ use App\Models\Role;
 class UserController extends Controller
 {
     public function index() {
-        $users = User::all();
+        $users = User::where('service_center_id', auth()->user()->serviceCenter->id)->get();
         $users->load('roles');
 
         $roles = Role::all();
