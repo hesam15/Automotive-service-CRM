@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\OptionsArrayHelper;
-use App\Models\Options;
+use App\Models\User;
+use App\Models\Option;
 use Illuminate\Http\Request;
+use App\Helpers\OptionsArrayHelper;
 use Illuminate\Support\Facades\Auth;
 
 class OptionsController extends Controller
@@ -12,7 +13,9 @@ class OptionsController extends Controller
     // Read
     public function index()
     {
-        $options = Options::all();
+        $user = User::with('serviceCenter.options')->find(auth()->user()->id);
+
+        $options = $user->serviceCenter->options;
         foreach ($options as $option) {
             $option->values = json_decode($option->values);
         }
@@ -32,10 +35,10 @@ class OptionsController extends Controller
         $options_array = OptionsArrayHelper::generateOptionsArray($request->options, $request->values);
 
         try {
-            Options::create([
+            Option::create([
                 'name' => $request->name,
                 'values' => json_encode($options_array, JSON_UNESCAPED_UNICODE),
-                'user_id' => Auth::id(),
+                'service_center_id' => auth()->user()->serviceCenter->id,
             ]);
     
             return redirect()->back()->with('alert', ['خدمت با موفقیت ایجاد شد.', "success"]);
@@ -46,13 +49,13 @@ class OptionsController extends Controller
     }
 
     // Update
-    public function edit(Options $option)
+    public function edit(Option $option)
     {
         $values = json_decode($option->values, true);
         return view('admin.options.edit', compact('option', 'values'));
     }
 
-    public function update(Request $request, Options $option)
+    public function update(Request $request, Option $option)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -77,7 +80,7 @@ class OptionsController extends Controller
     }
 
     // Delete
-    public function destroy(Options $option)
+    public function destroy(Option $option)
     {
         $option->delete();
         return redirect()->back()->with('alert', ['خدمت با موفقیت حذف شد.', "success"]);

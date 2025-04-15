@@ -21,7 +21,7 @@
 @endPushOnce
 
 <div id="{{ $id }}" 
-     class="modal fixed inset-0 z-50 hidden overflow-y-auto" 
+     class="modal fixed inset-0 z-50 hidden" 
      aria-labelledby="modal-title-{{ $id }}" 
      role="dialog" 
      aria-modal="true">
@@ -32,7 +32,7 @@
     {{-- Modal Panel --}}
     <div class="fixed inset-0 z-10 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
-            <div class="modal-content relative transform overflow-hidden rounded-lg bg-white text-right shadow-xl transition-all w-full 
+            <div class="modal-content relative transform bg-white text-right shadow-xl rounded-xl transition-all w-full flex flex-col max-h-[90vh]
                         {{ $maxWidth === 'sm' ? 'sm:max-w-sm' : '' }}
                         {{ $maxWidth === 'md' ? 'sm:max-w-md' : '' }}
                         {{ $maxWidth === 'lg' ? 'sm:max-w-lg' : '' }}
@@ -44,8 +44,8 @@
                         {{ $maxWidth === '6xl' ? 'sm:max-w-6xl' : '' }}
                         {{ $maxWidth === '7xl' ? 'sm:max-w-7xl' : '' }}">
                 
-                {{-- Header --}}
-                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                {{-- Header - Fixed --}}
+                <div class="bg-gray-50 px-6 py-4 rounded-t-xl border-b border-gray-200 flex-none">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-medium text-gray-900" id="modal-title-{{ $id }}">
                             {{ $title }}
@@ -63,22 +63,24 @@
                 <form id="createForm-{{ $id }}" 
                       action="{{ $action }}" 
                       method="{{ $method === 'GET' ? 'GET' : 'POST' }}"
-                      class="relative">
+                      class="flex flex-col flex-1 min-h-0">
                     @unless($method === 'GET')
                         @csrf
                         @method($method)
                     @endunless
 
-                    {{-- Body --}}
-                    <div class="bg-white px-6 py-6">
-                        <div class="space-y-4">
-                            {{ $slot }}
+                    {{-- Body - Scrollable --}}
+                    <div class="flex-1 overflow-y-auto bg-white">
+                        <div class="px-6 py-6">
+                            <div class="space-y-4">
+                                {{ $slot }}
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Footer --}}
+                    {{-- Footer - Fixed --}}
                     @if($showFooter)
-                        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-row-reverse gap-2">
+                        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-xl flex flex-row-reverse gap-2 flex-none">
                             <button type="submit"
                                     class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                 {{ $submitLabel }}
