@@ -100,21 +100,21 @@
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @foreach($customer->cars as $car)
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="{{ session('car') && session('car') == $car->id ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50' }}">
                                         <td class="px-4 py-3 text-gray-900">{{ $car->name }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-900">
                                             <div class="border-2 border-black rounded-lg p-2 inline-block bg-white">
                                                 <div class="flex items-center gap-1">
                                                     <div class="text-center">
                                                         <div class="text-[10px] border-b border-black">ایران</div>
-                                                        <div>{{$car->license_plate[3]}}</div>
+                                                        <div>{{$car->license_plate[0]}}</div>
                                                     </div>
                                                     <div class="h-8 w-px bg-black"></div>
                                                     <div>{{$car->license_plate[2]}}</div>
                                                     <div class="h-8 w-px bg-black"></div>
                                                     <div class="flex items-middle">{{$car->license_plate[1]}}</div>
                                                     <div class="h-8 w-px bg-black"></div>
-                                                    <div>{{$car->license_plate[0]}}</div>
+                                                    <div>{{$car->license_plate[3]}}</div>
                                                 </div>
                                             </div>
                                         </td>
