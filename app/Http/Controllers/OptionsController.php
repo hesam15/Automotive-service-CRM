@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Option;
 use Illuminate\Http\Request;
 use App\Helpers\OptionsArrayHelper;
+use App\Http\Requests\option\OptionStoreRequest;
+use App\Rules\OptionUniqueName;
 use Illuminate\Support\Facades\Auth;
 
 class OptionsController extends Controller
@@ -21,13 +23,7 @@ class OptionsController extends Controller
     }
 
     // Create
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:options',
-            'options' => 'required|array',
-            'values' => 'required|array',
-        ]);
+    public function store(OptionStoreRequest $request) {
 
         $options_array = OptionsArrayHelper::generateOptionsArray($request->options, $request->values);
 
@@ -51,14 +47,8 @@ class OptionsController extends Controller
         return view('admin.options.edit', compact('option'));
     }
 
-    public function update(Request $request, Option $option)
+    public function update(OptionUniqueName $request, Option $option)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'options' => 'required|array',
-            'values' => 'required|array',
-        ]);
-
         $options_array = OptionsArrayHelper::generateOptionsArray($request->sub_options, $request->sub_values);
 
         try {

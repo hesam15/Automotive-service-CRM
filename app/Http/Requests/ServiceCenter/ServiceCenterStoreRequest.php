@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\ServiceCenter;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ServiceCenterUpdateRequest extends FormRequest
+class ServiceCenterStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
-    {
-        return auth()->user()->can('edit_serviceCenters');
+    {        
+        return auth()->user()->can("create_serviceCenters");
     }
 
     /**
@@ -22,9 +22,9 @@ class ServiceCenterUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => "required|string|max:50|exists:service_centers",
-            "phone" => "required|string|max_digits:11|regex:/[0]{1}[0-9]{10}/|exists:service_centers",
-            'manager' => 'required|exists:service_centers',
+            "name" => "required|string|max:50",
+            "phone" => "required|string|max_digits:11|unique:service_centers|regex:/[0]{1}[0-9]{10}/",
+            'manager' => 'required',
             "fridays_off" => "required|boolean",
             "working_hours" => "required|array|max:2"
         ];

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Customer;
 
 use App\Rules\CustomerPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;

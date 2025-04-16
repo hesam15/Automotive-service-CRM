@@ -7,9 +7,8 @@ use App\Models\User;
 use Illuminate\View\View;
 
 use App\Models\ServiceCenter;
-use Illuminate\Http\Client\Request;
-use App\Http\Requests\ServiceCenterStoreRequest;
-use App\Http\Requests\ServiceCenterUpdateRequest;
+use App\Http\Requests\ServiceCenter\ServiceCenterStoreRequest;
+use App\Http\Requests\ServiceCenter\ServiceCenterUpdateRequest;
 
 class ServiceCenterController extends Controller
 {

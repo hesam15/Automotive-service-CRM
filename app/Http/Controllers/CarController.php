@@ -6,7 +6,8 @@ use App\Models\Car;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Helpers\LicensePlateHleper;
-use App\Http\Requests\CarStoreRequest;
+use App\Http\Requests\Car\CarStoreRequest;
+use App\Http\Requests\CarUpdateRequest;
 
 class CarController extends Controller {
     public function create(Customer $customer) {
@@ -44,17 +45,8 @@ class CarController extends Controller {
         return redirect()->route('customers.profile', $car->customer)->with("alert", ["این خودرو قبلا ثبت شده است.", 'danger'])->with('car', $car->id);
     }
 
-    public function update(Request $request, Car $car)
+    public function update(CarUpdateRequest $request, Car $car)
     {
-        $request->validate([
-            'name' => 'required',
-            'color' => 'required',
-            'plate_two' => 'required',
-            'plate_letter' => 'required',
-            'plate_three' => 'required',
-            'plate_iran' => 'required',
-        ]);
-
         $licensePlate = LicensePlateHleper::generate($request->only(['plate_iran', 'plate_letter', 'plate_three', 'plate_two']));
 
         $car->update([

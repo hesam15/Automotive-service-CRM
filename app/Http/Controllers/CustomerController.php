@@ -6,8 +6,8 @@ use App\Models\Booking;
 use App\Models\Customer;
 use App\Helpers\LicensePlateHleper;
 use App\Helpers\PersianConvertNumberHelper;
-use App\Http\Requests\CustomerStoreRequest;
-use App\Http\Requests\CustomerUpdateRequest;
+use App\Http\Requests\Customer\CustomerStoreRequest;
+use App\Http\Requests\Customer\CustomerUpdateRequest;
 
 class CustomerController extends Controller
 {

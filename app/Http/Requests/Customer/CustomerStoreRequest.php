@@ -1,6 +1,5 @@
 <?php
-
-namespace App\Http\Requests;
+namespace App\Http\Requests\Customer;
 
 use App\Models\Customer;
 use App\Rules\CustomerPhoneUnique;
