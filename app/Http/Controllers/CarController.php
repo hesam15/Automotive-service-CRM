@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\LicensePlateHleper;
-use App\Http\Requests\CarCreateRequest;
 use App\Models\Car;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Helpers\LicensePlateHleper;
+use App\Http\Requests\CarStoreRequest;
 
 class CarController extends Controller {
     public function create(Customer $customer) {
         return view('admin.car.create', compact('customer'));
     }
 
-    public function store(CarCreateRequest $request, Customer $customer) {        
+    public function store(CarStoreRequest $request, Customer $customer) {        
         $carPlates = Car::all();
 
         $licensePlate = LicensePlateHleper::generate($request->only(['plate_iran', 'plate_letter', 'plate_three', 'plate_two']));
