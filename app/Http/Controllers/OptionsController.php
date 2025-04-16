@@ -16,9 +16,6 @@ class OptionsController extends Controller
         $user = User::with('serviceCenter.options')->find(auth()->user()->id);
 
         $options = $user->serviceCenter->options;
-        foreach ($options as $option) {
-            $option->values = json_decode($option->values);
-        }
 
         return view('admin.options.index', compact('options'));
     }
@@ -27,7 +24,7 @@ class OptionsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:options',
             'options' => 'required|array',
             'values' => 'required|array',
         ]);
@@ -37,22 +34,21 @@ class OptionsController extends Controller
         try {
             Option::create([
                 'name' => $request->name,
-                'values' => json_encode($options_array, JSON_UNESCAPED_UNICODE),
+                'values' => $options_array,
                 'service_center_id' => auth()->user()->serviceCenter->id,
             ]);
     
             return redirect()->back()->with('alert', ['خدمت با موفقیت ایجاد شد.', "success"]);
-        }
-        catch (\Exception $e) {
-            return redirect()->back()->with('alert', ['خطا در ایجاد خدمت.', "danger"]);
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()->with('alert', [$e, "danger"]);
         }
     }
 
     // Update
     public function edit(Option $option)
     {
-        $values = json_decode($option->values, true);
-        return view('admin.options.edit', compact('option', 'values'));
+        return view('admin.options.edit', compact('option'));
     }
 
     public function update(Request $request, Option $option)

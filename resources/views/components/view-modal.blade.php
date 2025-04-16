@@ -6,7 +6,7 @@
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
         <!-- Modal panel -->
-        <div class="relative bg-white rounded-lg max-w-2xl w-full shadow-xl">
+        <div class="relative bg-white rounded-lg max-w-2xl w-full shadow-xl flex flex-col max-h-[90vh]">
             <!-- Modal header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900" id="modal-title">
@@ -18,7 +18,7 @@
             </div>
 
             <!-- Modal content -->
-            <div class="px-6 py-4">
+            <div class="px-6 py-4 overflow-y-auto flex-1">
                 {{ $slot }}
             </div>
 

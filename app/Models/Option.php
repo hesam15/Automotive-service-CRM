@@ -12,6 +12,10 @@ class Option extends Model
         'values',
     ];
 
+    protected $casts = [
+        'values' => 'array'
+    ];
+
     public function serviceCeter() {
         return $this->belongsTo(ServiceCenter::class);
     }

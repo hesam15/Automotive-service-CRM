@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Dompdf\Exception;
 use App\Models\Booking;
-use App\Models\Options;
+use App\Models\Option;
 use App\Models\Report;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Helpers\PersianConvertNumberHelper;
 use Mpdf\Mpdf;
 
@@ -26,7 +24,8 @@ class ReportController extends Controller
     public function create(Booking $booking) {
         $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
 
-        $options = Options::all();
+        $options = Option::where('service_center_id', $booking->serviceCenter->id)->get();
+
         foreach ($options as $option) {
             $option->values = json_decode($option->values);
         }
