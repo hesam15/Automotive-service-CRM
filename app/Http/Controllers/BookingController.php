@@ -16,7 +16,8 @@ class BookingController extends Controller
 {
     // Read
     public function index() {
-        $bookings = Booking::with('car', 'customer')->orderBy('date', 'asc')->orderByRaw("CAST(time_slot AS TIME)")->get();
+        $user = auth()->user();
+        $bookings = Booking::where('service_center_id', $user->serviceCenter->id)->with('car', 'customer')->orderBy('date', 'asc')->orderByRaw("CAST(time_slot AS TIME)")->get();
         foreach ($bookings as $booking) {
             $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->getValue();
         }

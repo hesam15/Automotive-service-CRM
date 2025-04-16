@@ -31,7 +31,7 @@ class DashboardController extends Controller
         $todayBookings = Booking::whereDate('date', $today)->count();
 
         // Get recent bookings
-        $recentBookings = Booking::with('customer')
+        $recentBookings = Booking::where('service_center_id', $serviceCenter->id)->with('customer')
             ->orderBy('date', 'desc')
             ->orderBy('time_slot', 'desc')
             ->take(5)
