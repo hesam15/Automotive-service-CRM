@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+use App\Models\Booking;
 use Illuminate\Foundation\Application;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Middleware\PermisionMiddleware;
@@ -21,5 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->withSchedule(function (Schedule $schedule) {
-        $schedule->command('bookings:update-status')->everyMinute();
+        $schedule->call(function() {
+            $now = Carbon::now();
+            Booking::where('date', '<=', $now->toDateString())->delete();
+        })->everyFiveMinutes();
     })->create();

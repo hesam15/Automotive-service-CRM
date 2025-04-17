@@ -55,8 +55,6 @@ class BookingController extends Controller
             return back()->with("error", "این زمان قبلا رزرو شده است.");
         }
         
-
-
         try {
             Booking::create([
                 "date" => $request->date,

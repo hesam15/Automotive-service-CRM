@@ -2,15 +2,9 @@
 
 @section('title', 'رزروها')
 
-@push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
-@endpush
-
-@push('scripts')
-    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
-    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
-    @vite(['resources/js/datepicker.js'])
-@endpush
+@pushOnce('styles')
+    <link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+@endPushOnce
 
 @section('content')
 <div class="max-w-7xl mx-auto py-4 md:py-6">
@@ -59,8 +53,15 @@
                                 <td class="px-4 py-3 text-gray-900">{{ $booking->time_slot }}</td>
                                 <td class="px-4 py-3 text-gray-900">{{ $booking->car->name }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                        {{ $booking->status === 'completed' ? 'تکمیل شده' : 'در انتظار' }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                        ($booking->status === 'paid' ? 'bg-blue-100 text-blue-800' : 
+                                        ($booking->status === 'undergraduate' ? 'bg-purple-100 text-purple-800' : 
+                                        'bg-yellow-100 text-yellow-800')) }}">
+                                        {{ $booking->status === 'completed' ? 'تکمیل شده' : 
+                                        ($booking->status === 'paid' ? 'پرداخت شده' :
+                                        ($booking->status === 'undergraduate' ? 'درحال کارشناسی' : 
+                                        'در انتظار')) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
@@ -109,7 +110,7 @@
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <span class="block text-sm font-medium text-gray-500">نام و نام خانوادگی</span>
-                                                <span class="block mt-1 text-gray-900">{{ $booking->customer->fullname }}</span>
+                                                <span class="block mt-1 text-gray-900">{{ $booking->customer->name }}</span>
                                             </div>
                                             <div>
                                                 <span class="block text-sm font-medium text-gray-500">شماره تماس</span>
@@ -147,37 +148,68 @@
                                                 id="status_{{ $booking->id }}"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                                 required>
-                                            <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>در انتظار</option>
+                                            <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>در انتظار پرداخت</option>
+                                            <option value="paid" {{ $booking->status == 'paid' ? 'selected' : '' }}>پرداخت شده</option>
+                                            <option value="undergraduate" {{ $booking->status == 'undergraduate' ? 'selected' : '' }}>در حال کارشناسی</option>
                                             <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>تکمیل شده</option>
-                                            <option value="completed" {{ $booking->status == 'expired' ? 'selected' : '' }}>منقضی شده</option>
+                                            <option value="expired" {{ $booking->status == 'expired' ? 'selected' : '' }}>منقضی شده</option>
                                         </select>
+                                        <x-input-error :messages="$errors->get('status')" class="mt-2" />
                                     </div>
 
-                                    <div>
-                                        <label for="date_{{ $booking->id }}" class="block text-sm font-medium text-gray-700 mb-1">
-                                            تاریخ مراجعه
-                                        </label>
-                                        <input type="text" 
-                                            name="date" 
-                                            id="date_{{ $booking->id }}"
-                                            value="{{ $booking->date }}"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    <div class="form-group">
+                                        <label for="appointment_date" class="block text-sm font-medium text-gray-700 mb-1 md:mb-2">تاریخ مراجعه</label>
+                                        <input 
+                                            type="text" 
+                                            id="appointment_date"
+                                            name="date"
+                                            placeholder="تاریخ مدنظر خود را انتخاب کنید"
+                                            data-jdp
+                                            data-jdp-min-date="today"
+                                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                                            value={{ $booking->date }}
                                             readonly>
+                                        <x-input-error :messages="$errors->get('date')" class="mt-2" />
                                     </div>
+
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">
                                             ساعت مراجعه
                                         </label>
-                                        <input type="hidden" 
-                                            name="time_slot" 
-                                            id="time_slot_{{ $booking->id }}" 
-                                            value="{{ $booking->time_slot }}">
                                         
-                                        <div id="time-slots-container-{{ $booking->id }}">
-                                            <div id="time-slots-grid-{{ $booking->id }}" class="grid grid-cols-4 gap-2">
-                                                {{-- Time slots will be loaded here via JavaScript --}}
+                                        <div data-time-slots-container class="mt-2">
+                                            {{-- Time Slots Header --}}
+                                            <div class="flex items-center justify-between mb-4">
+                                                <h3 class="text-lg font-semibold text-gray-900">
+                                                    <span class="flex items-center gap-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        ساعت مراجعه
+                                                    </span>
+                                                </h3>
                                             </div>
+
+                                            {{-- Time Slots Message (Loading/Error) --}}
+                                            <div data-time-slots-message-{{ $booking->id }} class="mb-4 hidden">
+                                                <div class="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                                    در حال بارگذاری ساعات مراجعه...
+                                                </div>
+                                            </div>
+
+                                            {{-- Time Slots Grid --}}
+                                            <div id="time-slots-grid-{{ $booking->id }}" data-time-slots-grid class="">
+                                                {{-- Time slots will be dynamically inserted here --}}
+                                            </div>
+
+                                            {{-- Hidden Input for Selected Time --}}
+                                            <input type="hidden" 
+                                                name="time_slot" 
+                                                id="time_slot_{{ $booking->id }}" 
+                                                value="{{ $booking->time_slot }}"
+                                                data-time-slot-input>
+                                            <x-input-error :messages="$errors->get('time_slot')" class="mt-2" />
                                         </div>
                                     </div>
                                 </div>
@@ -193,4 +225,12 @@
 </div>
 
 <x-delete-modal type="booking" />
+
+@pushOnce('scripts')
+    <script src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+    <script>
+        window.requiredManagers = window.requiredManagers || [];
+        window.requiredManagers.push('datePickerManager');
+    </script>
+@endPushOnce
 @endsection

@@ -18,8 +18,9 @@ class BookingUpdateRequest extends FormRequest
         $date = (new PersianConvertNumberHelper($this->date))
         ->convertPersianToEnglish()
         ->convertDateToEnglish();
+
         $this->merge([
-            'date' => $date
+            'date' => $date->value
         ]);
     }
 
@@ -31,9 +32,9 @@ class BookingUpdateRequest extends FormRequest
     public function rules(): array {
         return [
             "car_id" => "required|exists:cars,id",
-            "date" => "required|date_format:Y/m/d",
+            "date" => "required|date_format:Y-m-d",
             "time_slot" => "required",
-            "status" => "required|in:pending",
+            "status" => "required",
         ];
     }
 }
