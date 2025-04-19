@@ -11,10 +11,8 @@ Route::prefix("bookings")->name('bookings.')->controller(BookingController::clas
         Route::post('/store', 'store')->name('store');
     })->can('create', 'booking');
 
-    Route::prefix('/{customer}')->group(function () {
+    Route::prefix('/{booking}')->group(function () {
         Route::post('/update', 'update')->name('update');
         Route::post('/delete', 'destroy')->name('destroy');
-
-        Route::post('/update-status', 'updateStatus')->name('updateStatus');
     })->can('update', 'booking');
 });

@@ -66,7 +66,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        @if($booking->status === 'pending')
+                                        @if(in_array($booking->status, ['pending', 'paid']))
                                             <a href="{{ route('report.create', ['booking' => $booking->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">assignment</i>
@@ -82,7 +82,7 @@
                                             </a>
                                         @endif
 
-                                        @if($booking->status === 'pending')
+                                        @if(in_array($booking->status, ['pending', 'paid']))
                                             <button data-modal-target="bookingEditModal-{{ $booking->id }}"
                                                     class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">edit</i>

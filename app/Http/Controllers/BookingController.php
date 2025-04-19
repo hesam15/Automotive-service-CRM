@@ -82,14 +82,12 @@ class BookingController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($booking, $request) {
-                $booking->update([
-                    "car_id" => $request->car_id,
-                    "date" => $request->date,
-                    "time_slot" => $request->time_slot,
-                    "status" => $request->status,
-                ]);
-            });
+            $booking->update([
+                "car_id" => $request->car_id,
+                "date" => $request->date,
+                "time_slot" => $request->time_slot,
+                "status" => $request->status,
+            ]);
 
             return back()->with("alert", ["ویرایش با موفقیت انجام شد.", "success"]);
         }

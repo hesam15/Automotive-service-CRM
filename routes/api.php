@@ -12,7 +12,7 @@ Route::middleware("auth:sanctum")->group(function() {
         Route::get('/', 'index')->name("index");
         Route::post('/create', 'create');
 
-        Route::get('/users/{user}', 'show')->name("show");
+        Route::get('/{user}', 'show')->name("show");
     });
 
     Route::get('/available-times', [DatePicker::class, 'getAvailableTimes']);
