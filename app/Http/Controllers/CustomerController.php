@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\VerifyPhone;
 use App\Helpers\LicensePlateHleper;
 use App\Helpers\PersianConvertNumberHelper;
 use App\Http\Requests\Customer\CustomerStoreRequest;
@@ -46,6 +47,12 @@ class CustomerController extends Controller
     public function store(CustomerStoreRequest $request) {
         $customers = Customer::all();
 
+        $token = VerifyPhone::where("user_phone", $request['phone'])->first();
+
+        if (!$token || $token->used) {
+            return redirect()->back()->with('alert', ['کد احراز هویت تایید نشده است.', 'danger'])->withInput();
+        }
+
         try {
             if($customers->contains('phone', $request->phone) && $customers->contains('name', $request->name)) {
                 $customer = Customer::where('phone', $request->phone)->first();
@@ -60,6 +67,8 @@ class CustomerController extends Controller
             ]);
 
             $customer->serviceCenters()->attach(auth()->user()->serviceCenter);
+
+            $token->delete();
             
             return redirect()->route('customers.index')->with("alert", ["مشتری با موفقیت اضافه شد.", 'success']);
         }
@@ -75,10 +84,18 @@ class CustomerController extends Controller
 
     public function update(CustomerUpdateRequest $request, Customer $customer) {
         try {
+            $token = VerifyPhone::where("user_phone", $request['phone'])->first();
+
+            if (!$token || $token->used) {
+                return redirect()->back()->with('alert', ['کد احراز هویت تایید نشده است.', 'danger'])->withInput();
+            }
+
             $customer->update([
                 "name" => $request->name,
                 "phone" => $request->phone,
             ]);
+
+            $token->delete();
 
             return redirect(route("customers.index"))->with("alert", ["ویرایش با موفقیت انجام شد.", 'success']);
         }

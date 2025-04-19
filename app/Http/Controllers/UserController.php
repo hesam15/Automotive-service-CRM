@@ -41,6 +41,7 @@ class UserController extends Controller
         if (!$token || $token->used) {
             return redirect()->back()->with('alert', ['کد احراز هویت تایید نشده است.', 'danger'])->withInput();
         }
+        
         $request->merge([
             'service_center_id' => auth()->user()->service_center_id
         ]);

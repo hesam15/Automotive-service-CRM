@@ -75,12 +75,19 @@
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->date }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $booking->time_slot }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                        {{ $booking->status === 'completed' ? 'تکمیل شده' : 'در انتظار' }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                        ($booking->status === 'paid' ? 'bg-blue-100 text-blue-800' : 
+                                        ($booking->status === 'undergraduate' ? 'bg-purple-100 text-purple-800' : 
+                                        'bg-yellow-100 text-yellow-800')) }}">
+                                        {{ $booking->status === 'completed' ? 'تکمیل شده' : 
+                                        ($booking->status === 'paid' ? 'پرداخت شده' :
+                                        ($booking->status === 'undergraduate' ? 'درحال کارشناسی' : 
+                                        'در انتظار')) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    @if(in_array($booking->status, ['pending', 'paid']))
+                                    @if(!in_array($booking->status, ['pending', 'completed']))
                                         <a href="{{ route("report.create", $booking->id) }}" 
                                         class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                             <span class="material-icons-round text-sm ml-1">assignment</span>
