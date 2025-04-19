@@ -22,6 +22,11 @@ class ReportController extends Controller
     }
 
     public function create(Booking $booking) {
+        if(auth()->user()->hasRole('expert')) {
+            $booking->status = 'undergraduate';
+            $booking->save();
+        }
+
         $booking->date = (new PersianConvertNumberHelper($booking->date))->convertDateToPersinan()->value;
 
         $options = Option::where('service_center_id', $booking->serviceCenter->id)->get();

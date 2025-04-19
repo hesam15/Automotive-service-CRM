@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
             'name' => 'حسام الدین زراعتکار',
             'email' => 'hesam@gmail.com',
             'password' => bcrypt('12345678'),
-            'phone' => '09059202884',
+            'phone' => '09059202883',
             'service_center_id' => '2'
         ]);
 

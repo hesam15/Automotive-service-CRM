@@ -80,7 +80,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    @if($booking->status === 'pending')
+                                    @if(in_array($booking->status, ['pending', 'paid']))
                                         <a href="{{ route("report.create", $booking->id) }}" 
                                         class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                             <span class="material-icons-round text-sm ml-1">assignment</span>
