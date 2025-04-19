@@ -41,7 +41,7 @@ class DashboardController extends Controller
                 return $booking;
             });
 
-        return view('dashboard', compact(
+        return view('admin.dashboard', compact(
             'customersCount',
             'todayBookings',
             'reportsCount',

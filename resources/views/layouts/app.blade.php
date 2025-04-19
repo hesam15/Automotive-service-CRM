@@ -1,4 +1,3 @@
-
 @inject('agent', 'Jenssegers\Agent\Agent')
 
 <!DOCTYPE html>
@@ -14,7 +13,9 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @if(optional(auth()->user())->serviceCenter)
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @endif
 
     <!-- Core Assets -->
     @vite(['resources/css/app.css'])
@@ -23,9 +24,9 @@
     @stack('styles')
 </head>
 
-<body class="font-sans antialiased">
-    <div class="flex min-h-screen bg-gray">
-        <!-- Sidebar -->
+<body class="font-sans antialiased {{ optional(auth()->user())->serviceCenter ? 'dashboard-page' : 'landing-page' }}">
+    <div class="flex min-h-screen {{ optional(auth()->user())->serviceCenter ? 'bg-gray' : 'bg-white' }}">
+        <!-- Sidebar - Only for Dashboard -->
         @if(optional(auth()->user())->serviceCenter)
             <div class="fixed md:w-52 w-full bottom-0 md:top-0 md:right-0 h-16 md:h-screen bg-white border-t md:border-l border-gray-200 shadow-sm z-50">
                 @include('layouts.aside')
@@ -33,18 +34,21 @@
         @endif
          
         <!-- Main Content -->
-        <div class="flex-1 {{ optional(auth()->user())->serviceCenter ? 'md:mr-52' : '' }} mb-16 md:mb-0">
-            @if($agent->isMobile())
+        <div class="flex-1 {{ optional(auth()->user())->serviceCenter ? 'md:mr-52 mb-16 md:mb-0' : '' }}">
+            @if(!optional(auth()->user())->serviceCenter || $agent->isMobile())
                 <nav class="sticky top-0 z-40 bg-white border-b border-gray-200">
                     @include('layouts.navigation')
                 </nav>
             @endif
 
-            <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 {{ optional(auth()->user())->serviceCenter ? 'md:right-52' : '' }} z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
-                {{ Breadcrumbs::render(Request::route()->getName(), isset($value) ? $value : null) }}
-            </div>
+            {{-- Breadcrumb - Only for Dashboard --}}
+            @if(optional(auth()->user())->serviceCenter)
+                {{-- <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
+                    {{ Breadcrumbs::render(Request::route()->getName(), isset($value) ? $value : null) }}
+                </div> --}}
+            @endif
 
-            <main class="p-4 mt-9">
+            <main class="p-4 {{ optional(auth()->user())->serviceCenter ? 'mt-9' : '' }}">
                 @yield('content')
             </main>
         </div>
@@ -56,14 +60,16 @@
     <!-- Page Specific Scripts -->
     @stack('scripts')
 
-    <script>
-        // Verify dependencies are loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof jQuery === 'undefined') {
-                console.error('jQuery is not loaded');
-            }
-        });
-    </script>
+    @if(optional(auth()->user())->serviceCenter)
+        <script>
+            // Verify dependencies are loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof jQuery === 'undefined') {
+                    console.error('jQuery is not loaded');
+                }
+            });
+        </script>
+    @endif
 
     @if (session('alert'))
     <script>
