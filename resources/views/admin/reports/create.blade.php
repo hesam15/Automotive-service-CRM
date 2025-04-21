@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'ثبت گزارش')
@@ -43,7 +44,7 @@
                         <div class="space-y-3">
                             <div class="flex items-center">
                                 <span class="text-gray-600 ml-2">نام:</span>
-                                <span class="text-gray-900 font-medium">{{ $booking->customer->fullname }}</span>
+                                <span class="text-gray-900 font-medium">{{ $booking->customer->name }}</span>
                             </div>
                             <div class="flex items-center">
                                 <span class="text-gray-600 ml-2">شماره تماس:</span>
@@ -78,79 +79,95 @@
         </div>
     </div>
 
-    <!-- Report Form -->
+    <!-- Report Form or No Services Message -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="px-6 py-4 bg-gray-100">
             <h5 class="text-xl font-semibold text-gray-800">ثبت گزارش جدید</h5>
         </div>
 
         <div class="p-6">
-            <form action="{{ route('report.store', ['booking' => $booking->id]) }}" method="POST">
-                @csrf
-                
-                <div class="space-y-8">
-                    @foreach ($options as $mainService)
-                        <div class="pb-3 border-b border-gray-200 last:border-0">
-                            <label class="block text-lg font-semibold text-gray-800 mb-4">
-                                {{ $mainService->name }}
-                            </label>
+            @if(count($options) > 0)
+                <form action="{{ route('report.store', ['booking' => $booking->id]) }}" method="POST">
+                    @csrf
+                    
+                    <div class="space-y-8">
+                        @foreach ($options as $mainService)
+                            <div class="pb-3 border-b border-gray-200 last:border-0">
+                                <label class="block text-lg font-semibold text-gray-800 mb-4">
+                                    {{ $mainService->name }}
+                                </label>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                @foreach ($mainService->values as $key => $subService)
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-600 mb-2">{{ $key }}</label>
-                                        <select name="options[{{ $mainService->name }}][{{ $key }}]" 
-                                                class="w-full px-4 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
-                                            <option value="">انتخاب کنید</option>
-                                            @foreach($subService as $value)
-                                                <option value="{{ $value }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endforeach
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    @foreach ($mainService->values as $key => $subService)
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">{{ $key }}</label>
+                                            <select name="options[{{ $mainService->name }}][{{ $key }}]" 
+                                                    class="w-full px-4 py-2.5 text-sm text-gray-900 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200">
+                                                <option value="">انتخاب کنید</option>
+                                                @foreach($subService as $value)
+                                                    <option value="{{ $value }}">{{ $value }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <button type="button" 
+                                        class="explanation-toggle inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                        data-service="{{ str_replace(' ', '_', $mainService->name) }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" 
+                                         class="h-4 w-4 ml-1.5 transition-transform duration-200" 
+                                         fill="none" 
+                                         viewBox="0 0 24 24" 
+                                         stroke="currentColor">
+                                        <path stroke-linecap="round" 
+                                              stroke-linejoin="round" 
+                                              stroke-width="2" 
+                                              d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    نیاز به توضیح دارید؟
+                                </button>
+                                
+                                <div id="explanation_{{ str_replace(' ', '_', $mainService->name) }}"
+                                     class="mt-1"></div>
                             </div>
+                        @endforeach
 
-                            <button type="button" 
-                                    class="explanation-toggle inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                                    data-service="{{ str_replace(' ', '_', $mainService->name) }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" 
-                                     class="h-4 w-4 ml-1.5 transition-transform duration-200" 
-                                     fill="none" 
-                                     viewBox="0 0 24 24" 
-                                     stroke="currentColor">
-                                    <path stroke-linecap="round" 
-                                          stroke-linejoin="round" 
-                                          stroke-width="2" 
-                                          d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                نیاز به توضیح دارید؟
-                            </button>
-                            
-                            <div id="explanation_{{ str_replace(' ', '_', $mainService->name) }}"
-                                 class="mt-1"></div>
+                        <div>
+                            <label for="description" 
+                                   class="block text-lg font-semibold text-gray-800 mb-4">توضیحات کلی</label>
+                            <textarea name="description" 
+                                      id="description" 
+                                      rows="5" 
+                                      placeholder="توضیحات تکمیلی خود را اینجا وارد کنید..."
+                                      class="w-full px-4 py-3 text-sm text-gray-900 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"></textarea>
                         </div>
-                    @endforeach
-
-                    <div>
-                        <label for="description" 
-                               class="block text-lg font-semibold text-gray-800 mb-4">توضیحات کلی</label>
-                        <textarea name="description" 
-                                  id="description" 
-                                  rows="5" 
-                                  placeholder="توضیحات تکمیلی خود را اینجا وارد کنید..."
-                                  class="w-full px-4 py-3 text-sm text-gray-900 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"></textarea>
                     </div>
-                </div>
 
-                <input type="hidden" name="car_id" value="{{ $booking->car->id }}">
+                    <input type="hidden" name="car_id" value="{{ $booking->car->id }}">
 
-                <div class="flex justify-end mt-8">
-                    <button type="submit"
-                            class="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                        ثبت گزارش
-                    </button>
+                    <div class="flex justify-end mt-8">
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                            ثبت گزارش
+                        </button>
+                    </div>
+                </form>
+            @else
+                <div class="text-center py-12">
+                    <div class="mb-4">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">هیچ خدمتی تعریف نشده است</h3>
+                    <p class="text-gray-500 mb-6">برای ثبت گزارش، ابتدا باید خدمات مورد نظر را تعریف کنید.</p>
+                    <a href="{{ route('options.create') }}" 
+                       class="inline-flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        ایجاد خدمت جدید
+                    </a>
                 </div>
-            </form>
+            @endif
         </div>
     </div>
 </div>

@@ -43,9 +43,9 @@
 
             {{-- Breadcrumb - Only for Dashboard --}}
             @if(optional(auth()->user())->serviceCenter)
-                {{-- <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
+                <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
                     {{ Breadcrumbs::render(Request::route()->getName(), isset($value) ? $value : null) }}
-                </div> --}}
+                </div>
             @endif
 
             <main class="p-4 {{ optional(auth()->user())->serviceCenter ? 'mt-9' : '' }}">

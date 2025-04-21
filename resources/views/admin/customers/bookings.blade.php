@@ -63,35 +63,41 @@
                                 <td class="px-4 py-3 text-gray-900">{{ $booking->time_slot }}</td>
                                 <td class="px-4 py-3 text-gray-900">{{ $booking->car->name }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                        {{ $booking->status === 'completed' ? 'تکمیل شده' : 'در انتظار' }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {{ $booking->status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                        ($booking->status === 'paid' ? 'bg-blue-100 text-blue-800' : 
+                                        ($booking->status === 'undergraduate' ? 'bg-purple-100 text-purple-800' : 
+                                        'bg-yellow-100 text-yellow-800')) }}">
+                                        {{ $booking->status === 'completed' ? 'تکمیل شده' : 
+                                        ($booking->status === 'paid' ? 'پرداخت شده' :
+                                        ($booking->status === 'undergraduate' ? 'درحال کارشناسی' : 
+                                        'در انتظار')) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
-                                        @if($booking->status === 'pending')
+                                        @if(in_array($booking->status, ['pending', 'paid', 'undergraduate']))
                                             <a href="{{ route('report.create', ['booking' => $booking->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">assignment</i>
                                                 <span class="text-xs mr-0.5">ثبت گزارش</span>
                                             </a>
-                                        @elseif($booking->status === 'completed')
-                                            <a href="{{ route('report.index', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
+                                        @endif
+
+                                        @if($booking->status === 'completed')
+                                            <a href="{{ route('report.show', ['booking' => $booking->id, 'report' => $booking->report->id]) }}"
                                             class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">visibility</i>
                                                 <span class="text-xs mr-0.5">مشاهده گزارش</span>
                                             </a>
                                         @endif
 
-                                        @if($booking->status === 'pending')
-                                            <button class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200"
-                                                    data-modal-target="bookingEditModal-{{$booking->id}}">
+                                        @if(in_array($booking->status, ['pending', 'paid', 'undergraduate']))
+                                            <button data-modal-target="bookingEditModal-{{ $booking->id }}"
+                                                    class="modal-trigger inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors duration-200">
                                                 <i class="material-icons-round text-sm">edit</i>
                                                 <span class="text-xs mr-0.5">ویرایش</span>
                                             </button>
-                                        @endif
-
-                                        @if ($booking->status === 'pending')
                                             <button class="delete-btn inline-flex items-center px-2 py-1 bg-rose-100 text-rose-800 rounded hover:bg-rose-200 transition-colors duration-200" data-route="{{route("bookings.destroy", $booking->id)}}" data-type="booking">
                                                 <i class="material-icons-round text-sm">cancel</i>
                                                 <span class="text-xs mr-0.5">کنسل کردن</span>
