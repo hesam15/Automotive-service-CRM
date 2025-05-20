@@ -6,3 +6,5 @@ use Hekmatinasser\Jalali\Jalali;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientSideController::class, 'index']);
+
+Route::get('/service-centers/{service_center}', [ClientSideController::class, 'show']);

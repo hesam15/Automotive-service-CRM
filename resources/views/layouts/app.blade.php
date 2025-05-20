@@ -25,28 +25,28 @@
 <body class="font-sans antialiased {{ optional(auth()->user())->serviceCenter ? 'dashboard-page' : 'landing-page' }}">
     <div class="flex min-h-screen {{ optional(auth()->user())->serviceCenter ? 'bg-gray' : 'bg-white' }}">
         <!-- Sidebar - Only for Dashboard -->
-        @if(auth()->check() && auth()->user()->serviceCenter && request()->is('admin/*'))
+        @if(auth()->check() && request()->is('admin/*') && !auth()->user()->hasRole('customer'))
             <div class="fixed md:w-52 w-full bottom-0 md:top-0 md:right-0 h-16 md:h-screen bg-white border-t md:border-l border-gray-200 shadow-sm z-50">
                 @include('layouts.aside')
             </div>
         @endif
          
         <!-- Main Content -->
-        <div class="flex-1 {{ optional(auth()->user())->serviceCenter && request()->is('admin/*') ? 'md:mr-52 mb-16 md:mb-0' : '' }}">
-            @if(!optional(auth()->user())->serviceCenter)
+        <div class="flex-1 {{ request()->is('admin/*') && !auth()->user()->hasRole('customer') ? 'md:mr-52 mb-16 md:mb-0' : '' }}">
+            @if(request()->is('admin/*') && !auth()->user()->hasRole('customer'))
                 <nav class="sticky top-0 z-40 bg-white border-b border-gray-200">
                     @include('layouts.navigation')
                 </nav>
             @endif
 
             {{-- Breadcrumb - Only for Dashboard --}}
-            @if(optional(auth()->user())->serviceCenter && request()->is('admin/*'))
+            @if(request()->is('admin/*') && !auth()->user()->hasRole('customer'))
                 <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
                     {{ Breadcrumbs::render(Request::route()->getName(), isset($value) ? $value : null) }}
                 </div>
             @endif
 
-            <main class="{{ optional(auth()->user())->serviceCenter && request()->is('admin/*') ? 'mt-9 p-4' : '' }}">
+            <main class="{{ request()->is('admin/*') && !auth()->user()->hasRole('customer') ? 'mt-9 p-4' : '' }}">
                 @yield('content')
             </main>
         </div>

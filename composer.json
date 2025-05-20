@@ -35,7 +35,9 @@
         },
         "files": [
             "app/Helpers/PersianConvertNumberHelper.php",
-            "app/Helpers/FileStorageManager.php"
+            "app/Helpers/FileStorageManager.php",
+            "app/Helpers/CheckCloseStatus.php"
+
         ]
     },
     "autoload-dev": {
