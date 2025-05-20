@@ -5,7 +5,7 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\VerifyPhoneTokens;
 
-class GenerateToken {
+class GeneratePhoneValidationToken {
         /**
      * Generate a six digits code
      *

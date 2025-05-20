@@ -34,16 +34,19 @@ class ServiceCenterController extends Controller
             'phone' => $request->phone,
             'fridays_off' => $request->fridays_off,
             'working_hours' => $workingHours,
-            'manager' => $user->name,
+            'user_id' => $user->id,
             'address' => $request->address,
             'city_id' => 1
         ]);
 
+        if($request->thumbnail_pat) {
+            $request->thumbnail_path = fileStorageManager($request->thumbnail_pat, 'thumbnail', ServiceCenter::class, $serviceCenter->id);
+        } else {
+            $serviceCenter->thumbnail_path = 'service-centers/default-thumbnail.webp';
+            $serviceCenter->save();
+        }
 
-        $user->service_center_id = $serviceCenter->id;
-        $user->save();
-
-        return redirect()->route("home")->with('alert', ['مجموعه شما ثبت شد. خوش آمدید!', 'success']);
+        return redirect()->route("home", $serviceCenter->id)->with('alert', ['مجموعه شما ثبت شد. خوش آمدید!', 'success']);
     }
 
     public function edit(ServiceCenter $serviceCenter) :View {

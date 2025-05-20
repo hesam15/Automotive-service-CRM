@@ -9,15 +9,16 @@ class ServiceCenter extends Model
     protected $fillable = [
         'name',
         'phone',
+        'thumbnail_path',
         'city_id',
         'address',
-        'manager',
+        'user_id',
         'fridays_off',
         'working_hours'
     ];
 
     public function users() {
-        return $this->hasMany(User::class)->chaperone();
+        return $this->belongsToMany(User::class);
     }
 
     public function options() {

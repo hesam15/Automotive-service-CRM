@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->char("phone", 11)->nullable();
             $table->string('password');
-            $table->foreignId("service_center_id")->nullable()->constrained()->onUpdate('cascade')->onDelete("set null");
             $table->rememberToken();
             $table->timestamps();
         });

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string("name");
             $table->char("phone", 11)->unique();
-            $table->string("manager");
+            $table->string('thumbnail_path')->nullable();
+            $table->foreignId("user_id")->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string("city_id");
             $table->string("address");
             $table->boolean("fridays_off");

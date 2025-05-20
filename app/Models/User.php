@@ -24,7 +24,6 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'service_center_id'
     ];
 
     /**
@@ -50,7 +49,7 @@ class User extends Authenticatable
         ];
     } 
 
-    public function serviceCenter() {
-        return $this->belongsTo(ServiceCenter::class);
+    public function serviceCenters() {
+        return $this->hasMany(ServiceCenter::class);
     }
 }

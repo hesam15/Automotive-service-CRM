@@ -8,7 +8,7 @@ use App\Http\Controllers\DashboardController;
 require __DIR__.'/web/admin/beforeCompleteLogin.php';
 
 Route::middleware(['auth', 'verified', CheckServiceCenter::class, 'role:adminstrator|expert|clerk'])->group(function () {    
-    Route::prefix('admin/dashboard')->group(function () {
+    Route::prefix('serviceCenters/{service_center}/dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('home');
 
         //Service Center

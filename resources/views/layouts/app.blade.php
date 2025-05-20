@@ -1,5 +1,3 @@
-@inject('agent', 'Jenssegers\Agent\Agent')
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 <head>
@@ -27,28 +25,28 @@
 <body class="font-sans antialiased {{ optional(auth()->user())->serviceCenter ? 'dashboard-page' : 'landing-page' }}">
     <div class="flex min-h-screen {{ optional(auth()->user())->serviceCenter ? 'bg-gray' : 'bg-white' }}">
         <!-- Sidebar - Only for Dashboard -->
-        @if(optional(auth()->user())->serviceCenter)
+        @if(auth()->check() && auth()->user()->serviceCenter && request()->is('admin/*'))
             <div class="fixed md:w-52 w-full bottom-0 md:top-0 md:right-0 h-16 md:h-screen bg-white border-t md:border-l border-gray-200 shadow-sm z-50">
                 @include('layouts.aside')
             </div>
         @endif
          
         <!-- Main Content -->
-        <div class="flex-1 {{ optional(auth()->user())->serviceCenter ? 'md:mr-52 mb-16 md:mb-0' : '' }}">
-            @if(!optional(auth()->user())->serviceCenter || $agent->isMobile())
+        <div class="flex-1 {{ optional(auth()->user())->serviceCenter && request()->is('admin/*') ? 'md:mr-52 mb-16 md:mb-0' : '' }}">
+            @if(!optional(auth()->user())->serviceCenter)
                 <nav class="sticky top-0 z-40 bg-white border-b border-gray-200">
                     @include('layouts.navigation')
                 </nav>
             @endif
 
             {{-- Breadcrumb - Only for Dashboard --}}
-            @if(optional(auth()->user())->serviceCenter)
+            @if(optional(auth()->user())->serviceCenter && request()->is('admin/*'))
                 <div class="breadcrumb-container fixed top-[3.25rem] md:top-1 left-0 md:left-0 right-0 md:right-52 z-30 bg-white border-b border-gray-200 transform transition-all duration-300 ease-in-out">
                     {{ Breadcrumbs::render(Request::route()->getName(), isset($value) ? $value : null) }}
                 </div>
             @endif
 
-            <main class="p-4 {{ optional(auth()->user())->serviceCenter ? 'mt-9' : '' }}">
+            <main class="{{ optional(auth()->user())->serviceCenter && request()->is('admin/*') ? 'mt-9 p-4' : '' }}">
                 @yield('content')
             </main>
         </div>

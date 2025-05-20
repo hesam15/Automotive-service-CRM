@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Models\User;
 use App\Models\VerifyPhone;
 use Illuminate\Http\Request;
-use App\Services\GenerateToken;
+use App\Services\GeneratePhoneValidationToken;
 use App\Http\Controllers\Controller;
 use App\Services\Notification\SmsVerificationService;
 
@@ -31,7 +31,7 @@ class VerifyPhoneController extends Controller
             $this->token->delete();
         }
 
-        $code = GenerateToken::generateCode();
+        $code = GeneratePhoneValidationToken::generateCode();
 
         $this->token = VerifyPhone::create([
             'code' => $code,
