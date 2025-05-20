@@ -49,7 +49,7 @@ class User extends Authenticatable
         ];
     } 
 
-    public function serviceCenters() {
-        return $this->hasMany(ServiceCenter::class);
+    public function serviceCenter() {
+        return $this->hasOne(ServiceCenter::class);
     }
 }

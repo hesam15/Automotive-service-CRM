@@ -46,7 +46,7 @@ class ServiceCenterController extends Controller
             $serviceCenter->save();
         }
 
-        return redirect()->route("home", $serviceCenter->id)->with('alert', ['مجموعه شما ثبت شد. خوش آمدید!', 'success']);
+        return redirect()->route("home")->with('alert', ['مجموعه شما ثبت شد. خوش آمدید!', 'success']);
     }
 
     public function edit(ServiceCenter $serviceCenter) :View {

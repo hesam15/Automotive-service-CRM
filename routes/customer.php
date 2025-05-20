@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\ClientSideController;
 use App\Models\ServiceCenter;
+use Hekmatinasser\Jalali\Jalali;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function() {
-    return view('customer.index', ['serviceCenters' => ServiceCenter::all()]);
-});
+Route::get('/', [ClientSideController::class, 'index']);

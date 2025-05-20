@@ -19,6 +19,7 @@ class ServiceCenterSeeder extends Seeder
             'user_id' => '1',
             'city_id' => '444',
             'address' => 'فکوری 5، شهرستانی 7',
+            'thumbnail_path' => 'service-centers/default-thumbnail.webp',
             'fridays_off' => true,
             'working_hours' => "8:30-21:30"
         ]);
@@ -29,6 +30,7 @@ class ServiceCenterSeeder extends Seeder
             'user_id' => '2',
             'city_id' => '444',
             'address' => 'فکوری 5، شهرستانی 7',
+            'thumbnail_path' => 'service-centers/default-thumbnail.webp',
             'fridays_off' => true,
             'working_hours' => "8:30-21:30"
         ]);

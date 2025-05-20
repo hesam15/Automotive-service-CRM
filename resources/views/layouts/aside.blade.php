@@ -9,7 +9,6 @@
         <!-- Scrollable Navigation -->
         <nav class="flex-1 overflow-y-auto p-3">
             <div class="space-y-2">
-                @if($agent->isDesktop())
                 <a href="{{route('home')}}" class="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 {{ Route::currentRouteName() == 'home' ? 'bg-gray-100' : '' }}">
                     <i class="material-icons-round text-gray-500 text-lg ml-2 {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : '' }}">dashboard</i>
                     <span class="text-gray-700 {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : '' }}">داشبورد</span>
@@ -47,7 +46,6 @@
                             </div>
                         </div>
                     </div>
-                    @endif
                 @endcan
 
                 <!-- Services Menu -->
@@ -128,7 +126,6 @@
     </div>
 </div>
 
-@if($agent->isMobile() || $agent->isTablet())
 <!-- Mobile Bottom Navigation -->
 <div class="fixed md:hidden bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex justify-around items-center z-40">
     <a href="{{route('home')}}" class="flex flex-col items-center {{ Route::currentRouteName() == 'home' ? 'text-blue-600' : '' }}">
@@ -148,7 +145,6 @@
         </a>
     @endcan
 </div>
-@endif
 
 @if (!auth()->user()->tokens()->exists() && auth()->user()->can("create_api_key"))
     <x-modal id="apiKeyModal" title="API Key شما">

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string("address");
             $table->boolean("fridays_off");
             $table->string("working_hours");
+            $table->boolean("is_open")->default(false);
             $table->timestamps();
         });
     }

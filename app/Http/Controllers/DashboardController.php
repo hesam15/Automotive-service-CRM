@@ -10,13 +10,13 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Container\Attributes\Auth;
 use App\Helpers\PersianConvertNumberHelper;
 use App\Models\Permission;
-use App\Models\ServiceCenter;
 
 class DashboardController extends Controller
 {
-    public function index(ServiceCenter $serviceCenter)
+    public function index()
     {
         $user = auth()->user();
+        $serviceCenter = auth()->user()->serviceCenter;
         $reportsCount = 0;
 
         foreach($serviceCenter->customers as $customer) {
