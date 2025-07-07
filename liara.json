@@ -1,6 +1,9 @@
 {
   "app": "karshenasi-khodro",
   "port": 3000,
+  "laravel": {
+      "phpversion": "8.4"
+  }
   "build": {
     "location": "iran"
   },
