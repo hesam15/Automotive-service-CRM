@@ -19,6 +19,8 @@ class ClientSideController extends Controller
     }
 
     public function show(ServiceCenter $serviceCenter) {
+        checkCloseStatus($serviceCenter);
 
+        return view('customer.booking.index', ['serviceCenter' => $serviceCenter]);
     }
 }

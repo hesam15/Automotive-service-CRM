@@ -8,7 +8,7 @@ use App\Http\Controllers\Auth\VerifyPhoneTokensController;
 
 
 Route::middleware("auth:sanctum")->group(function() {
-    Route::prefix('users')->name("users.")->controller(UserController::class)->group(function () {
+    Route::prefix('users')->name("api.users.")->controller(UserController::class)->group(function () {
         Route::get('/', 'index')->name("index");
         Route::post('/create', 'create');
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{-- <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 <head>
     <meta charset="utf-8">
@@ -121,4 +121,4 @@
         window.requiredManagers.push('phoneVerificationManager');
     </script>
 </body>
-</html>
+</html> --}}

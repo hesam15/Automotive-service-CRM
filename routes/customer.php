@@ -7,4 +7,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ClientSideController::class, 'index']);
 
-Route::get('/service-centers/{service_center}', [ClientSideController::class, 'show']);
+Route::get('/service-centers/{service_center}', [ClientSideController::class, 'show'])->name('show.serviceCenter');

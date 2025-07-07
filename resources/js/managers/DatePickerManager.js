@@ -129,7 +129,7 @@ class DatePickerManager {
                 throw new Error('Time slots elements not found');
             }
     
-            const url = `/dashboard/available-times?date=${selectedDate}`;
+            const url = `admin/dashboard/available-times?date=${selectedDate}`;
     
             timeSlotsContainer.classList.remove('hidden');
             this.showLoadingState(instance);
